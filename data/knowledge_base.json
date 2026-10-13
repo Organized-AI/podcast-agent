@@ -1,0 +1,167 @@
+{
+  "description": "Curated, dated facts the agency trusts. Each entry has an as_of date so the fact-checker can judge staleness. Facts were checked against public sources on 2026-10-13; edit or extend freely.",
+  "entries": [
+    {
+      "id": "KB-001",
+      "title": "GitLab is all-remote and publishes its company handbook publicly",
+      "content": "GitLab operates as an all-remote company and publishes its company handbook publicly at handbook.gitlab.com. The handbook documents how the company works across functions and serves as the single source of truth for processes, which lets team members find answers asynchronously instead of asking for guidance.",
+      "source": "GitLab Handbook",
+      "url": "https://handbook.gitlab.com/",
+      "as_of": "2025-12-01",
+      "tags": ["remote work", "documentation", "handbook", "async", "gitlab"]
+    },
+    {
+      "id": "KB-002",
+      "title": "Automattic has been a fully distributed company since 2005",
+      "content": "Automattic, the company behind WordPress.com and Tumblr, has operated as a fully distributed company since it was founded in 2005, with employees working remotely around the world. It relies heavily on written, asynchronous communication through internal P2 blogs rather than meetings, and holds periodic in-person meetups.",
+      "source": "Automattic — About",
+      "url": "https://automattic.com/about/",
+      "as_of": "2025-06-01",
+      "tags": ["remote work", "distributed", "async", "automattic", "documentation"]
+    },
+    {
+      "id": "KB-003",
+      "title": "Doist is a remote-first, async-first company",
+      "content": "Doist, maker of Todoist and Twist, is a fully remote, async-first company with team members spread across dozens of countries. It publishes guides and essays on asynchronous communication and remote work practices.",
+      "source": "Doist — About",
+      "url": "https://doist.com/about",
+      "as_of": "2025-06-01",
+      "tags": ["remote work", "async", "doist", "documentation"]
+    },
+    {
+      "id": "KB-004",
+      "title": "Hybrid is the most common arrangement for remote-capable US workers",
+      "content": "Gallup's surveys of remote-capable US employees show hybrid as the most common arrangement (roughly half), with about a quarter fully remote and the rest on-site. Several large employers have moved the other way: Amazon required corporate staff to return to the office five days a week from January 2025.",
+      "source": "Gallup workplace surveys; Amazon CEO memo (Sept 2024)",
+      "url": "https://www.gallup.com/401384/indicator-hybrid-work.aspx",
+      "as_of": "2025-06-01",
+      "tags": ["remote work", "hybrid", "return to office", "talent"]
+    },
+    {
+      "id": "KB-010",
+      "title": "FDA reviews AI-enabled medical devices and lists more than 1,000 authorized devices",
+      "content": "The US FDA reviews AI-enabled medical devices through its standard premarket pathways (510(k), De Novo and PMA) and maintains a public list of authorized AI-enabled devices. The list has grown past 1,000 devices; a third-party tally counted 1,451 by the end of 2025, with radiology accounting for roughly three quarters.",
+      "source": "US FDA AI-enabled device list; IntuitionLabs tracker",
+      "url": "https://intuitionlabs.ai/articles/fda-ai-medical-device-tracker",
+      "as_of": "2025-12-31",
+      "tags": ["fda", "regulation", "medical devices", "ai", "review"]
+    },
+    {
+      "id": "KB-011",
+      "title": "Hospitals use AI to read X-rays and flag urgent cases for clinicians",
+      "content": "AI tools are used in hospitals for reading medical images such as X-rays and CT scans and for flagging urgent cases so clinicians review them first (computer-aided triage). In February 2018 the FDA authorized Viz.ai's ContaCT, which analyzes CT images for suspected large-vessel-occlusion strokes and alerts specialists. Most such tools assist clinicians rather than replace their reads.",
+      "source": "FDA press announcement (Feb 2018); radiology AI literature",
+      "url": "https://www.fiercehealthcare.com/regulatory/fda-approval-clinical-decision-support-ai-triage-app",
+      "as_of": "2025-06-01",
+      "tags": ["hospitals", "x-rays", "radiology", "triage", "urgent cases", "assistive ai"]
+    },
+    {
+      "id": "KB-012",
+      "title": "FDA authorized IDx-DR in 2018 as the first autonomous AI diagnostic system",
+      "content": "In April 2018 the FDA authorized IDx-DR (now LumineticsCore by Digital Diagnostics) through the De Novo pathway: the first AI system permitted to make a screening decision for diabetic retinopathy without a clinician interpreting the image. Autonomous AI diagnostics therefore already exist for narrow indications, although most authorized AI devices remain assistive.",
+      "source": "FDA De Novo authorization (April 2018)",
+      "url": "https://www.biospace.com/fda-permits-marketing-of-idx-dr-for-automated-detection-of-diabetic-retinopathy-in-primary-care",
+      "as_of": "2025-06-01",
+      "tags": ["fda", "autonomy", "autonomous ai", "diagnostics", "full autonomy"]
+    },
+    {
+      "id": "KB-013",
+      "title": "Symptom-checker and triage chatbots are offered to patients online",
+      "content": "Symptom-checker and triage chatbots are offered by digital-health companies (for example Ada Health and Buoy Health) and by some health systems on their websites and apps, guiding patients toward next steps and an appropriate level of care before they see a doctor.",
+      "source": "Digital health industry overview",
+      "url": "https://ada.com/",
+      "as_of": "2025-06-01",
+      "tags": ["chatbots", "triage", "symptom checker", "patients", "hospital websites"]
+    },
+    {
+      "id": "KB-014",
+      "title": "Clinical algorithms can inherit bias from historical data (Science, 2019)",
+      "content": "A 2019 study in Science by Obermeyer et al. found that a widely used commercial algorithm for allocating extra care underestimated the needs of Black patients because it used past healthcare costs as a proxy for need. It is a well-documented example of AI trained on existing clinical data reproducing skew in that data. Patient data used by such systems is also subject to privacy rules such as HIPAA.",
+      "source": "Science 366(6464), 2019",
+      "url": "https://www.science.org/doi/10.1126/science.aax2342",
+      "as_of": "2019-10-25",
+      "tags": ["bias", "clinical data", "privacy", "algorithmic bias", "skewed data"]
+    },
+    {
+      "id": "KB-015",
+      "title": "The COVID-19 pandemic accelerated digital health and telehealth adoption",
+      "content": "McKinsey estimated in 2021 that telehealth use had stabilized at levels 38 times higher than before the COVID-19 pandemic, and investment in digital health, including AI tools, rose sharply during the pandemic.",
+      "source": "McKinsey & Company (July 2021)",
+      "url": "https://www.mckinsey.com/industries/healthcare/our-insights/telehealth-a-quarter-trillion-dollar-post-covid-19-reality",
+      "as_of": "2021-07-09",
+      "tags": ["pandemic", "digital health", "telehealth", "adoption"]
+    },
+    {
+      "id": "KB-020",
+      "title": "Venture funding dilutes founder ownership and can reduce control",
+      "content": "Raising venture capital means selling equity: each priced round dilutes existing shareholders' ownership, and investors typically receive board seats or protective provisions that reduce founder control in exchange for capital that funds faster growth.",
+      "source": "Startup finance primer",
+      "url": null,
+      "as_of": "2025-01-01",
+      "tags": ["venture capital", "dilution", "control", "fundraising", "vc"]
+    },
+    {
+      "id": "KB-021",
+      "title": "VC fund lifecycles create pressure for exits",
+      "content": "Venture capital funds are usually structured with a life of about ten years, so investors need portfolio companies to reach a liquidity event such as an acquisition or IPO within that horizon. This can create pressure on founders for growth and exits.",
+      "source": "Venture capital fund structure primer",
+      "url": null,
+      "as_of": "2025-01-01",
+      "tags": ["venture capital", "exits", "fund life", "investor pressure"]
+    },
+    {
+      "id": "KB-022",
+      "title": "Bootstrapping trades growth speed for ownership and control",
+      "content": "Bootstrapping means funding a company from founders' savings and customer revenue instead of outside investment. Founders keep full ownership and control and must focus on revenue and profitability early, but growth is usually slower because it is limited by cash flow.",
+      "source": "Startup finance primer",
+      "url": null,
+      "as_of": "2025-01-01",
+      "tags": ["bootstrapping", "revenue", "profitability", "control", "growth"]
+    },
+    {
+      "id": "KB-030",
+      "title": "NASA's Mars Sample Return has been delayed and restructured; no 2026 launch",
+      "content": "NASA's Mars Sample Return (MSR) has not launched. The original plan targeted launches around 2026 with samples back in the early 2030s, but after an independent review warned costs could reach $11 billion, NASA in January 2025 outlined two cheaper architectures with launches around 2030-2031 and Earth return between 2035 and 2039. A decision between them was deferred to mid-2026, and the President's FY2026 budget request proposed cancelling the program.",
+      "source": "NASA (Jan 2025); Scientific American",
+      "url": "https://www.scientificamerican.com/article/the-fate-of-nasas-mars-sample-return-program-may-be-decided-in-2026/",
+      "as_of": "2025-07-01",
+      "tags": ["nasa", "mars", "sample return", "mission", "launch", "2026"]
+    },
+    {
+      "id": "KB-031",
+      "title": "Perseverance landed in Jezero Crater in February 2021 and is caching samples",
+      "content": "NASA's Perseverance rover landed in Jezero Crater on Mars on February 18, 2021, and has been collecting and caching rock and regolith samples intended for eventual return to Earth.",
+      "source": "NASA Mars 2020 mission",
+      "url": "https://science.nasa.gov/mission/mars-2020-perseverance/",
+      "as_of": "2025-01-01",
+      "tags": ["nasa", "perseverance", "rover", "jezero crater", "samples", "2021"]
+    },
+    {
+      "id": "KB-032",
+      "title": "Bitcoin peaked near $126,000 in 2025 and did not reach $200,000",
+      "content": "Bitcoin's highest price in 2025 was about $126,210, set on October 6, 2025. It did not reach $200,000 in 2025, and that record still stood a year later.",
+      "source": "Market data via KuCoin News (Oct 2026)",
+      "url": "https://www.kucoin.com/news/flash/bitcoin-s-126-210-all-time-high-turns-one-year-old",
+      "as_of": "2026-10-06",
+      "tags": ["bitcoin", "crypto", "price", "all-time high", "200k", "2025"]
+    },
+    {
+      "id": "KB-033",
+      "title": "Nvidia became the first company to reach a $5 trillion market value (Oct 2025)",
+      "content": "On October 29, 2025, Nvidia became the first public company to reach a market capitalization of $5 trillion, driven by demand for its AI chips.",
+      "source": "AP / Entrepreneur (Oct 29, 2025)",
+      "url": "https://www.entrepreneur.com/business-news/nvidia-becomes-the-first-to-pass-5-trillion-in-market-value",
+      "as_of": "2025-10-29",
+      "tags": ["nvidia", "market cap", "five trillion", "ai stocks", "2025"]
+    },
+    {
+      "id": "KB-034",
+      "title": "No crewed Mars landing has happened; timelines are uncertain",
+      "content": "No humans have landed on Mars. NASA's Moon to Mars planning places the first crewed Mars missions no earlier than the late 2030s, and published timelines from NASA and private companies have repeatedly shifted.",
+      "source": "NASA Moon to Mars architecture",
+      "url": "https://www.nasa.gov/humans-in-space/moon-to-mars/",
+      "as_of": "2025-06-01",
+      "tags": ["mars", "humans", "crewed mission", "prediction", "2040"]
+    }
+  ]
+}

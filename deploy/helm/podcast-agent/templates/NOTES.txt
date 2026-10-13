@@ -1,0 +1,7 @@
+podcast-agent {{ .Chart.AppVersion }} installed as "{{ .Release.Name }}".
+{{- if .Values.api.enabled }}
+API: kubectl port-forward svc/{{ include "podcast-agent.fullname" . }}-api 8080:80  →  POST /v1/process
+{{- end }}
+{{- if .Values.worker.enabled }}
+Worker: consumes {{ .Values.worker.queueUri }} → {{ .Values.worker.outputUri }}
+{{- end }}

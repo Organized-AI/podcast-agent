@@ -1,0 +1,286 @@
+{
+  "schema_version": "1.0",
+  "run_id": "20261013-152710-7e9784",
+  "generated_at": "2026-10-13T20:27:10+00:00",
+  "episode": {
+    "episode_id": "ep003",
+    "title": "Bootstrapping vs Fundraising — Which Path Wins?",
+    "host": "Lena Torres",
+    "guests": [
+      "Samir Gupta",
+      "Emily Rogers"
+    ],
+    "duration": "05:10",
+    "word_count": 192,
+    "utterances": 16,
+    "source": "data/transcripts/ep003_bootstrapping.json",
+    "cleaning": {}
+  },
+  "provider": "offline",
+  "models": {
+    "provider": "offline",
+    "main": "offline-heuristic",
+    "fast": "offline-heuristic"
+  },
+  "plan": {
+    "goal": "Publish-ready show notes and a fact-check table for 'Bootstrapping vs Fundraising — Which Path Wins?'.",
+    "steps": [
+      {
+        "step": "summarize",
+        "reason": "192 words fits within the single-pass budget.",
+        "params": {
+          "strategy": "single_pass"
+        }
+      },
+      {
+        "step": "extract_notes",
+        "reason": "Required show-notes deliverable.",
+        "params": {}
+      },
+      {
+        "step": "extract_claims",
+        "reason": "Claim signals (entities=4, years=0, predictions=0) suggest about 5 check-worthy claims.",
+        "params": {
+          "max_claims": 5
+        }
+      },
+      {
+        "step": "verify_claims",
+        "reason": "Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.",
+        "params": {
+          "max_steps_per_claim": 3,
+          "tools": [
+            "search_knowledge_base",
+            "web_search"
+          ]
+        }
+      }
+    ],
+    "repaired": false,
+    "repair_notes": []
+  },
+  "summary": {
+    "text": "In \"Bootstrapping vs Fundraising — Which Path Wins?\", Lena Torres talks with Samir Gupta, Emily Rogers about bootstrapping, path, market and control. Samir Gupta opens by noting: “Excited to share my experiences bootstrapping companies from scratch.” Emily Rogers opens by noting: “I’ve raised multiple funding rounds, so we’ll debate both perspectives.” Gupta argues: “Bootstrapping forces discipline. You focus on revenue and profitability early. No distractions from chasing VC metrics.” Rogers argues: “If your market is time-sensitive, VC money helps capture it before competitors.” Gupta points to: “I built a SaaS with no outside capital; we reached break-even in 18 months. We had total control.” Rogers points to: “Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.” Gupta suggests: “If your market is niche, defensible, and revenue-generating early, bootstrap.” Rogers suggests: “If it’s a fast-moving, competitive space and you need talent or product scale fast, raise.” Gupta weighs the trade-offs: “Bootstrapping: slower growth, full control, less risk from investors.” Rogers weighs the trade-offs: “VC: faster growth, resources, but you dilute control and may face pressure for quick exits.” Lena Torres concludes: “It seems the best path depends heavily on market type and founder priorities.”",
+    "word_count": 201,
+    "strategy": "single_pass"
+  },
+  "notes": {
+    "takeaways": [
+      {
+        "text": "Gupta: Bootstrapping: slower growth, full control, less risk from investors.",
+        "timestamp": "04:25"
+      },
+      {
+        "text": "Rogers: Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.",
+        "timestamp": "02:35"
+      },
+      {
+        "text": "Gupta: Excited to share my experiences bootstrapping companies from scratch.",
+        "timestamp": "00:20"
+      },
+      {
+        "text": "Gupta: If your market is niche, defensible, and revenue-generating early, bootstrap.",
+        "timestamp": "03:15"
+      },
+      {
+        "text": "Rogers: VC: faster growth, resources, but you dilute control and may face pressure for quick exits.",
+        "timestamp": "04:40"
+      }
+    ],
+    "quotes": [
+      {
+        "text": "Bootstrapping: slower growth, full control, less risk from investors.",
+        "speaker": "Samir Gupta",
+        "timestamp": "04:25",
+        "match_score": 1.0
+      },
+      {
+        "text": "VC: faster growth, resources, but you dilute control and may face pressure for quick exits.",
+        "speaker": "Emily Rogers",
+        "timestamp": "04:40",
+        "match_score": 1.0
+      },
+      {
+        "text": "Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.",
+        "speaker": "Emily Rogers",
+        "timestamp": "02:35",
+        "match_score": 1.0
+      },
+      {
+        "text": "True, but if your market is time-sensitive, VC money helps capture it before competitors.",
+        "speaker": "Emily Rogers",
+        "timestamp": "01:30",
+        "match_score": 1.0
+      }
+    ],
+    "topics": [
+      "founder",
+      "debates",
+      "bootstrapping",
+      "path",
+      "market",
+      "control",
+      "capital"
+    ]
+  },
+  "fact_checks": [
+    {
+      "claim": {
+        "id": "C1",
+        "claim": "No distractions from chasing VC metrics.",
+        "speaker": "Samir Gupta",
+        "timestamp": "01:05",
+        "quote": "No distractions from chasing VC metrics.",
+        "type": "factual",
+        "time_sensitive": false
+      },
+      "verdict": "unverifiable",
+      "confidence": 0.3,
+      "raw_confidence": 0.3,
+      "rationale": "No knowledge-base entry or search result addresses this claim directly.",
+      "evidence": [],
+      "tool_calls": 2,
+      "tools_used": [
+        "search_knowledge_base",
+        "web_search"
+      ]
+    },
+    {
+      "claim": {
+        "id": "C2",
+        "claim": "If your market is time-sensitive, VC money helps capture it before competitors.",
+        "speaker": "Emily Rogers",
+        "timestamp": "01:30",
+        "quote": "If your market is time-sensitive, VC money helps capture it before competitors.",
+        "type": "factual",
+        "time_sensitive": false
+      },
+      "verdict": "unverifiable",
+      "confidence": 0.3,
+      "raw_confidence": 0.3,
+      "rationale": "No knowledge-base entry or search result addresses this claim directly.",
+      "evidence": [],
+      "tool_calls": 2,
+      "tools_used": [
+        "search_knowledge_base",
+        "web_search"
+      ]
+    },
+    {
+      "claim": {
+        "id": "C3",
+        "claim": "Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.",
+        "speaker": "Emily Rogers",
+        "timestamp": "02:35",
+        "quote": "Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.",
+        "type": "anecdotal",
+        "time_sensitive": false
+      },
+      "verdict": "unverifiable",
+      "confidence": 0.3,
+      "raw_confidence": 0.3,
+      "rationale": "Personal anecdote from the speaker; no independent source can confirm it.",
+      "evidence": [],
+      "tool_calls": 0,
+      "tools_used": []
+    },
+    {
+      "claim": {
+        "id": "C4",
+        "claim": "Bootstrapping: slower growth, full control, less risk from investors.",
+        "speaker": "Samir Gupta",
+        "timestamp": "04:25",
+        "quote": "Bootstrapping: slower growth, full control, less risk from investors.",
+        "type": "factual",
+        "time_sensitive": false
+      },
+      "verdict": "verified",
+      "confidence": 0.69,
+      "raw_confidence": 0.69,
+      "rationale": "Sources [E1] support the claim as stated.",
+      "evidence": [
+        {
+          "id": "E1",
+          "source": "knowledge_base",
+          "title": "KB-022: Bootstrapping trades growth speed for ownership and control",
+          "snippet": "Bootstrapping means funding a company from founders' savings and customer revenue instead of outside investment. Founders keep full ownership and control and must focus on revenue and profitability early, but growth is usually slower because it is limited by cash flow.",
+          "url": null,
+          "date": "2025-01-01",
+          "relevance": 0.576
+        }
+      ],
+      "tool_calls": 2,
+      "tools_used": [
+        "search_knowledge_base",
+        "web_search"
+      ]
+    },
+    {
+      "claim": {
+        "id": "C5",
+        "claim": "VC: faster growth, resources, but you dilute control and may face pressure for quick exits.",
+        "speaker": "Emily Rogers",
+        "timestamp": "04:40",
+        "quote": "VC: faster growth, resources, but you dilute control and may face pressure for quick exits.",
+        "type": "factual",
+        "time_sensitive": false
+      },
+      "verdict": "unverifiable",
+      "confidence": 0.3,
+      "raw_confidence": 0.3,
+      "rationale": "No knowledge-base entry or search result addresses this claim directly.",
+      "evidence": [],
+      "tool_calls": 2,
+      "tools_used": [
+        "search_knowledge_base",
+        "web_search"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "step": "plan",
+      "status": "ok",
+      "duration_ms": 3,
+      "attempts": 0,
+      "detail": "4 steps"
+    },
+    {
+      "step": "summarize",
+      "status": "ok",
+      "duration_ms": 1,
+      "attempts": 1,
+      "detail": "201 words (single_pass, target 200–300)"
+    },
+    {
+      "step": "extract_notes",
+      "status": "ok",
+      "duration_ms": 5,
+      "attempts": 1,
+      "detail": "5 takeaways · 4 verbatim quotes · 7 topics"
+    },
+    {
+      "step": "extract_claims",
+      "status": "ok",
+      "duration_ms": 3,
+      "attempts": 1,
+      "detail": "5 check-worthy claims (1 anecdotal, 4 factual)"
+    },
+    {
+      "step": "verify_claims",
+      "status": "ok",
+      "duration_ms": 21,
+      "attempts": 5,
+      "detail": "1 ✅ · 0 ⚠️ · 4 ❓ across 5 claims · 8 tool calls"
+    }
+  ],
+  "usage": {
+    "llm_calls": 17,
+    "cached_calls": 0,
+    "input_tokens": 12542,
+    "output_tokens": 1878,
+    "cache_read_tokens": 0,
+    "estimated": true
+  },
+  "warnings": []
+}

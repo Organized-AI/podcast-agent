@@ -1,0 +1,71 @@
+{{- if .Values.worker.enabled }}
+{{- $sel := dict "root" . "component" "worker" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "podcast-agent.fullname" . }}-worker
+  labels:
+    {{- include "podcast-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  {{- if not .Values.worker.keda.enabled }}
+  replicas: {{ .Values.worker.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "podcast-agent.selector" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "podcast-agent.selector" $sel | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "podcast-agent.serviceAccountName" . }}
+      # The worker finishes its in-flight episode on SIGTERM, then exits; unacked jobs are redelivered.
+      terminationGracePeriodSeconds: {{ .Values.worker.terminationGracePeriodSeconds }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: worker
+          {{- include "podcast-agent.containerCommon" . | nindent 10 }}
+          args: ["worker", "--quiet"]
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+      {{- include "podcast-agent.volumes" . | nindent 6 }}
+{{- if .Values.worker.keda.enabled }}
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: {{ include "podcast-agent.fullname" . }}-sqs
+  labels:
+    {{- include "podcast-agent.labels" . | nindent 4 }}
+spec:
+  podIdentity:
+    provider: aws
+    identityOwner: workload   # use the worker's IRSA role to read queue depth
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "podcast-agent.fullname" . }}-worker
+  labels:
+    {{- include "podcast-agent.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    name: {{ include "podcast-agent.fullname" . }}-worker
+  minReplicaCount: {{ .Values.worker.keda.minReplicas }}
+  maxReplicaCount: {{ .Values.worker.keda.maxReplicas }}
+  pollingInterval: {{ .Values.worker.keda.pollingInterval }}
+  cooldownPeriod: {{ .Values.worker.keda.cooldownPeriod }}
+  triggers:
+    - type: aws-sqs-queue
+      authenticationRef:
+        name: {{ include "podcast-agent.fullname" . }}-sqs
+      metadata:
+        queueURL: {{ .Values.worker.queueUri | quote }}
+        queueLength: {{ .Values.worker.keda.messagesPerReplica | quote }}
+        awsRegion: {{ .Values.worker.awsRegion | quote }}
+{{- end }}
+{{- end }}

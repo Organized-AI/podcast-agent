@@ -1,0 +1,88 @@
+# One image, two roles: `serve` (API) and `worker` (queue consumer). See docs/DEPLOYMENT.md.
+image:
+  repository: ghcr.io/organized-ai/podcast-agent
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+  # IRSA: grant SQS receive/delete, S3 put/get on the output bucket, Bedrock invoke (if used).
+  annotations: {}
+  #  eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/podcast-agent
+
+# Non-secret configuration, rendered into a ConfigMap and loaded as environment variables.
+config:
+  LLM_PROVIDER: anthropic
+  ANTHROPIC_MODEL: claude-sonnet-5-5
+  ANTHROPIC_FAST_MODEL: claude-haiku-5-5
+  SEARCH_PROVIDER: mock
+  MAX_CLAIMS: "8"
+  MAX_STEPS_PER_CLAIM: "4"
+  LLM_CACHE_DIR: /cache/llm
+
+secrets:
+  # Secret with ANTHROPIC_API_KEY (and optionally TAVILY_API_KEY). Created by External Secrets
+  # when externalSecrets.enabled=true, otherwise must already exist in the namespace.
+  name: podcast-agent-secrets
+
+externalSecrets:
+  enabled: false
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-secrets-manager
+  remoteKey: prod/podcast-agent   # JSON secret with the keys above
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+api:
+  enabled: true
+  replicaCount: 2
+  port: 8080
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 512Mi }
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+
+worker:
+  enabled: true
+  queueUri: https://sqs.us-east-1.amazonaws.com/123456789012/podcast-agent-jobs
+  outputUri: s3://podcast-agent-outputs/reports
+  awsRegion: us-east-1
+  maxAttempts: 3
+  # Long enough to finish an in-flight episode after SIGTERM (worker drains, then exits).
+  terminationGracePeriodSeconds: 900
+  resources:
+    requests: { cpu: 250m, memory: 384Mi }
+    limits: { memory: 768Mi }
+  keda:
+    enabled: true          # requires KEDA in the cluster; otherwise set replicaCount
+    minReplicas: 0         # scale to zero when the queue is empty
+    maxReplicas: 20        # cap below the model provider's rate limit
+    messagesPerReplica: 2
+    pollingInterval: 15
+    cooldownPeriod: 300
+  replicaCount: 1          # used only when keda.enabled=false
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true            # ingress only to the API port; egress only DNS + HTTPS

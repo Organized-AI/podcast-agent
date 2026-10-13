@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "podcast-agent.fullname" . }}
+  labels:
+    {{- include "podcast-agent.labels" . | nindent 4 }}
+data:
+  {{- range $k, $v := .Values.config }}
+  {{ $k }}: {{ $v | quote }}
+  {{- end }}
+  {{- if .Values.worker.enabled }}
+  QUEUE_URI: {{ .Values.worker.queueUri | quote }}
+  OUTPUT_URI: {{ .Values.worker.outputUri | quote }}
+  AWS_REGION: {{ .Values.worker.awsRegion | quote }}
+  WORKER_MAX_ATTEMPTS: {{ .Values.worker.maxAttempts | quote }}
+  {{- end }}

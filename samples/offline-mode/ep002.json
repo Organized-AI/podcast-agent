@@ -1,0 +1,351 @@
+{
+  "schema_version": "1.0",
+  "run_id": "20261013-152710-7e9784",
+  "generated_at": "2026-10-13T20:27:10+00:00",
+  "episode": {
+    "episode_id": "ep002",
+    "title": "AI in Healthcare: Hype or Reality?",
+    "host": "David Chen",
+    "guests": [
+      "Dr. Priya Patel",
+      "Alex Moore"
+    ],
+    "duration": "05:10",
+    "word_count": 233,
+    "utterances": 16,
+    "source": "data/transcripts/ep002_ai_healthcare.json",
+    "cleaning": {}
+  },
+  "provider": "offline",
+  "models": {
+    "provider": "offline",
+    "main": "offline-heuristic",
+    "fast": "offline-heuristic"
+  },
+  "plan": {
+    "goal": "Publish-ready show notes and a fact-check table for 'AI in Healthcare: Hype or Reality?'.",
+    "steps": [
+      {
+        "step": "summarize",
+        "reason": "233 words fits within the single-pass budget.",
+        "params": {
+          "strategy": "single_pass"
+        }
+      },
+      {
+        "step": "extract_notes",
+        "reason": "Required show-notes deliverable.",
+        "params": {}
+      },
+      {
+        "step": "extract_claims",
+        "reason": "Claim signals (entities=5, years=0, predictions=4) suggest about 7 check-worthy claims.",
+        "params": {
+          "max_claims": 7
+        }
+      },
+      {
+        "step": "verify_claims",
+        "reason": "Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.",
+        "params": {
+          "max_steps_per_claim": 4,
+          "tools": [
+            "search_knowledge_base",
+            "web_search"
+          ]
+        }
+      }
+    ],
+    "repaired": false,
+    "repair_notes": []
+  },
+  "summary": {
+    "text": "In \"AI in Healthcare: Hype or Reality?\", David Chen talks with Dr. Priya Patel, Alex Moore about healthcare, hype, reality and health. Dr. Priya Patel opens by noting: “Excited to discuss the real applications and limitations.” Alex Moore opens by noting: “Let’s be practical and look at use cases that are live today.” Dr. Patel argues: “Some hospitals use AI for reading X-rays or flagging urgent cases. But it’s assistive, not replacing clinicians.” Moore argues: “The regulatory barriers are huge. The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.” Dr. Patel points to: “Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.” Moore acknowledges: “Data privacy and bias are major hurdles. AI learns from existing clinical data, which may be skewed.” Dr. Patel observes: “Efficiency and clinician support. Hospitals want faster reads and fewer errors.” Moore observes: “The pandemic accelerated digital health adoption, including AI tools.” Dr. Patel looks ahead: “AI copilots that suggest treatment plans, but a human will always make the final call.” Moore looks ahead: “Interoperability is key. AI will work best when systems talk to each other securely.” David Chen concludes: “AI is powerful, but cautious optimism is the way forward.”",
+    "word_count": 208,
+    "strategy": "single_pass"
+  },
+  "notes": {
+    "takeaways": [
+      {
+        "text": "Dr. Patel: Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.",
+        "timestamp": "01:50"
+      },
+      {
+        "text": "Moore: Plus, the pandemic accelerated digital health adoption, including AI tools.",
+        "timestamp": "03:30"
+      },
+      {
+        "text": "Dr. Patel: Hospitals want faster reads and fewer errors.",
+        "timestamp": "03:05"
+      },
+      {
+        "text": "Moore: The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.",
+        "timestamp": "01:15"
+      },
+      {
+        "text": "Dr. Patel: Some hospitals use AI for reading X-rays or flagging urgent cases.",
+        "timestamp": "00:55"
+      }
+    ],
+    "quotes": [
+      {
+        "text": "Yes, AI copilots that suggest treatment plans, but a human will always make the final call.",
+        "speaker": "Dr. Priya Patel",
+        "timestamp": "04:15",
+        "match_score": 1.0
+      },
+      {
+        "text": "Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.",
+        "speaker": "Dr. Priya Patel",
+        "timestamp": "01:50",
+        "match_score": 1.0
+      },
+      {
+        "text": "Plus, the pandemic accelerated digital health adoption, including AI tools.",
+        "speaker": "Alex Moore",
+        "timestamp": "03:30",
+        "match_score": 1.0
+      },
+      {
+        "text": "AI is everywhere, but in healthcare it’s complicated.",
+        "speaker": "David Chen",
+        "timestamp": "00:00",
+        "match_score": 1.0
+      }
+    ],
+    "topics": [
+      "tech",
+      "health",
+      "healthcare",
+      "hype",
+      "reality",
+      "cases",
+      "diagnostics"
+    ]
+  },
+  "fact_checks": [
+    {
+      "claim": {
+        "id": "C1",
+        "claim": "Some hospitals use AI for reading X-rays or flagging urgent cases.",
+        "speaker": "Dr. Priya Patel",
+        "timestamp": "00:55",
+        "quote": "Some hospitals use AI for reading X-rays or flagging urgent cases.",
+        "type": "factual",
+        "time_sensitive": false
+      },
+      "verdict": "verified",
+      "confidence": 0.9,
+      "raw_confidence": 0.9,
+      "rationale": "Sources [E1] support the claim as stated.",
+      "evidence": [
+        {
+          "id": "E1",
+          "source": "knowledge_base",
+          "title": "KB-011: Hospitals use AI to read X-rays and flag urgent cases for clinicians",
+          "snippet": "AI tools are used in hospitals for reading medical images such as X-rays and CT scans and for flagging urgent cases so clinicians review them first (computer-aided triage). In February 2018 the FDA authorized Viz.ai's ContaCT, which analyzes CT images for suspected large-vessel-occlusion strokes and alerts specialists. Most such tools assist clinicians rather than replace their reads.",
+          "url": "https://www.fiercehealthcare.com/regulatory/fda-approval-clinical-decision-support-ai-triage-app",
+          "date": "2025-06-01",
+          "relevance": 1.0
+        }
+      ],
+      "tool_calls": 1,
+      "tools_used": [
+        "search_knowledge_base"
+      ]
+    },
+    {
+      "claim": {
+        "id": "C2",
+        "claim": "The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.",
+        "speaker": "Alex Moore",
+        "timestamp": "01:15",
+        "quote": "The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.",
+        "type": "prediction",
+        "time_sensitive": true
+      },
+      "verdict": "unverifiable",
+      "confidence": 0.35,
+      "raw_confidence": 0.35,
+      "rationale": "Forward-looking prediction; it cannot be verified yet.",
+      "evidence": [],
+      "tool_calls": 0,
+      "tools_used": []
+    },
+    {
+      "claim": {
+        "id": "C3",
+        "claim": "Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.",
+        "speaker": "Dr. Priya Patel",
+        "timestamp": "01:50",
+        "quote": "Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.",
+        "type": "factual",
+        "time_sensitive": false
+      },
+      "verdict": "verified",
+      "confidence": 0.75,
+      "raw_confidence": 0.75,
+      "rationale": "Sources [E1] support the claim as stated.",
+      "evidence": [
+        {
+          "id": "E1",
+          "source": "knowledge_base",
+          "title": "KB-013: Symptom-checker and triage chatbots are offered to patients online",
+          "snippet": "Symptom-checker and triage chatbots are offered by digital-health companies (for example Ada Health and Buoy Health) and by some health systems on their websites and apps, guiding patients toward next steps and an appropriate level of care before they see a doctor.",
+          "url": "https://ada.com/",
+          "date": "2025-06-01",
+          "relevance": 0.705
+        }
+      ],
+      "tool_calls": 1,
+      "tools_used": [
+        "search_knowledge_base"
+      ]
+    },
+    {
+      "claim": {
+        "id": "C4",
+        "claim": "AI learns from existing clinical data, which may be skewed.",
+        "speaker": "Alex Moore",
+        "timestamp": "02:20",
+        "quote": "AI learns from existing clinical data, which may be skewed.",
+        "type": "factual",
+        "time_sensitive": false
+      },
+      "verdict": "verified",
+      "confidence": 0.71,
+      "raw_confidence": 0.71,
+      "rationale": "Sources [E1] support the claim as stated.",
+      "evidence": [
+        {
+          "id": "E1",
+          "source": "knowledge_base",
+          "title": "KB-014: Clinical algorithms can inherit bias from historical data (Science, 2019)",
+          "snippet": "A 2019 study in Science by Obermeyer et al. found that a widely used commercial algorithm for allocating extra care underestimated the needs of Black patients because it used past healthcare costs as a proxy for need. It is a well-documented example of AI trained on existing clinical data reproducing skew in that data. Patient data used by such systems is also subject to privacy rules such as HIPAA.",
+          "url": "https://www.science.org/doi/10.1126/science.aax2342",
+          "date": "2019-10-25",
+          "relevance": 0.61
+        }
+      ],
+      "tool_calls": 1,
+      "tools_used": [
+        "search_knowledge_base"
+      ]
+    },
+    {
+      "claim": {
+        "id": "C5",
+        "claim": "Hospitals want faster reads and fewer errors.",
+        "speaker": "Dr. Priya Patel",
+        "timestamp": "03:05",
+        "quote": "Hospitals want faster reads and fewer errors.",
+        "type": "factual",
+        "time_sensitive": false
+      },
+      "verdict": "unverifiable",
+      "confidence": 0.3,
+      "raw_confidence": 0.3,
+      "rationale": "No knowledge-base entry or search result addresses this claim directly.",
+      "evidence": [],
+      "tool_calls": 2,
+      "tools_used": [
+        "search_knowledge_base",
+        "web_search"
+      ]
+    },
+    {
+      "claim": {
+        "id": "C6",
+        "claim": "The pandemic accelerated digital health adoption, including AI tools.",
+        "speaker": "Alex Moore",
+        "timestamp": "03:30",
+        "quote": "The pandemic accelerated digital health adoption, including AI tools.",
+        "type": "factual",
+        "time_sensitive": false
+      },
+      "verdict": "verified",
+      "confidence": 0.9,
+      "raw_confidence": 0.9,
+      "rationale": "Sources [E1] support the claim as stated.",
+      "evidence": [
+        {
+          "id": "E1",
+          "source": "knowledge_base",
+          "title": "KB-015: The COVID-19 pandemic accelerated digital health and telehealth adoption",
+          "snippet": "McKinsey estimated in 2021 that telehealth use had stabilized at levels 38 times higher than before the COVID-19 pandemic, and investment in digital health, including AI tools, rose sharply during the pandemic.",
+          "url": "https://www.mckinsey.com/industries/healthcare/our-insights/telehealth-a-quarter-trillion-dollar-post-covid-19-reality",
+          "date": "2021-07-09",
+          "relevance": 1.0
+        }
+      ],
+      "tool_calls": 1,
+      "tools_used": [
+        "search_knowledge_base"
+      ]
+    },
+    {
+      "claim": {
+        "id": "C7",
+        "claim": "AI copilots that suggest treatment plans, but a human will always make the final call.",
+        "speaker": "Dr. Priya Patel",
+        "timestamp": "04:15",
+        "quote": "AI copilots that suggest treatment plans, but a human will always make the final call.",
+        "type": "prediction",
+        "time_sensitive": true
+      },
+      "verdict": "unverifiable",
+      "confidence": 0.35,
+      "raw_confidence": 0.35,
+      "rationale": "Forward-looking prediction; it cannot be verified yet.",
+      "evidence": [],
+      "tool_calls": 0,
+      "tools_used": []
+    }
+  ],
+  "steps": [
+    {
+      "step": "plan",
+      "status": "ok",
+      "duration_ms": 3,
+      "attempts": 0,
+      "detail": "4 steps"
+    },
+    {
+      "step": "summarize",
+      "status": "ok",
+      "duration_ms": 1,
+      "attempts": 1,
+      "detail": "208 words (single_pass, target 200–300)"
+    },
+    {
+      "step": "extract_notes",
+      "status": "ok",
+      "duration_ms": 6,
+      "attempts": 1,
+      "detail": "5 takeaways · 4 verbatim quotes · 7 topics"
+    },
+    {
+      "step": "extract_claims",
+      "status": "ok",
+      "duration_ms": 4,
+      "attempts": 1,
+      "detail": "7 check-worthy claims (5 factual, 2 prediction)"
+    },
+    {
+      "step": "verify_claims",
+      "status": "ok",
+      "duration_ms": 21,
+      "attempts": 7,
+      "detail": "4 ✅ · 0 ⚠️ · 3 ❓ across 7 claims · 6 tool calls"
+    }
+  ],
+  "usage": {
+    "llm_calls": 17,
+    "cached_calls": 0,
+    "input_tokens": 12465,
+    "output_tokens": 1999,
+    "cache_read_tokens": 0,
+    "estimated": true
+  },
+  "warnings": []
+}

@@ -1,0 +1,107 @@
+{
+  "description": "Fixture behind the mock web_search tool. It simulates a search engine: mixed-quality pages with publish dates, including stale pages (2020 Mars plan, 2024 Bitcoin forecast) that a careful fact-checker must not treat as current.",
+  "pages": [
+    {
+      "title": "NASA and ESA outline Mars Sample Return campaign with launches in 2026",
+      "url": "https://example-news.test/2020/mars-sample-return-plan",
+      "snippet": "NASA and ESA plan to launch the Mars Sample Return lander and Earth Return Orbiter in 2026, bringing Perseverance's samples back to Earth in the early 2030s.",
+      "published": "2020-11-10"
+    },
+    {
+      "title": "Independent review: Mars Sample Return could cost up to $11 billion",
+      "url": "https://example-news.test/2023/msr-independent-review",
+      "snippet": "An independent review board found the Mars Sample Return mission could cost $8 billion to $11 billion, with samples unlikely to return before 2040 under the existing plan; NASA paused parts of the program.",
+      "published": "2023-09-21"
+    },
+    {
+      "title": "NASA unveils two cheaper options for Mars Sample Return, return now 2035-2039",
+      "url": "https://example-news.test/2025/nasa-msr-two-options",
+      "snippet": "NASA announced two possible architectures for Mars Sample Return, using a sky-crane lander or a commercial heavy-lift lander, with samples returning between 2035 and 2039. A final decision was delayed to 2026.",
+      "published": "2025-01-07"
+    },
+    {
+      "title": "Analysts: Bitcoin could hit $200,000 by the end of 2025",
+      "url": "https://example-markets.test/2024/bitcoin-200k-forecast",
+      "snippet": "Several analysts forecast that Bitcoin could reach $200,000 by the end of 2025, citing ETF inflows and the halving cycle.",
+      "published": "2024-12-18"
+    },
+    {
+      "title": "Bitcoin sets record above $126,000",
+      "url": "https://example-markets.test/2025/bitcoin-record-126k",
+      "snippet": "Bitcoin climbed to a record of about $126,000 on October 6, 2025 before pulling back; the price fell well short of the $200,000 forecasts made earlier in the year.",
+      "published": "2025-10-06"
+    },
+    {
+      "title": "Nvidia becomes first company worth $5 trillion",
+      "url": "https://example-markets.test/2025/nvidia-5-trillion",
+      "snippet": "Nvidia became the first company to reach a $5 trillion market capitalization on October 29, 2025, extending its lead in the AI chip boom.",
+      "published": "2025-10-29"
+    },
+    {
+      "title": "Perseverance rover lands safely in Jezero Crater",
+      "url": "https://example-news.test/2021/perseverance-landing",
+      "snippet": "NASA's Perseverance rover touched down in Jezero Crater on February 18, 2021, beginning its mission to search for signs of ancient life and collect samples.",
+      "published": "2021-02-18"
+    },
+    {
+      "title": "How GitLab runs an all-remote company with a public handbook",
+      "url": "https://example-work.test/gitlab-handbook-remote",
+      "snippet": "GitLab's public handbook runs to thousands of pages and documents nearly every process, a model other remote companies such as Automattic and Doist cite for async, documentation-first work.",
+      "published": "2024-05-02"
+    },
+    {
+      "title": "Amazon orders corporate staff back to the office five days a week",
+      "url": "https://example-work.test/2024/amazon-rto",
+      "snippet": "Amazon told corporate employees to return to the office five days a week starting January 2, 2025, one of the largest return-to-office mandates among big employers.",
+      "published": "2024-09-16"
+    },
+    {
+      "title": "Remote-capable workers: hybrid remains the dominant model",
+      "url": "https://example-work.test/2025/hybrid-dominant",
+      "snippet": "Surveys of remote-capable US employees find about half work hybrid, roughly a quarter fully remote, and the rest on-site, with little change over the past two years.",
+      "published": "2025-06-15"
+    },
+    {
+      "title": "FDA's AI-enabled medical device list passes 1,200 entries",
+      "url": "https://example-health.test/2025/fda-ai-device-list",
+      "snippet": "The FDA's updated list of AI-enabled medical devices now includes more than 1,200 authorized devices, most of them in radiology, all reviewed through 510(k), De Novo or PMA pathways.",
+      "published": "2025-07-10"
+    },
+    {
+      "title": "FDA permits first autonomous AI diagnostic device, IDx-DR",
+      "url": "https://example-health.test/2018/idx-dr-autonomous",
+      "snippet": "The FDA permitted marketing of IDx-DR, the first device authorized to provide a screening decision for diabetic retinopathy without a clinician also interpreting the images.",
+      "published": "2018-04-11"
+    },
+    {
+      "title": "Telehealth use stabilizes at 38 times pre-pandemic levels",
+      "url": "https://example-health.test/2021/telehealth-38x",
+      "snippet": "Telehealth utilization has stabilized at levels 38 times higher than before the COVID-19 pandemic, as the pandemic accelerated adoption of digital health tools.",
+      "published": "2021-07-09"
+    },
+    {
+      "title": "Study finds racial bias in widely used health algorithm",
+      "url": "https://example-health.test/2019/algorithm-bias",
+      "snippet": "Researchers found a commercial algorithm used to guide care for millions of patients underestimated the needs of Black patients because it was trained on historical cost data.",
+      "published": "2019-10-24"
+    },
+    {
+      "title": "Hospitals deploy AI triage to flag urgent scans",
+      "url": "https://example-health.test/2024/ai-triage-scans",
+      "snippet": "Hospitals are using AI to prioritize X-rays and CT scans with urgent findings such as strokes and collapsed lungs, moving them to the top of radiologists' worklists.",
+      "published": "2024-03-04"
+    },
+    {
+      "title": "Why most startups should bootstrap first",
+      "url": "https://example-startups.test/bootstrap-first",
+      "snippet": "Bootstrapped founders keep control and are forced to find revenue early; venture-backed founders trade equity and some control for speed, and face pressure from investors for an exit.",
+      "published": "2023-08-30"
+    },
+    {
+      "title": "When will humans land on Mars?",
+      "url": "https://example-news.test/2025/humans-on-mars-timeline",
+      "snippet": "NASA targets crewed Mars missions no earlier than the late 2030s; private timelines have repeatedly slipped and no date is firm.",
+      "published": "2025-03-12"
+    }
+  ]
+}

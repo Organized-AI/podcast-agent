@@ -1,0 +1,26 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "podcast-agent.fullname" . }}
+  labels:
+    {{- include "podcast-agent.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    - ports:
+        - port: {{ .Values.api.port }}
+          protocol: TCP
+  egress:
+    - ports:   # DNS
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    - ports:   # model APIs, SQS, S3, search — HTTPS only
+        - port: 443
+          protocol: TCP
+{{- end }}

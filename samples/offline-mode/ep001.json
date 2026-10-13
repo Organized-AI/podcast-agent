@@ -1,0 +1,258 @@
+{
+  "schema_version": "1.0",
+  "run_id": "20261013-152710-7e9784",
+  "generated_at": "2026-10-13T20:27:10+00:00",
+  "episode": {
+    "episode_id": "ep001",
+    "title": "The Future of Remote Work",
+    "host": "Sarah Johnson",
+    "guests": [
+      "Mark Rivera"
+    ],
+    "duration": "06:00",
+    "word_count": 325,
+    "utterances": 19,
+    "source": "data/transcripts/ep001_remote_work.json",
+    "cleaning": {}
+  },
+  "provider": "offline",
+  "models": {
+    "provider": "offline",
+    "main": "offline-heuristic",
+    "fast": "offline-heuristic"
+  },
+  "plan": {
+    "goal": "Publish-ready show notes and a fact-check table for 'The Future of Remote Work'.",
+    "steps": [
+      {
+        "step": "summarize",
+        "reason": "325 words fits within the single-pass budget.",
+        "params": {
+          "strategy": "single_pass"
+        }
+      },
+      {
+        "step": "extract_notes",
+        "reason": "Required show-notes deliverable.",
+        "params": {}
+      },
+      {
+        "step": "extract_claims",
+        "reason": "Claim signals (entities=7, years=2, predictions=3) suggest about 8 check-worthy claims.",
+        "params": {
+          "max_claims": 8
+        }
+      },
+      {
+        "step": "verify_claims",
+        "reason": "Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.",
+        "params": {
+          "max_steps_per_claim": 4,
+          "tools": [
+            "search_knowledge_base",
+            "web_search"
+          ]
+        }
+      }
+    ],
+    "repaired": false,
+    "repair_notes": []
+  },
+  "summary": {
+    "text": "In \"The Future of Remote Work\", Sarah Johnson talks with Mark Rivera about work, remote, culture and teams. Mark Rivera opens by noting: “Excited to be here. Remote work has evolved a lot in just a few years.” Rivera argues: “Not quite. It’s more about async-first culture, documentation, and autonomy. Being remote doesn’t just mean a location; it means structured processes and trust.” Rivera argues: “Look at GitLab, Automattic, and Doist. They’ve literally written handbooks for everything. Employees can figure things out without asking for constant guidance.” Rivera points to: “Even small teams benefit from clear documentation. It reduces context-switching and keeps knowledge from being siloed.” Rivera observes: “They help, but tools aren’t the solution. Culture is. Slack is great, but if you rely on it for everything, people will burn out.” Rivera observes: “Outcomes over hours. Set goals, track progress on deliverables, and trust the team. Transparency matters more than check-ins.” Rivera acknowledges: “Regular virtual coffee chats, occasional in-person retreats, and team rituals help. Remote doesn’t mean isolated; it just needs intention.” Rivera predicts: “Remote-first companies will dominate talent acquisition. Local offices might become optional hubs, and async culture will become standard practice.” Rivera concludes: “Focus on documentation, set clear goals, invest in culture, and trust your team. That’s the foundation.”",
+    "word_count": 212,
+    "strategy": "single_pass"
+  },
+  "notes": {
+    "takeaways": [
+      {
+        "text": "Rivera: Remote work has evolved a lot in just a few years.",
+        "timestamp": "00:15"
+      },
+      {
+        "text": "Rivera: Focus on documentation, set clear goals, invest in culture, and trust your team. That’s the foundation.",
+        "timestamp": "05:35"
+      },
+      {
+        "text": "Rivera: Being remote doesn’t just mean a location; it means structured processes and trust.",
+        "timestamp": "00:45"
+      },
+      {
+        "text": "Rivera: Local offices might become optional hubs, and async culture will become standard practice.",
+        "timestamp": "05:00"
+      },
+      {
+        "text": "Rivera: Remote doesn’t mean isolated; it just needs intention.",
+        "timestamp": "04:10"
+      }
+    ],
+    "quotes": [
+      {
+        "text": "Remote work has evolved a lot in just a few years.",
+        "speaker": "Mark Rivera",
+        "timestamp": "00:15",
+        "match_score": 1.0
+      },
+      {
+        "text": "What about loneliness or lack of connection? It’s often cited as a remote work downside.",
+        "speaker": "Sarah Johnson",
+        "timestamp": "03:55",
+        "match_score": 1.0
+      },
+      {
+        "text": "So Mark, a lot of people equate remote work with working from anywhere.",
+        "speaker": "Sarah Johnson",
+        "timestamp": "00:30",
+        "match_score": 1.0
+      },
+      {
+        "text": "Focus on documentation, set clear goals, invest in culture, and trust your team. That’s the foundation.",
+        "speaker": "Mark Rivera",
+        "timestamp": "05:35",
+        "match_score": 1.0
+      }
+    ],
+    "topics": [
+      "remote-work",
+      "work-reimagined",
+      "work",
+      "reimagined",
+      "culture",
+      "teams",
+      "documentation"
+    ]
+  },
+  "fact_checks": [
+    {
+      "claim": {
+        "id": "C1",
+        "claim": "Look at GitLab, Automattic, and Doist. They’ve literally written handbooks for everything.",
+        "speaker": "Mark Rivera",
+        "timestamp": "01:20",
+        "quote": "Look at GitLab, Automattic, and Doist. They’ve literally written handbooks for everything.",
+        "type": "factual",
+        "time_sensitive": false
+      },
+      "verdict": "verified",
+      "confidence": 0.72,
+      "raw_confidence": 0.72,
+      "rationale": "Sources [E4] support the claim as stated.",
+      "evidence": [
+        {
+          "id": "E4",
+          "source": "web_search",
+          "title": "How GitLab runs an all-remote company with a public handbook",
+          "snippet": "GitLab's public handbook runs to thousands of pages and documents nearly every process, a model other remote companies such as Automattic and Doist cite for async, documentation-first work.",
+          "url": "https://example-work.test/gitlab-handbook-remote",
+          "date": "2024-05-02",
+          "relevance": 0.63
+        }
+      ],
+      "tool_calls": 2,
+      "tools_used": [
+        "search_knowledge_base",
+        "web_search"
+      ]
+    },
+    {
+      "claim": {
+        "id": "C2",
+        "claim": "Slack is great, but if you rely on it for everything, people will burn out.",
+        "speaker": "Mark Rivera",
+        "timestamp": "02:45",
+        "quote": "Slack is great, but if you rely on it for everything, people will burn out.",
+        "type": "prediction",
+        "time_sensitive": true
+      },
+      "verdict": "unverifiable",
+      "confidence": 0.35,
+      "raw_confidence": 0.35,
+      "rationale": "Forward-looking prediction; it cannot be verified yet.",
+      "evidence": [],
+      "tool_calls": 0,
+      "tools_used": []
+    },
+    {
+      "claim": {
+        "id": "C3",
+        "claim": "Local offices might become optional hubs, and async culture will become standard practice.",
+        "speaker": "Mark Rivera",
+        "timestamp": "05:00",
+        "quote": "Local offices might become optional hubs, and async culture will become standard practice.",
+        "type": "prediction",
+        "time_sensitive": true
+      },
+      "verdict": "unverifiable",
+      "confidence": 0.35,
+      "raw_confidence": 0.35,
+      "rationale": "Forward-looking prediction; it cannot be verified yet.",
+      "evidence": [],
+      "tool_calls": 0,
+      "tools_used": []
+    },
+    {
+      "claim": {
+        "id": "C4",
+        "claim": "Remote-first companies will dominate talent acquisition.",
+        "speaker": "Mark Rivera",
+        "timestamp": "05:00",
+        "quote": "Remote-first companies will dominate talent acquisition.",
+        "type": "prediction",
+        "time_sensitive": true
+      },
+      "verdict": "unverifiable",
+      "confidence": 0.35,
+      "raw_confidence": 0.35,
+      "rationale": "Forward-looking prediction; it cannot be verified yet.",
+      "evidence": [],
+      "tool_calls": 0,
+      "tools_used": []
+    }
+  ],
+  "steps": [
+    {
+      "step": "plan",
+      "status": "ok",
+      "duration_ms": 5,
+      "attempts": 0,
+      "detail": "4 steps"
+    },
+    {
+      "step": "summarize",
+      "status": "ok",
+      "duration_ms": 1,
+      "attempts": 1,
+      "detail": "212 words (single_pass, target 200–300)"
+    },
+    {
+      "step": "extract_notes",
+      "status": "ok",
+      "duration_ms": 6,
+      "attempts": 1,
+      "detail": "5 takeaways · 4 verbatim quotes · 7 topics"
+    },
+    {
+      "step": "extract_claims",
+      "status": "ok",
+      "duration_ms": 3,
+      "attempts": 1,
+      "detail": "4 check-worthy claims (1 factual, 3 prediction)"
+    },
+    {
+      "step": "verify_claims",
+      "status": "ok",
+      "duration_ms": 10,
+      "attempts": 4,
+      "detail": "1 ✅ · 0 ⚠️ · 3 ❓ across 4 claims · 2 tool calls"
+    }
+  ],
+  "usage": {
+    "llm_calls": 10,
+    "cached_calls": 0,
+    "input_tokens": 7890,
+    "output_tokens": 1478,
+    "cache_read_tokens": 0,
+    "estimated": true
+  },
+  "warnings": []
+}
