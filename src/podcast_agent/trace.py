@@ -54,10 +54,13 @@ class Tracer:
         self.episode_id: str | None = None
         self._jsonl = None
         self._plain = None
+        self.jsonl_path: Path | None = None
+        self.events_written = 0
         if log_dir:
             path = Path(log_dir)
             path.mkdir(parents=True, exist_ok=True)
-            self._jsonl = (path / "trace.jsonl").open("a", encoding="utf-8")
+            self.jsonl_path = path / "trace.jsonl"
+            self._jsonl = self.jsonl_path.open("a", encoding="utf-8")
             self._plain = (path / "run.log").open("a", encoding="utf-8")
 
     # ------------------------------------------------------------------ core
@@ -76,6 +79,7 @@ class Tracer:
         if self._jsonl:
             self._jsonl.write(json.dumps(record, ensure_ascii=False) + "\n")
             self._jsonl.flush()
+            self.events_written += 1
         if kind == "llm" and not self.verbose:
             return
         icon, style = KIND_STYLE.get(kind, ("·", "white"))
@@ -101,6 +105,8 @@ class Tracer:
                             "run_id": self.run_id, "episode_id": self.episode_id, "kind": "section",
                             "message": title}, ensure_ascii=False) + "\n"
             )
+            self._jsonl.flush()
+            self.events_written += 1
 
     # ------------------------------------------------------------------ helpers
     def info(self, step: str, message: str, **data: Any) -> None:

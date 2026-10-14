@@ -33,8 +33,9 @@ Sample outputs from a complete run are committed in [`samples/offline-mode/`](sa
 ```bash
 git clone <this repo> && cd podcast-agent
 cp .env.example .env            # add ANTHROPIC_API_KEY=...
-docker build -t podcast-agent .
+docker build --build-arg GIT_COMMIT=$(git rev-parse --short HEAD) -t podcast-agent .
 docker run --rm -t --env-file .env -v "$PWD/output:/app/output" podcast-agent
+docker run --rm -t -v "$PWD/output:/app/output" podcast-agent audit output   # re-verify the run
 ```
 
 That processes every transcript in `data/transcripts/` and writes to `./output/`:
@@ -48,7 +49,8 @@ That processes every transcript in `data/transcripts/` and writes to `./output/`
 | `output/index.md` | One row per episode: counts, verdict mix, LLM calls, tokens |
 | `output/logs/run.log` | Human-readable reasoning trace |
 | `output/logs/trace.jsonl` | Structured trace (one event per line: `run_id`, `episode_id`, `step`, `kind`, `message`, `data`) |
-| `output/run_manifest.json` | Provider, models, prompt version, per-step timings and token usage |
+| `output/run_manifest.json` | Code commit, prompt version, settings, input and output SHA-256 hashes, per-step timings and token usage |
+| `output/audit.json` · `audit.md` | Written by `podcast-agent audit`: every guarantee re-checked from the files (quotes verbatim, confidence caps, trace completeness, hashes) |
 
 Process your own files:
 
@@ -89,9 +91,10 @@ python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 export ANTHROPIC_API_KEY=...            # or LLM_PROVIDER=offline
 .venv/bin/podcast-agent run data/transcripts --out output
 .venv/bin/podcast-agent run data/transcripts/ep002_ai_healthcare.json --today 2026-10-13 --max-claims 5
+.venv/bin/podcast-agent audit output             # re-verify a run: hashes, quotes, caps, trace coverage
 .venv/bin/podcast-agent kb "FDA autonomous AI"    # query the knowledge base directly
 .venv/bin/podcast-agent serve --port 8080         # HTTP API: POST /v1/process, GET /healthz
-.venv/bin/pytest -q                               # 29 tests, no network or API key needed
+.venv/bin/pytest -q                               # 32 tests, no network or API key needed
 ```
 
 ---
@@ -212,7 +215,7 @@ data/transcripts/                               ep001–ep003 (provided) + ep004
 data/knowledge_base.json · mock_web_index.json  local KB (18 dated facts) · mock search corpus
 docs/DEPLOYMENT.md                              deployment strategy: diagram + narrative
 deploy/helm/podcast-agent/                      Helm chart: API + KEDA-scaled workers
-tests/                                          29 tests, including scripted-model tests of every correction path
+tests/                                          32 tests, including scripted-model tests of every correction path
 ```
 
 ## Making changes quickly

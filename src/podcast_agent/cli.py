@@ -81,6 +81,30 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 1 if errors else 0
 
 
+def cmd_audit(args: argparse.Namespace) -> int:
+    from podcast_agent.audit import audit_run, write_audit
+
+    console = Console(highlight=False)
+    run_dir = Path(args.run_dir)
+    if not (run_dir / "run_manifest.json").exists():
+        console.print(f"[red]{run_dir} has no run_manifest.json — point audit at a run's output folder.[/red]")
+        return 2
+    res = audit_run(run_dir, args.transcripts)
+    table = Table(title=f"Audit of run {res.run_id}")
+    for col in ("Scope", "Area", "Check", "Result", "Detail"):
+        table.add_column(col, overflow="fold")
+    style = {"pass": "[green]PASS[/green]", "warn": "[yellow]WARN[/yellow]", "fail": "[bold red]FAIL[/bold red]"}
+    for ch in res.checks:
+        table.add_row(ch.scope, ch.area, ch.name, style[ch.status], ch.detail)
+    console.print(table)
+    c = res.counts
+    console.print(f"{c['pass']} passed · {c['warn']} warnings · {c['fail']} failed")
+    if not args.no_write:
+        write_audit(res, run_dir)
+        console.print(f"Wrote {run_dir}/audit.json and {run_dir}/audit.md")
+    return 1 if c["fail"] else 0
+
+
 def cmd_kb(args: argparse.Namespace) -> int:
     from podcast_agent.tools.knowledge_base import KnowledgeBase
 
@@ -136,6 +160,12 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--no-cache", action="store_true", help="bypass the local LLM response cache")
     run.add_argument("--quiet", action="store_true", help="hide per-call LLM lines in the console trace")
     run.set_defaults(func=cmd_run)
+
+    audit = sub.add_parser("audit", help="Re-verify a finished run from its files (writes audit.json/audit.md)")
+    audit.add_argument("run_dir", nargs="?", default="output", help="the run's output folder (default: output)")
+    audit.add_argument("--transcripts", action="append", help="where to find source transcripts if moved")
+    audit.add_argument("--no-write", action="store_true", help="print only; don't write audit.json/audit.md")
+    audit.set_defaults(func=cmd_audit)
 
     kb = sub.add_parser("kb", help="Query the local knowledge base")
     kb.add_argument("query")

@@ -9,7 +9,11 @@ RUN python -m venv /opt/venv && /opt/venv/bin/pip install ".[aws]"
 
 # ---- runtime: slim, non-root, no build tooling ---------------------------------------------
 FROM python:3.12-slim AS runtime
-ENV PYTHONDONTWRITEBYTECODE=1 \
+# Recorded in every run_manifest.json so a run can be traced to the code that produced it:
+#   docker build --build-arg GIT_COMMIT=$(git rev-parse --short HEAD) -t podcast-agent .
+ARG GIT_COMMIT=unknown
+ENV GIT_COMMIT=${GIT_COMMIT} \
+    PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH" \
     LLM_CACHE_DIR=/cache/llm \
