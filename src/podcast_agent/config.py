@@ -38,6 +38,8 @@ class Settings:
     anthropic_api_key: str | None = field(default_factory=lambda: _env("ANTHROPIC_API_KEY"))
     anthropic_model: str = field(default_factory=lambda: _env("ANTHROPIC_MODEL", "claude-sonnet-5-5"))
     anthropic_fast_model: str = field(default_factory=lambda: _env("ANTHROPIC_FAST_MODEL", "claude-haiku-5-5"))
+    # Only for keys that aren't scoped to a workspace: Console → Settings → Workspaces → ID (wrkspc_…).
+    anthropic_workspace_id: str | None = field(default_factory=lambda: _env("ANTHROPIC_WORKSPACE_ID"))
     # Claude on Amazon Bedrock: AWS credentials come from the standard chain (env vars, ~/.aws, IAM role / IRSA).
     bedrock_model: str | None = field(default_factory=lambda: _env("BEDROCK_MODEL"))
     bedrock_fast_model: str | None = field(default_factory=lambda: _env("BEDROCK_FAST_MODEL"))

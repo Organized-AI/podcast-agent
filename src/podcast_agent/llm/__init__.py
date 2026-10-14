@@ -15,6 +15,7 @@ def build_provider(settings: Settings) -> LLMProvider:
         provider = AnthropicProvider(
             settings.anthropic_model, settings.anthropic_fast_model, settings.anthropic_api_key, settings.llm_timeout_s,
             prompt_cache=settings.prompt_cache, effort=settings.anthropic_effort,
+            workspace_id=settings.anthropic_workspace_id,
         )
     elif name == "bedrock":
         from podcast_agent.llm.anthropic_provider import BedrockProvider

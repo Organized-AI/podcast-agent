@@ -110,3 +110,11 @@ def test_anthropic_request_matches_the_installed_sdk_and_claude_5_5_rules():
     fake2 = SimpleNamespace(messages=FakeMessages())
     AnthropicProvider("m", None, client=fake2, effort=None).complete(system="s", messages=[{"role": "user", "content": "x"}])
     assert "output_config" not in fake2.messages.kwargs
+
+
+def test_workspace_id_is_sent_for_keys_not_scoped_to_a_workspace():
+    from podcast_agent.llm.anthropic_provider import AnthropicProvider
+
+    p = AnthropicProvider("m", None, api_key="sk-ant-test", workspace_id="wrkspc_test")
+    assert p._client.default_headers["anthropic-workspace-id"] == "wrkspc_test"
+    assert "anthropic-workspace-id" not in AnthropicProvider("m", None, api_key="sk-ant-test")._client.default_headers

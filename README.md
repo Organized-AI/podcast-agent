@@ -94,7 +94,7 @@ export ANTHROPIC_API_KEY=...            # or LLM_PROVIDER=offline
 .venv/bin/podcast-agent audit output             # re-verify a run: hashes, quotes, caps, trace coverage
 .venv/bin/podcast-agent kb "FDA autonomous AI"    # query the knowledge base directly
 .venv/bin/podcast-agent serve --port 8080         # HTTP API: POST /v1/process, GET /healthz
-.venv/bin/pytest -q                               # 34 tests, no network or API key needed
+.venv/bin/pytest -q                               # 35 tests, no network or API key needed
 ```
 
 ---
@@ -215,7 +215,7 @@ data/transcripts/                               ep001–ep003 (provided) + ep004
 data/knowledge_base.json · mock_web_index.json  local KB (18 dated facts) · mock search corpus
 docs/DEPLOYMENT.md                              deployment strategy: diagram + narrative
 deploy/helm/podcast-agent/                      Helm chart: API + KEDA-scaled workers
-tests/                                          34 tests, including scripted-model tests of every correction path
+tests/                                          35 tests, including scripted-model tests of every correction path
 ```
 
 ## Making changes quickly

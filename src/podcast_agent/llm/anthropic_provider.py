@@ -30,6 +30,7 @@ class AnthropicProvider(LLMProvider):
         client: Any = None,
         prompt_cache: bool = True,
         effort: str | None = "low",
+        workspace_id: str | None = None,
     ):
         super().__init__(model, fast_model)
         try:
@@ -41,7 +42,11 @@ class AnthropicProvider(LLMProvider):
             if not api_key:
                 raise LLMError("ANTHROPIC_API_KEY is not set")
             # The SDK retries 408/409/429/5xx with exponential backoff; we raise the ceiling a little.
-            client = anthropic.Anthropic(api_key=api_key, timeout=timeout_s, max_retries=4)
+            extra: dict[str, Any] = {}
+            if workspace_id:
+                # A key that isn't scoped to one workspace must name the workspace on every request.
+                extra["default_headers"] = {"anthropic-workspace-id": workspace_id}
+            client = anthropic.Anthropic(api_key=api_key, timeout=timeout_s, max_retries=4, **extra)
         self._client = client
         self.prompt_cache = prompt_cache
         self.effort = effort
