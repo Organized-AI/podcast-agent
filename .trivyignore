@@ -1,0 +1,13 @@
+# Trivy findings accepted on purpose. Each entry says why; remove it when the reason no longer holds.
+
+# Dockerfile has no HEALTHCHECK: the default command is a batch run that exits, and the API's
+# liveness and readiness probes are defined in the Helm chart, which Kubernetes uses instead.
+DS-0026
+
+# Workloads in the default namespace: the chart takes its namespace from `helm install -n`;
+# Trivy renders it with the default release namespace.
+KSV-0110
+
+# Images from trusted registries only: enforced by cluster admission policy, not by the chart.
+# The image repository becomes ghcr.io/organized-ai/podcast-agent with the GitOps phase.
+KSV-0125
