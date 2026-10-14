@@ -34,6 +34,15 @@ externalSecrets:
     name: aws-secrets-manager
   remoteKey: prod/podcast-agent   # JSON secret with the keys above
 
+# OpenTelemetry: off unless enabled. Pods send OTLP/HTTP to a Collector (see docs/OBSERVABILITY.md).
+otel:
+  enabled: false
+  endpoint: http://otel-collector.observability.svc.cluster.local:4318
+  environment: ""              # deployment.environment.name, e.g. dev or prod
+  sampler: parentbased_traceidratio
+  samplerArg: "1.0"            # keep every trace; lower it when traffic grows
+  captureContent: false        # prompts and transcript text in spans: never where content is confidential
+
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 10001

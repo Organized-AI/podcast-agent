@@ -3,6 +3,9 @@
 #   docker compose -f deploy/compose/docker-compose.yml --profile api up api              → HTTP API on 127.0.0.1:8080
 #   docker compose -f deploy/compose/docker-compose.yml --profile worker up worker        → drain ./queue/inbox
 #   docker compose -f deploy/compose/docker-compose.yml --profile local-llm up -d ollama  → local model
+#   docker compose -f deploy/compose/docker-compose.yml --profile observability up -d otel-collector jaeger prometheus grafana
+#     then: OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318 docker compose -f deploy/compose/docker-compose.yml run --rm agent
+#     (or `make observe`; UIs: Jaeger 127.0.0.1:16686 · Prometheus 127.0.0.1:9090 · Grafana 127.0.0.1:3000)
 name: podcast-agent
 x-agent: &agent
   build:
@@ -13,6 +16,10 @@ x-agent: &agent
       required: false
   environment:
     OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434/v1}
+    # Empty means telemetry off; point it at the Collector to send traces and metrics.
+    OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT: ${OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT:-false}
+    DEPLOY_ENV: ${DEPLOY_ENV:-local}
   volumes:
     - ../../data:/app/data:ro
     - ../../output:/app/output
@@ -50,6 +57,47 @@ services:
     ports: ["127.0.0.1:11434:11434"]
     volumes:
       - ollama:/root/.ollama
+
+  # --- observability profile: images pinned by digest (the comment names the tag) ---------------
+  otel-collector:
+    profiles: ["observability"]
+    image: otel/opentelemetry-collector-contrib:0.161.0@sha256:fd328de2552466ad78385e1b1289c3f2402b1c45f265b252aab1955b42845ac1
+    command: ["--config=/etc/observability/otel-collector.yaml"]
+    volumes:
+      - ../observability:/etc/observability:ro   # a folder, so edited files show up on restart
+    ports:
+      - "127.0.0.1:4317:4317"   # OTLP gRPC
+      - "127.0.0.1:4318:4318"   # OTLP HTTP
+    depends_on: [jaeger]
+
+  jaeger:
+    profiles: ["observability"]
+    image: jaegertracing/jaeger:2.21.0@sha256:3d0ac795ff98aa04d1be04311d2dac6c25b4bfc8322dc02e53bc5b170c5018c3
+    ports:
+      - "127.0.0.1:16686:16686" # UI and query API
+
+  prometheus:
+    profiles: ["observability"]
+    image: prom/prometheus:v3.14.0@sha256:5ce7540c3c00ef4ab0c9d2c995c6a5b9c421f44b4a115d97a2c7af3b1c21cbb0
+    volumes:
+      - ../observability/prometheus:/etc/prometheus:ro
+    ports:
+      - "127.0.0.1:9090:9090"
+    depends_on: [otel-collector]
+
+  grafana:
+    profiles: ["observability"]
+    image: grafana/grafana:13.2.3@sha256:b28bae15e219c998fb0e0424ed724930cc61b1f61fb404d47c862f9a23f9e572
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"       # local only: bound to 127.0.0.1
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/podcast-agent.json
+    volumes:
+      - ../observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on: [prometheus, jaeger]
 
 volumes:
   agent-cache: {}

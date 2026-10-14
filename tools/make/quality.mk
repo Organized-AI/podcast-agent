@@ -1,6 +1,6 @@
 ##@ Quality
 lint: ## ruff (includes bandit security rules)
-	$(UV) run ruff check src tests tools
+	$(UV) run ruff check src tests tools e2e
 
 types: ## mypy on the package
 	$(UV) run mypy

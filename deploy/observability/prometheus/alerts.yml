@@ -1,0 +1,67 @@
+# Alerts on the agent's OpenTelemetry metrics (names as the Collector's Prometheus exporter writes them).
+# Unit tests: deploy/observability/prometheus/alerts_test.yml (`make observability-check`).
+groups:
+  - name: podcast-agent
+    rules:
+      - alert: PodcastAgentEpisodesFailing
+        expr: sum by (service_name) (increase(podcast_agent_episodes_total{podcast_agent_episode_status=~"failed|partial"}[15m])) > 0
+        labels:
+          severity: page
+        annotations:
+          summary: Episodes are finishing with failed steps
+          description: >-
+            {{ $value | humanize }} episode(s) finished failed or partial in the last 15 minutes.
+            Open the episode's invoke_agent span in Jaeger; failed steps carry the exception.
+
+      - alert: PodcastAgentModelErrors
+        expr: sum by (service_name, gen_ai_provider_name) (increase(gen_ai_client_operation_duration_seconds_count{error_type!=""}[10m])) > 3
+        labels:
+          severity: page
+        annotations:
+          summary: Model calls are failing ({{ $labels.gen_ai_provider_name }})
+          description: "{{ $value | humanize }} failed model calls in 10 minutes; check provider status, keys and rate limits."
+
+      - alert: PodcastAgentModelLatencyHigh
+        expr: >-
+          histogram_quantile(0.95, sum by (le, gen_ai_request_model)
+          (rate(gen_ai_client_operation_duration_seconds_bucket[10m]))) > 30
+        for: 10m
+        labels:
+          severity: ticket
+        annotations:
+          summary: p95 model latency above 30s for {{ $labels.gen_ai_request_model }}
+          description: Slow model calls back up the queue; consider a faster tier for extraction steps.
+
+      - alert: PodcastAgentUnverifiableShareHigh
+        expr: >-
+          sum by (service_name) (increase(podcast_agent_verdicts_total{podcast_agent_verdict="unverifiable"}[1h]))
+          / sum by (service_name) (increase(podcast_agent_verdicts_total[1h])) > 0.6
+          and sum by (service_name) (increase(podcast_agent_verdicts_total[1h])) >= 10
+        for: 30m
+        labels:
+          severity: ticket
+        annotations:
+          summary: Most claims are coming back unverifiable
+          description: >-
+            {{ $value | humanizePercentage }} of verdicts in the last hour were unverifiable. Search may be down,
+            or the knowledge base may be stale for current topics.
+
+      - alert: PodcastAgentToolErrors
+        expr: sum by (service_name, gen_ai_tool_name) (increase(podcast_agent_tool_calls_total{outcome="error"}[15m])) > 5
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.gen_ai_tool_name }} is failing"
+          description: "{{ $value | humanize }} tool errors in 15 minutes; fact-checks fall back to the remaining tools."
+
+      - alert: PodcastAgentSelfCorrectionsHigh
+        expr: >-
+          sum by (service_name) (increase(podcast_agent_self_corrections_total[1h]))
+          / sum by (service_name) (increase(gen_ai_client_operation_duration_seconds_count[1h])) > 0.25
+          and sum by (service_name) (increase(gen_ai_client_operation_duration_seconds_count[1h])) >= 20
+        for: 30m
+        labels:
+          severity: ticket
+        annotations:
+          summary: More than a quarter of model outputs are being rejected and retried
+          description: A prompt or model change may have broken the output format; compare against the eval baseline.
