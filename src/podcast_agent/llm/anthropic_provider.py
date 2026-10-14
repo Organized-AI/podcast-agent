@@ -1,6 +1,11 @@
 """Claude providers: the Anthropic API (default) and Claude on Amazon Bedrock.
 
 Both use the same Messages API shape, so Bedrock is the Anthropic provider with a different client.
+
+Claude 5.5 models reject non-default sampling parameters (temperature, top_p, top_k) and think by
+default, with thinking tokens counted against max_tokens. So this provider never sends temperature,
+sets an explicit effort level (ANTHROPIC_EFFORT, default "low": these are bounded extraction tasks),
+and adds headroom to max_tokens for thinking. Only tokens actually generated are billed.
 """
 
 from __future__ import annotations
@@ -8,6 +13,8 @@ from __future__ import annotations
 from typing import Any
 
 from podcast_agent.llm.base import LLMError, LLMProvider, LLMResponse
+
+THINKING_HEADROOM = 4096
 
 
 class AnthropicProvider(LLMProvider):
@@ -22,6 +29,7 @@ class AnthropicProvider(LLMProvider):
         *,
         client: Any = None,
         prompt_cache: bool = True,
+        effort: str | None = "low",
     ):
         super().__init__(model, fast_model)
         try:
@@ -36,6 +44,7 @@ class AnthropicProvider(LLMProvider):
             client = anthropic.Anthropic(api_key=api_key, timeout=timeout_s, max_retries=4)
         self._client = client
         self.prompt_cache = prompt_cache
+        self.effort = effort
 
     def _complete(
         self,
@@ -44,7 +53,7 @@ class AnthropicProvider(LLMProvider):
         messages: list[dict[str, str]],
         model: str,
         max_tokens: int,
-        temperature: float | None,
+        temperature: float | None,  # not sent: Claude 5.5 models reject non-default sampling parameters
         cache_prefix: str | None,
         task: str,
         context: dict[str, Any],
@@ -60,12 +69,12 @@ class AnthropicProvider(LLMProvider):
         system_blocks.append({"type": "text", "text": system})
         kwargs: dict[str, Any] = {
             "model": model,
-            "max_tokens": max_tokens,
+            "max_tokens": max_tokens + THINKING_HEADROOM,
             "system": system_blocks,
             "messages": messages,
         }
-        if temperature is not None:
-            kwargs["temperature"] = temperature
+        if self.effort:
+            kwargs["output_config"] = {"effort": self.effort}
         try:
             resp = self._client.messages.create(**kwargs)
         except self._anthropic.APIError as exc:
@@ -96,6 +105,7 @@ class BedrockProvider(AnthropicProvider):
         *,
         client: Any = None,
         prompt_cache: bool = True,
+        effort: str | None = "low",
     ):
         if client is None:
             try:
@@ -104,4 +114,4 @@ class BedrockProvider(AnthropicProvider):
                 client = anthropic.AnthropicBedrock(aws_region=region, timeout=timeout_s, max_retries=4)
             except ImportError as exc:  # pragma: no cover
                 raise LLMError("Bedrock needs boto3: pip install 'podcast-agent[aws]'") from exc
-        super().__init__(model, fast_model, client=client, prompt_cache=prompt_cache)
+        super().__init__(model, fast_model, client=client, prompt_cache=prompt_cache, effort=effort)

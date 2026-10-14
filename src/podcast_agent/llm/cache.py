@@ -45,6 +45,7 @@ class CachedProvider(LLMProvider):
                 "messages": messages,
                 "max_tokens": max_tokens,
                 "temperature": temperature,
+                "effort": getattr(self.inner, "effort", None),
             },
             sort_keys=True,
         )

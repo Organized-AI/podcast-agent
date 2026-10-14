@@ -14,7 +14,7 @@ def build_provider(settings: Settings) -> LLMProvider:
 
         provider = AnthropicProvider(
             settings.anthropic_model, settings.anthropic_fast_model, settings.anthropic_api_key, settings.llm_timeout_s,
-            prompt_cache=settings.prompt_cache,
+            prompt_cache=settings.prompt_cache, effort=settings.anthropic_effort,
         )
     elif name == "bedrock":
         from podcast_agent.llm.anthropic_provider import BedrockProvider
@@ -23,7 +23,7 @@ def build_provider(settings: Settings) -> LLMProvider:
             raise LLMError("Set BEDROCK_MODEL to a Claude model or inference-profile ID from your Bedrock console")
         provider = BedrockProvider(
             settings.bedrock_model, settings.bedrock_fast_model, settings.aws_region, settings.llm_timeout_s,
-            prompt_cache=settings.prompt_cache,
+            prompt_cache=settings.prompt_cache, effort=settings.anthropic_effort,
         )
     elif name == "openai":
         from podcast_agent.llm.openai_provider import OpenAICompatibleProvider

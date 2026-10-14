@@ -21,6 +21,11 @@ def _env_float(name: str, default: float | None) -> float | None:
     return float(value)
 
 
+def _env_effort(name: str, default: str) -> str | None:
+    value = (_env(name, default) or "").lower()
+    return None if value in {"none", "off", "default"} else value
+
+
 def _env_bool(name: str, default: bool) -> bool:
     value = _env(name)
     return default if value is None else value.lower() in {"1", "true", "yes", "on"}
@@ -38,6 +43,8 @@ class Settings:
     bedrock_fast_model: str | None = field(default_factory=lambda: _env("BEDROCK_FAST_MODEL"))
     aws_region: str = field(default_factory=lambda: _env("AWS_REGION", _env("AWS_DEFAULT_REGION", "us-east-1")))
     prompt_cache: bool = field(default_factory=lambda: _env_bool("PROMPT_CACHE", True))
+    # Claude effort level (low|medium|high|xhigh|max); "none" sends no effort, for older models.
+    anthropic_effort: str | None = field(default_factory=lambda: _env_effort("ANTHROPIC_EFFORT", "low"))
     openai_api_key: str | None = field(default_factory=lambda: _env("OPENAI_API_KEY"))
     openai_base_url: str = field(default_factory=lambda: _env("OPENAI_BASE_URL", "https://api.openai.com/v1"))
     openai_model: str | None = field(default_factory=lambda: _env("OPENAI_MODEL"))

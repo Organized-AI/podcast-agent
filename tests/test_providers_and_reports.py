@@ -88,3 +88,25 @@ def test_episode_json_round_trips_with_computed_fields(data_dir):
     data = json.loads(report.model_dump_json())
     assert "fact_check_table" in data and "verification" in data["fact_checks"][0]
     type(report).model_validate(data)  # extra computed keys are ignored on load
+
+
+def test_anthropic_request_matches_the_installed_sdk_and_claude_5_5_rules():
+    """Every kwarg we send must be accepted by the real SDK; no sampling params; effort and thinking headroom."""
+    import inspect
+
+    import anthropic.resources.messages as sdk
+
+    from podcast_agent.llm.anthropic_provider import THINKING_HEADROOM, AnthropicProvider
+
+    fake = SimpleNamespace(messages=FakeMessages())
+    p = AnthropicProvider("claude-sonnet-5-5", "claude-haiku-5-5", client=fake)
+    p.complete(system="sys", messages=[{"role": "user", "content": "hi"}], max_tokens=900, temperature=0.2,
+               cache_prefix="CTX")
+    sent = fake.messages.kwargs
+    inspect.signature(sdk.Messages.create).bind(None, **sent)  # raises TypeError on an unknown kwarg
+    assert not {"temperature", "top_p", "top_k"} & set(sent)
+    assert sent["output_config"] == {"effort": "low"} and sent["max_tokens"] == 900 + THINKING_HEADROOM
+
+    fake2 = SimpleNamespace(messages=FakeMessages())
+    AnthropicProvider("m", None, client=fake2, effort=None).complete(system="s", messages=[{"role": "user", "content": "x"}])
+    assert "output_config" not in fake2.messages.kwargs
