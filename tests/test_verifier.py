@@ -103,3 +103,17 @@ def test_the_turn_format_asks_for_a_purpose_not_private_reasoning():
     assert '"purpose"' in system
     for banned in ('"thought"', '"reasoning"', '"thinking"', "scratchpad", "your reasoning"):
         assert banned not in system
+
+
+def test_near_miss_turns_are_accepted_and_real_errors_are_named():
+    provider = ScriptedProvider({"verify_step": [
+        {"purpose": "kb", "action": "search_knowledge_base", "input": "bitcoin 2025 high"},  # query as a plain string
+        {"purpose": "oops", "action": "search_everything", "input": {"query": "x"}},  # unknown action
+        {"purpose": "done", "action": "finish", "verdict": "possibly_outdated_or_inaccurate",  # fields beside input
+         "confidence": 0.8, "reason": "See [E1].", "evidence": ["E1"]},
+    ]})
+    ctx = make_ctx(provider)
+    fc = verify_claim(ctx, CLAIM, "ep", max_steps=4, tools=["search_knowledge_base"])
+    assert fc.tool_calls == 1 and fc.verdict == Verdict.OUTDATED and fc.evidence[0].id == "E1"
+    correction = provider.calls[2]["messages"][-1]["content"]
+    assert correction.startswith("That reply could not be used (action:")

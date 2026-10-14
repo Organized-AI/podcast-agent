@@ -36,8 +36,39 @@ class VerifyTurn(BaseModel):
 class FinishInput(BaseModel):
     verdict: Verdict
     confidence: float = Field(ge=0.0, le=1.0)
-    rationale: str
-    evidence_ids: list[str] = Field(default_factory=list)
+    rationale: str = Field(validation_alias=AliasChoices("rationale", "reason", "explanation", "justification"))
+    evidence_ids: list[str] = Field(default_factory=list,
+                                    validation_alias=AliasChoices("evidence_ids", "evidence", "sources", "citations"))
+
+
+def normalize_turn(raw: Any) -> Any:
+    """Accept the common near-misses so a formatting slip doesn't cost a turn: the query given as a
+    plain string, finish fields placed beside "input" instead of inside it, or familiar key synonyms."""
+    if not isinstance(raw, dict):
+        return raw
+    d = dict(raw)
+    for alt in ("tool", "name"):
+        if "action" not in d and alt in d:
+            d["action"] = d.pop(alt)
+    for alt in ("arguments", "args", "parameters", "params"):
+        if "input" not in d and alt in d:
+            d["input"] = d.pop(alt)
+    if isinstance(d.get("input"), str):
+        d["input"] = {"query": d["input"]}
+    if d.get("action") == "finish":
+        inp = dict(d.get("input") or {})
+        for key in ("verdict", "confidence", "rationale", "reason", "explanation", "evidence_ids", "evidence"):
+            if key not in inp and key in d:
+                inp[key] = d[key]
+        d["input"] = inp
+    return d
+
+
+def describe_error(exc: Exception) -> str:
+    """One line naming what was wrong, for the model's correction prompt and the log."""
+    if isinstance(exc, ValidationError):
+        return "; ".join(f"{'.'.join(str(x) for x in e['loc']) or 'reply'}: {e['msg']}" for e in exc.errors()[:3])
+    return str(exc)[:160]
 
 
 def calibrate(verdict: Verdict, raw: float, cited: list[Evidence]) -> float:
@@ -126,13 +157,16 @@ def verify_claim(
         ctx.trace.llm_call(step, resp)
         messages.append({"role": "assistant", "content": resp.text})
         try:
-            turn = VerifyTurn.model_validate(extract_json(resp.text))
+            turn = VerifyTurn.model_validate(normalize_turn(extract_json(resp.text)))
         except (ValueError, ValidationError) as exc:
             corrections += 1
-            ctx.trace.event("self_correct", step, f"unparseable turn ({str(exc)[:80]}); asking again", indent=1)
+            problem = describe_error(exc)
+            ctx.trace.event("self_correct", step, f"unusable turn ({problem}); asking again", indent=1,
+                            reply=resp.text[:600])
             if corrections > 2:
                 break
-            messages.append({"role": "user", "content": 'Respond with exactly one JSON object: {"action": ..., "input": {...}, "purpose": ...}'})
+            messages.append({"role": "user", "content": f"That reply could not be used ({problem}). Respond with exactly "
+                             'one JSON object: {"action": "<tool name or finish>", "input": {...}, "purpose": "<one sentence>"}'})
             continue
         if turn.purpose:
             ctx.trace.event("purpose", step, turn.purpose, indent=1)
@@ -144,7 +178,7 @@ def verify_claim(
                 if candidate.verdict != Verdict.UNVERIFIABLE and not candidate.evidence_ids and evidence:
                     problems.append("cite the evidence ids that support this verdict")
             except ValidationError as exc:
-                candidate, problems = None, [f"invalid finish input: {exc.errors()[0]['msg']}"]
+                candidate, problems = None, [f"invalid finish input: {describe_error(exc)}"]
             if problems and corrections < 2:
                 corrections += 1
                 ctx.trace.event("self_correct", step, f"finish rejected — {problems[0]}", indent=1)
