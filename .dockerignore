@@ -13,3 +13,10 @@ deploy
 docs
 tests
 .env
+website
+tools
+e2e
+config
+.github
+*.md
+!README.md
