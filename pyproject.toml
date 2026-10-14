@@ -65,7 +65,7 @@ branch = true
 
 [tool.coverage.report]
 # A ratchet: raise it when coverage goes up, never lower it.
-fail_under = 79
+fail_under = 80
 show_missing = false
 skip_covered = true
 exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError", "pragma: no cover"]

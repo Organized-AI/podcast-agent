@@ -17,6 +17,7 @@ Work toward v0.2.0, tracked in the [v0.2.0 milestone](https://github.com/Organiz
 - Security scanning on every pull request, push to `main` and weekly: CodeQL (Python and Actions), gitleaks over the full history, zizmor on workflows, Trivy on `uv.lock`, the Dockerfile, the Helm chart and the built image, and dependency review on pull requests. Results appear in the Security tab.
 - OpenSSF Scorecard runs weekly and on `main`; Dependabot proposes uv, Actions and Docker updates weekly after a 7-day cooldown.
 - Helm pods run with group 10001 and a CPU limit.
+- An `episode_id` inside a transcript could name output files outside the output folder (`../../x` wrote `x.md` two levels up). Ids are now reduced to `[A-Za-z0-9._-]`, at most 64 characters, before they name a file.
 
 ### Fixed
 - `.env.example` documents `ANTHROPIC_THINKING_SUMMARIES` and `LLM_CACHE_DIR`, which the code read but the example never listed.

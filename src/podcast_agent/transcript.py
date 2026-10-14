@@ -30,10 +30,27 @@ FILLER_PHRASES = re.compile(
     r"(?i),\s*(?:you know|i mean|like|sort of|kind of)\s*,|(?:^|(?<=[.!?]\s))(?:you know|i mean|so like|like),"
 )
 REPEATED_WORD = re.compile(r"(?i)\b([a-z']+)(\s+\1\b)+")
+UNSAFE_ID_CHARS = re.compile(r"[^A-Za-z0-9._-]+")
+MAX_ID_LENGTH = 64
 
 
 class TranscriptError(ValueError):
     pass
+
+
+def safe_episode_id(raw: object, fallback: str = "episode") -> str:
+    """Return an episode id that is safe to use as a file name.
+
+    Ids come from transcript content and runs write ``<episode_id>.md`` and ``.json``, so an id such as
+    ``../../x`` must not leave the output folder. Characters outside ``[A-Za-z0-9._-]`` become ``-``,
+    leading and trailing dots and dashes are dropped (no ``..``, no hidden files) and the id is capped
+    at 64 characters. An id with nothing left falls back to ``fallback``, cleaned the same way.
+    """
+    for candidate in (raw, fallback):
+        cleaned = UNSAFE_ID_CHARS.sub("-", str(candidate or "")).strip(".-")[:MAX_ID_LENGTH].rstrip(".-")
+        if cleaned:
+            return cleaned
+    return "episode"
 
 
 def load_episode(path: str | Path) -> Episode:
@@ -74,7 +91,7 @@ def parse_json_transcript(data: dict | list, source_path: str | None = None, fal
             )
         )
     return Episode(
-        episode_id=str(data.get("episode_id") or fallback_id),
+        episode_id=safe_episode_id(data.get("episode_id"), fallback_id),
         title=str(data.get("title") or fallback_id.replace("_", " ").title()),
         host=host,
         guests=guests,
