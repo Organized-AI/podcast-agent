@@ -18,7 +18,8 @@ from pathlib import Path
 from podcast_agent.models import Episode, Role, Utterance, timestamp_to_seconds
 
 TXT_LINE = re.compile(r"^\s*\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s+([^:\n]{1,40}?):\s*(.*)$")
-HEADER_LINE = re.compile(r"^\s*(title|host|guests?|episode(?:_id)?)\s*:\s*(.+)$", re.IGNORECASE)
+# The value must start with a non-space so the two runs of spaces cannot overlap (no polynomial backtracking).
+HEADER_LINE = re.compile(r"^\s*(title|host|guests?|episode(?:_id)?)\s*:[ \t]*(\S.*)$", re.IGNORECASE)
 TITLES = {"dr", "mr", "mrs", "ms", "prof", "sir"}
 
 # Disfluencies that carry no meaning. Discourse words like "so", "well" or "actually"

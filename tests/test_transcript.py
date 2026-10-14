@@ -61,3 +61,16 @@ def test_resolve_speaker_generic_labels():
     assert resolve_speaker("Host", "A B", ["C D"]) == ("A B", "host")
     assert resolve_speaker("Guest", "A B", ["C D"]) == ("C D", "guest")
     assert resolve_speaker("Guest", "A B", ["C D", "E F"]) == ("Guest", "guest")
+
+
+def test_header_pattern_has_no_polynomial_backtracking():
+    """CodeQL py/polynomial-redos: `\\s*:\\s*(.+)$` backtracked quadratically on 'host:' followed by many spaces."""
+    import time
+
+    from podcast_agent.transcript import HEADER_LINE
+
+    hostile = "host:" + " " * 40_000 + "a\nb"
+    started = time.perf_counter()
+    assert HEADER_LINE.match(hostile) is None
+    assert time.perf_counter() - started < 0.5
+    assert HEADER_LINE.match("  Title :  The Future of Remote Work").groups() == ("Title", "The Future of Remote Work")
