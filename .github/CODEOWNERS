@@ -1,0 +1,5 @@
+# Default owner for everything; see AGENTS.md for the repo map.
+*                       @jhillbht
+/deploy/                @jhillbht
+/.github/workflows/     @jhillbht
+/evals/                 @jhillbht
