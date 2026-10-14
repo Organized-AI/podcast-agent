@@ -1078,7 +1078,7 @@ dev = [
 requires-dist = [
     { name = "anthropic", specifier = ">=1.13" },
     { name = "boto3", marker = "extra == 'aws'", specifier = ">=1.34" },
-    { name = "fastapi", specifier = ">=0.110" },
+    { name = "fastapi", specifier = ">=0.143" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "opentelemetry-api", specifier = ">=1.27" },
     { name = "opentelemetry-exporter-otlp-proto-http", specifier = ">=1.27" },

@@ -100,7 +100,7 @@ uv run podcast-agent run data/transcripts --out output
 uv run podcast-agent run data/transcripts/ep002_ai_healthcare.json --today 2026-10-13 --max-claims 5
 uv run podcast-agent audit output              # re-verify a run: hashes, quotes, caps, trace coverage
 uv run podcast-agent kb "FDA autonomous AI"    # query the knowledge base directly
-uv run podcast-agent serve --host 127.0.0.1    # HTTP API: POST /v1/process, GET /healthz
+uv run podcast-agent serve --host 127.0.0.1    # HTTP API: POST /v1/process, POST /v1/jobs (needs QUEUE_URI), GET /healthz
 make check                                     # lint, types, hermetic tests, drift checks
 make help                                      # every target, grouped by area
 ```

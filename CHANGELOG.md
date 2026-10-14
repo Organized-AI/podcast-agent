@@ -13,6 +13,7 @@ Work toward v0.2.0, tracked in the [v0.2.0 milestone](https://github.com/Organiz
 - Repository rulesets: `main` only accepts squash-merged pull requests whose required checks pass, and `v*` tags cannot be moved or deleted.
 - OpenTelemetry tracing with the GenAI semantic conventions: one trace per run (`run` → `invoke_agent` per episode → `step` → `verify_claim` → `chat` and `execute_tool`), with token usage, finish reasons and verdicts as attributes. Off unless `OTEL_EXPORTER_OTLP_ENDPOINT` or `OTEL_TRACES_EXPORTER` is set; transcript and model text stay out of spans unless content capture is turned on.
 - OpenTelemetry metrics: `gen_ai.client.token.usage`, `gen_ai.client.operation.duration`, and counters for episodes, verdicts, self-corrections and tool calls.
+- Trace context crosses the API and the queue: `POST /v1/jobs` queues a transcript with the request's W3C trace context, and the worker's `process <queue>` CONSUMER span joins that trace, retries included. FastAPI's native OpenTelemetry provides the SERVER spans and HTTP metrics; `/healthz` is excluded.
 - `logs/trace.jsonl` lines carry `trace_id` and `span_id`, and the run manifest (schema 1.2) records `otel_trace_id`, so the audit trail links to the trace.
 
 ### Changed
@@ -23,6 +24,7 @@ Work toward v0.2.0, tracked in the [v0.2.0 milestone](https://github.com/Organiz
 - Security scanning on every pull request, push to `main` and weekly: CodeQL (Python and Actions), gitleaks over the full history, zizmor on workflows, Trivy on `uv.lock`, the Dockerfile, the Helm chart and the built image, and dependency review on pull requests. Results appear in the Security tab.
 - OpenSSF Scorecard runs weekly and on `main`; Dependabot proposes uv, Actions and Docker updates weekly after a 7-day cooldown.
 - Helm pods run with group 10001 and a CPU limit.
+- The TXT header pattern could backtrack quadratically on a line like `host:` followed by tens of thousands of spaces (CodeQL `py/polynomial-redos`, flagged once `POST /v1/jobs` made transcript text API input). The value now has to start with a non-space.
 - An `episode_id` inside a transcript could name output files outside the output folder (`../../x` wrote `x.md` two levels up). Ids are now reduced to `[A-Za-z0-9._-]`, at most 64 characters, before they name a file.
 
 ### Fixed
