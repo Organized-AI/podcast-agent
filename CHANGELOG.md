@@ -15,6 +15,7 @@ Work toward v0.2.0, tracked in the [v0.2.0 milestone](https://github.com/Organiz
 - Trace context crosses the API and the queue: `POST /v1/jobs` queues a transcript with the request's W3C trace context, and the worker's `process <queue>` CONSUMER span joins that trace, retries included. FastAPI's native OpenTelemetry provides the SERVER spans and HTTP metrics; `/healthz` is excluded.
 - `logs/trace.jsonl` lines carry `trace_id` and `span_id`, and the run manifest (schema 1.2) records `otel_trace_id`, so the audit trail links to the trace.
 - Local observability stack (Compose profile `observability`): OpenTelemetry Collector, Jaeger, Prometheus with six alert rules and promtool unit tests, and a provisioned Grafana dashboard. `make observe` runs every transcript with telemetry on and `e2e/check_telemetry.py` confirms the trace and metrics arrived; CI runs it on every pull request. The Helm chart gets `otel.*` values.
+- Labeled eval datasets: `evals/datasets/factcheck.jsonl` (25 claims with the expected verdict on a fixed date, acceptable alternatives and why: stale facts, passed and future deadlines, open-ended predictions, contradicted claims, anecdotes, verified facts) and `evals/datasets/episodes.yaml` (per-transcript expectations for summary themes, note counts and the claims each run should check). A schema test runs in CI.
 
 ### Changed
 - Repository layout follows vllm-project/semantic-router: the guide moved to `website/`, Compose to `deploy/compose/`, the embed script to `tools/guide/`, and the Makefile is split into `tools/make/*.mk`.
