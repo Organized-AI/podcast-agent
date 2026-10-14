@@ -24,7 +24,7 @@ The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/
 | A deployment strategy with diagram and narrative | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/architecture.svg](docs/architecture.svg) |
 | A detailed README | This file, plus the interactive guide in `docs/guide/public/index.html` |
 
-Sample outputs from a complete run are committed in [`samples/offline-mode/`](samples/offline-mode), with its audit (`audit.md`). Captured test, lint, Helm and Docker output from the same commit, including a tamper test the audit catches, is in [`samples/proof/`](samples/proof). The guide's **Audit trail** tab renders all of it and re-hashes the run's files in the browser.
+Sample outputs are committed for two complete runs, each with its audit (`audit.md`): [`samples/claude-run/`](samples/claude-run) (Claude Sonnet 5.5 and Haiku 5.5, run in Docker on an M1 MacBook: 36 of 36 audit checks pass) and [`samples/offline-mode/`](samples/offline-mode) (no API key, deterministic heuristics). Captured test, lint, Helm and Docker output from the same commit, including a tamper test the audit catches, is in [`samples/proof/`](samples/proof). The guide's **Audit trail** tab renders all of it and re-hashes the run's files in the browser.
 
 ---
 

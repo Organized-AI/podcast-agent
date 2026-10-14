@@ -18,7 +18,7 @@ offline:            ## no key needed: deterministic heuristics, exercises the fu
 audit:              ## re-verify the last run from its files
 	.venv/bin/podcast-agent audit output
 
-RUN ?= samples/offline-mode
+RUN ?= samples/claude-run
 guide:              ## refill the guide's Audit trail tab from a run folder: make guide RUN=output
 	.venv/bin/podcast-agent audit $(RUN) && .venv/bin/python scripts/embed_audit.py $(RUN) samples/proof docs/guide/public/index.html
 

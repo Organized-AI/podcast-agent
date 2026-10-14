@@ -1,15 +1,15 @@
 {
   "schema_version": "1.1",
-  "run_id": "20261014-120705-1c61da",
-  "started_at": "2026-10-14T17:07:05+00:00",
-  "finished_at": "2026-10-14T17:07:05+00:00",
+  "run_id": "20261014-204457-8d333f",
+  "started_at": "2026-10-14T20:44:58+00:00",
+  "finished_at": "2026-10-14T20:48:30+00:00",
   "agent_version": "0.1.0",
-  "git_commit": "07366cb",
+  "git_commit": "a8ab82e",
   "prompt_version": "2026-10-13.1",
   "provider": {
-    "provider": "offline",
-    "main": "offline-heuristic",
-    "fast": "offline-heuristic"
+    "provider": "anthropic",
+    "main": "claude-sonnet-5-5",
+    "fast": "claude-haiku-5-5"
   },
   "search": "mock",
   "knowledge_base_entries": 18,
@@ -18,17 +18,18 @@
     "entries": 18,
     "sha256": "348dbf15ccd570dc4aae3d20e6ae5a87b71cf1be4332f3fa16d311735c090c39"
   },
-  "today": "2026-10-13",
+  "today": "2026-10-14",
   "settings": {
-    "provider": "offline",
+    "provider": "anthropic",
     "models": {
-      "provider": "offline",
-      "main": "offline-heuristic",
-      "fast": "offline-heuristic"
+      "provider": "anthropic",
+      "main": "claude-sonnet-5-5",
+      "fast": "claude-haiku-5-5"
     },
     "search": "mock",
-    "today": "2026-10-13",
-    "temperature": 0.2,
+    "today": "2026-10-14",
+    "temperature": null,
+    "effort": "low",
     "max_claims": 8,
     "max_steps_per_claim": 4,
     "max_attempts": 3,
@@ -38,20 +39,20 @@
     "response_cache": true,
     "mock_search_failure_rate": 0.0
   },
-  "trace_events": 350,
+  "trace_events": 395,
   "outputs_sha256": {
-    "report.md": "2ebd6e6d601c7c74c16d6f99f8a6adcb976dd9093293c49a3eb727eeb1a4a17f",
-    "report.json": "a7bc73d1b42a1aa53f59d6b67fde130b835a4a49ca748e33fb3235720429dcec",
-    "index.md": "3ef92ba46d13694654ed3bd883645ba4d7e4adc9afa1efcfdd369d94b883583a",
-    "ep001.json": "74ac7c43be0a3b3a2f6bb52aabd30575c5ccd488cd36b4fa3f5485701ed5312e",
-    "ep001.md": "5b73adbc8bc7edf94bd09ddffd729fa6324e1ac1f1ca84361c36e31a58cc2f08",
-    "ep002.json": "a54aad273a765539246002a373d4197031e208475f274aef1f4cd4b73f44ec2d",
-    "ep002.md": "034f8696863814d5f86fc6544658da88df3e48cf59f709c548904401479f9c23",
-    "ep003.json": "541a2fab8576d95c7ca02537f2a0331fdbaba738e47e597c62ef25eb5a5c7ccc",
-    "ep003.md": "7105179e2ae75d18019e2423449413f858a1924fcce6f178a74aac93bcab6be8",
-    "ep004.json": "bcc945b3e7baf8943bc5650bd0c383641ae4aabc9104569a402d4a962bcafb5c",
-    "ep004.md": "2ae3507af419aadc7bacb4863fa815a788a21402515fcde6fc519e44bbe1313e",
-    "logs/trace.jsonl": "9c89bef41478707d848457adf94dfa457fe29cda6760ba74be96f84a5a415605"
+    "report.md": "5986c8647c0e6deb00b9c9bd38c24621b64d0678caf9872f3902541a7e51f44a",
+    "report.json": "faab2240c51f60f67d5257ba8d459d991616cf697b667680ebeb116b878372f0",
+    "index.md": "ee043787eba2a85617ba1dd23f85251e8bfceb614132cab3cff140c0bd6e6002",
+    "ep001.json": "8090363a741d1ed1cb08cc2d812c82624c7604b47fa314faf04bc5dfb76d792e",
+    "ep001.md": "1d724892fe1032175cabdd0982cc78e118030931c63992b149d1c443e4217a06",
+    "ep002.json": "103aef3bcb09be503672de61f6d92b4ccbd3b7fef77369729b14de845f3d10e3",
+    "ep002.md": "4b813bccdf3bb2623b0d621b1cde87ca93582c6943501712251efbcc7781f5b1",
+    "ep003.json": "85bbba4856189e01bcf2150e5fd48ee5da3cedf0b400f7da80178629ec04271c",
+    "ep003.md": "70da6025f7ab852c2de90397456c319165fdcf32f60c64d420242e0edb0593d7",
+    "ep004.json": "9e22914c6bd979bf528fefc0066ce7119cab082204657acd505cf11ed266f2e9",
+    "ep004.md": "87695325bd2d32b25b99f9c6e4273eaa545a0a949640b48cff2f7115c1543828",
+    "logs/trace.jsonl": "994780ba51d4ee439c80949581a94e8d16ad930367c913bd533766f85aecd253"
   },
   "episodes": [
     {
@@ -68,48 +69,48 @@
         "report.json"
       ],
       "usage": {
-        "llm_calls": 10,
+        "llm_calls": 26,
         "cached_calls": 0,
-        "input_tokens": 7890,
-        "output_tokens": 1478,
-        "cache_read_tokens": 0,
-        "estimated": true
+        "input_tokens": 32635,
+        "output_tokens": 5544,
+        "cache_read_tokens": 3987,
+        "estimated": false
       },
       "steps": [
         {
           "step": "plan",
           "status": "ok",
-          "duration_ms": 6,
+          "duration_ms": 4244,
           "attempts": 0,
           "detail": "4 steps"
         },
         {
           "step": "summarize",
           "status": "ok",
-          "duration_ms": 2,
+          "duration_ms": 3972,
           "attempts": 1,
-          "detail": "212 words (single_pass, target 200\u2013300)"
+          "detail": "282 words (single_pass, target 200\u2013300)"
         },
         {
           "step": "extract_notes",
           "status": "ok",
-          "duration_ms": 9,
+          "duration_ms": 5874,
           "attempts": 1,
-          "detail": "5 takeaways \u00b7 4 verbatim quotes \u00b7 7 topics"
+          "detail": "5 takeaways \u00b7 5 verbatim quotes \u00b7 8 topics"
         },
         {
           "step": "extract_claims",
           "status": "ok",
-          "duration_ms": 5,
+          "duration_ms": 6846,
           "attempts": 1,
-          "detail": "4 check-worthy claims (1 factual, 3 prediction)"
+          "detail": "6 check-worthy claims (2 factual, 1 historical, 3 prediction)"
         },
         {
           "step": "verify_claims",
           "status": "ok",
-          "duration_ms": 13,
-          "attempts": 4,
-          "detail": "1 \u2705 \u00b7 0 \u26a0\ufe0f \u00b7 3 \u2753 across 4 claims \u00b7 2 tool calls"
+          "duration_ms": 50152,
+          "attempts": 6,
+          "detail": "0 \u2705 \u00b7 2 \u26a0\ufe0f \u00b7 4 \u2753 across 6 claims \u00b7 16 tool calls"
         }
       ],
       "warnings": []
@@ -128,48 +129,48 @@
         "report.json"
       ],
       "usage": {
-        "llm_calls": 17,
+        "llm_calls": 13,
         "cached_calls": 0,
-        "input_tokens": 12465,
-        "output_tokens": 1999,
-        "cache_read_tokens": 0,
-        "estimated": true
+        "input_tokens": 12993,
+        "output_tokens": 3775,
+        "cache_read_tokens": 3216,
+        "estimated": false
       },
       "steps": [
         {
           "step": "plan",
           "status": "ok",
-          "duration_ms": 4,
+          "duration_ms": 3175,
           "attempts": 0,
           "detail": "4 steps"
         },
         {
           "step": "summarize",
           "status": "ok",
-          "duration_ms": 1,
+          "duration_ms": 4700,
           "attempts": 1,
-          "detail": "208 words (single_pass, target 200\u2013300)"
+          "detail": "262 words (single_pass, target 200\u2013300)"
         },
         {
           "step": "extract_notes",
           "status": "ok",
-          "duration_ms": 8,
+          "duration_ms": 4537,
           "attempts": 1,
-          "detail": "5 takeaways \u00b7 4 verbatim quotes \u00b7 7 topics"
+          "detail": "5 takeaways \u00b7 5 verbatim quotes \u00b7 8 topics"
         },
         {
           "step": "extract_claims",
           "status": "ok",
-          "duration_ms": 5,
+          "duration_ms": 2290,
           "attempts": 1,
-          "detail": "7 check-worthy claims (5 factual, 2 prediction)"
+          "detail": "4 check-worthy claims (3 factual, 1 historical)"
         },
         {
           "step": "verify_claims",
           "status": "ok",
-          "duration_ms": 23,
-          "attempts": 7,
-          "detail": "4 \u2705 \u00b7 0 \u26a0\ufe0f \u00b7 3 \u2753 across 7 claims \u00b7 6 tool calls"
+          "duration_ms": 26416,
+          "attempts": 4,
+          "detail": "3 \u2705 \u00b7 1 \u26a0\ufe0f \u00b7 0 \u2753 across 4 claims \u00b7 5 tool calls"
         }
       ],
       "warnings": []
@@ -188,48 +189,48 @@
         "report.json"
       ],
       "usage": {
-        "llm_calls": 17,
+        "llm_calls": 15,
         "cached_calls": 0,
-        "input_tokens": 12542,
-        "output_tokens": 1878,
-        "cache_read_tokens": 0,
-        "estimated": true
+        "input_tokens": 15251,
+        "output_tokens": 4019,
+        "cache_read_tokens": 3057,
+        "estimated": false
       },
       "steps": [
         {
           "step": "plan",
           "status": "ok",
-          "duration_ms": 3,
+          "duration_ms": 5933,
           "attempts": 0,
           "detail": "4 steps"
         },
         {
           "step": "summarize",
           "status": "ok",
-          "duration_ms": 0,
+          "duration_ms": 4405,
           "attempts": 1,
-          "detail": "201 words (single_pass, target 200\u2013300)"
+          "detail": "268 words (single_pass, target 200\u2013300)"
         },
         {
           "step": "extract_notes",
           "status": "ok",
-          "duration_ms": 5,
+          "duration_ms": 5030,
           "attempts": 1,
-          "detail": "5 takeaways \u00b7 4 verbatim quotes \u00b7 7 topics"
+          "detail": "5 takeaways \u00b7 5 verbatim quotes \u00b7 8 topics"
         },
         {
           "step": "extract_claims",
           "status": "ok",
-          "duration_ms": 3,
+          "duration_ms": 5213,
           "attempts": 1,
-          "detail": "5 check-worthy claims (1 anecdotal, 4 factual)"
+          "detail": "4 check-worthy claims (3 anecdotal, 1 factual)"
         },
         {
           "step": "verify_claims",
           "status": "ok",
-          "duration_ms": 20,
-          "attempts": 5,
-          "detail": "1 \u2705 \u00b7 0 \u26a0\ufe0f \u00b7 4 \u2753 across 5 claims \u00b7 8 tool calls"
+          "duration_ms": 24215,
+          "attempts": 4,
+          "detail": "1 \u2705 \u00b7 0 \u26a0\ufe0f \u00b7 3 \u2753 across 4 claims \u00b7 7 tool calls"
         }
       ],
       "warnings": []
@@ -250,58 +251,56 @@
       "usage": {
         "llm_calls": 16,
         "cached_calls": 0,
-        "input_tokens": 12877,
-        "output_tokens": 2128,
-        "cache_read_tokens": 0,
-        "estimated": true
+        "input_tokens": 16119,
+        "output_tokens": 5603,
+        "cache_read_tokens": 1899,
+        "estimated": false
       },
       "steps": [
         {
           "step": "plan",
           "status": "ok",
-          "duration_ms": 3,
+          "duration_ms": 2266,
           "attempts": 0,
           "detail": "5 steps"
         },
         {
           "step": "normalize_transcript",
           "status": "ok",
-          "duration_ms": 3,
+          "duration_ms": 8,
           "attempts": 0,
           "detail": "removed 7 filler words, 3 filler phrases, 1 repeated words across 7 lines"
         },
         {
           "step": "summarize",
           "status": "ok",
-          "duration_ms": 4,
-          "attempts": 3,
-          "detail": "150 words (single_pass, target 200\u2013300)"
+          "duration_ms": 5024,
+          "attempts": 1,
+          "detail": "280 words (single_pass, target 200\u2013300)"
         },
         {
           "step": "extract_notes",
           "status": "ok",
-          "duration_ms": 5,
+          "duration_ms": 8834,
           "attempts": 1,
-          "detail": "5 takeaways \u00b7 4 verbatim quotes \u00b7 7 topics"
+          "detail": "5 takeaways \u00b7 4 verbatim quotes \u00b7 8 topics"
         },
         {
           "step": "extract_claims",
           "status": "ok",
-          "duration_ms": 3,
+          "duration_ms": 8051,
           "attempts": 1,
-          "detail": "4 check-worthy claims (2 prediction, 2 statistical)"
+          "detail": "5 check-worthy claims (1 factual, 1 historical, 2 prediction, 1 statistical)"
         },
         {
           "step": "verify_claims",
           "status": "ok",
-          "duration_ms": 15,
-          "attempts": 4,
-          "detail": "1 \u2705 \u00b7 2 \u26a0\ufe0f \u00b7 1 \u2753 across 4 claims \u00b7 6 tool calls"
+          "duration_ms": 30505,
+          "attempts": 5,
+          "detail": "2 \u2705 \u00b7 3 \u26a0\ufe0f \u00b7 0 \u2753 across 5 claims \u00b7 7 tool calls"
         }
       ],
-      "warnings": [
-        "summary: the summary is 150 words; it must be 200\u2013300 words \u2014 expand it using only the transcript"
-      ]
+      "warnings": []
     }
   ],
   "errors": []

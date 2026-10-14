@@ -1,37 +1,79 @@
-# command: docker build --build-arg GIT_COMMIT=07366cb -t podcast-agent:local .
+# command: docker build --progress=plain --build-arg GIT_COMMIT=a8ab82e -t podcast-agent:local .
 # machine: MacBook Pro · Apple M1 Pro · 16 GB · macOS 26.2 · Colima · Docker 29.2.1
-# commit: 07366cb
-# captured: 2026-10-14T17:09:28Z
+# commit: a8ab82e
+# captured: 2026-10-14T20:51:25Z
 
+#0 building with "colima" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.31kB done
 #1 DONE 0.0s
-#2 DONE 0.3s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1.7
+#2 DONE 0.5s
+
+#3 docker-image://docker.io/docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e
+#3 resolve docker.io/docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e 0.0s done
+#3 CACHED
+
 #4 [internal] load metadata for docker.io/library/python:3.12-slim
-#4 DONE 0.5s
+#4 DONE 0.4s
+
 #5 [internal] load .dockerignore
+#5 transferring context: 217B done
 #5 DONE 0.0s
+
 #6 [build 1/5] FROM docker.io/library/python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+#6 resolve docker.io/library/python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1 0.0s done
+#6 DONE 0.0s
+
 #7 [internal] load build context
+#7 transferring context: 3.71kB done
 #7 DONE 0.0s
-#8 [build 2/5] WORKDIR /src
-#9 [build 3/5] COPY pyproject.toml README.md ./
-#10 [build 4/5] COPY src ./src
-#11 [build 5/5] RUN python -m venv /opt/venv && /opt/venv/bin/pip install ".[aws]"
-#12 [runtime 2/6] RUN useradd --create-home --uid 10001 agent
-#12 DONE 0.2s
-#13 [runtime 3/6] WORKDIR /app
-#13 DONE 0.0s
+
+#8 [runtime 3/6] WORKDIR /app
+#8 CACHED
+
+#9 [build 5/5] RUN python -m venv /opt/venv && /opt/venv/bin/pip install ".[aws]"
+#9 CACHED
+
+#10 [runtime 2/6] RUN useradd --create-home --uid 10001 agent
+#10 CACHED
+
+#11 [build 2/5] WORKDIR /src
+#11 CACHED
+
+#12 [build 4/5] COPY src ./src
+#12 CACHED
+
+#13 [build 3/5] COPY pyproject.toml README.md ./
+#13 CACHED
+
 #14 [runtime 4/6] COPY --from=build /opt/venv /opt/venv
-#14 DONE 1.1s
+#14 CACHED
+
 #15 [runtime 5/6] COPY --chown=agent:agent data ./data
-#15 DONE 0.1s
+#15 CACHED
+
 #16 [runtime 6/6] RUN mkdir -p /app/output /app/queue /cache && chown -R agent:agent /app/output /app/queue /cache
-#16 DONE 0.2s
+#16 CACHED
+
+#17 exporting to image
+#17 exporting layers done
+#17 exporting manifest sha256:7c458d0d847fe71dba38c34bb4fb211602fc41926d395e894d474aa6a0c7f826 done
+#17 exporting config sha256:25420a6157cabcc7d4a7ec6433f21cf1e00a28d5368f1926b35de81a5bb4c9ba done
+#17 exporting attestation manifest sha256:1527e38925f67f4192d435d0985aafd05652b34063466a64fb46c6dd9ed65918
+#17 exporting attestation manifest sha256:1527e38925f67f4192d435d0985aafd05652b34063466a64fb46c6dd9ed65918 done
+#17 exporting manifest list sha256:8413ac751c336560c683b8e3f4131cce37e959eb3bee1322728b9fdcb5b954f8 done
 #17 naming to docker.io/library/podcast-agent:local done
-#17 DONE 4.4s
+#17 unpacking to docker.io/library/podcast-agent:local done
+#17 DONE 0.1s
+
+View build details: docker-desktop://dashboard/build/colima/colima/spfxwfwy0a66294wvhopsmq91
 
 $ docker image inspect podcast-agent:local
-id sha256:d2dbb21b7e651cc203342b7890efa135b1d07ae58a6e992f5cf4551ca56f7c42
-created 2026-10-14T12:09:31.391367443-05:00
+id sha256:8413ac751c336560c683b8e3f4131cce37e959eb3bee1322728b9fdcb5b954f8
+created 2026-10-14T15:40:12.396184698-05:00
 os/arch linux/arm64
-size 79531498 bytes
-GIT_COMMIT=07366cb
+size 79699901 bytes
+GIT_COMMIT=a8ab82e

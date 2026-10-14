@@ -1,10 +1,10 @@
 {
-  "run_id": "20261014-120705-1c61da",
-  "run_dir": "samples/offline-mode",
-  "audited_at": "2026-10-14T17:24:12+00:00",
+  "run_id": "20261014-204457-8d333f",
+  "run_dir": "output",
+  "audited_at": "2026-10-14T20:49:04+00:00",
   "summary": {
-    "pass": 35,
-    "warn": 1,
+    "pass": 36,
+    "warn": 0,
     "fail": 0
   },
   "checks": [
@@ -27,7 +27,7 @@
       "area": "run",
       "name": "Trace belongs to this run, in order and complete",
       "status": "pass",
-      "detail": "350 events, all run_id 20261014-120705-1c61da, timestamps in order, count matches the manifest (350)"
+      "detail": "395 events, all run_id 20261014-204457-8d333f, timestamps in order, count matches the manifest (395)"
     },
     {
       "scope": "run",
@@ -48,7 +48,7 @@
       "area": "notes",
       "name": "Summary length (spec mode)",
       "status": "pass",
-      "detail": "212 words, accepted range 180–321"
+      "detail": "282 words, accepted range 180–321"
     },
     {
       "scope": "ep001",
@@ -62,93 +62,93 @@
       "area": "notes",
       "name": "Quotes verbatim at their timestamp and speaker",
       "status": "pass",
-      "detail": "4 quotes re-matched against the transcript, all ≥ 0.90"
+      "detail": "5 quotes re-matched against the transcript, all ≥ 0.90"
     },
     {
       "scope": "ep001",
       "area": "notes",
       "name": "Topic tags well formed",
       "status": "pass",
-      "detail": "7 kebab-case tags"
+      "detail": "8 kebab-case tags"
     },
     {
       "scope": "ep001",
+      "area": "claims",
+      "name": "Every claim is grounded in its transcript line",
+      "status": "pass",
+      "detail": "6 claims re-matched at ≥ 0.85"
+    },
+    {
+      "scope": "ep001",
+      "area": "claims",
+      "name": "Confidence within the evidence cap; evidence ids unique",
+      "status": "pass",
+      "detail": "6 verdicts re-calibrated from their evidence, all within cap"
+    },
+    {
+      "scope": "ep001",
+      "area": "claims",
+      "name": "Every verdict has a complete trace",
+      "status": "pass",
+      "detail": "6 claims: tool calls in the trace match the report, each ends in a verdict"
+    },
+    {
+      "scope": "ep002",
+      "area": "plan",
+      "name": "Plan has every required step, in order, and none failed",
+      "status": "pass",
+      "detail": "4 planned steps; 5 executed, all ok"
+    },
+    {
+      "scope": "ep002",
+      "area": "notes",
+      "name": "Summary length (spec mode)",
+      "status": "pass",
+      "detail": "262 words, accepted range 180–321"
+    },
+    {
+      "scope": "ep002",
+      "area": "notes",
+      "name": "Exactly 5 takeaways",
+      "status": "pass",
+      "detail": "5 takeaways"
+    },
+    {
+      "scope": "ep002",
+      "area": "notes",
+      "name": "Quotes verbatim at their timestamp and speaker",
+      "status": "pass",
+      "detail": "5 quotes re-matched against the transcript, all ≥ 0.90"
+    },
+    {
+      "scope": "ep002",
+      "area": "notes",
+      "name": "Topic tags well formed",
+      "status": "pass",
+      "detail": "8 kebab-case tags"
+    },
+    {
+      "scope": "ep002",
       "area": "claims",
       "name": "Every claim is grounded in its transcript line",
       "status": "pass",
       "detail": "4 claims re-matched at ≥ 0.85"
     },
     {
-      "scope": "ep001",
+      "scope": "ep002",
       "area": "claims",
       "name": "Confidence within the evidence cap; evidence ids unique",
       "status": "pass",
       "detail": "4 verdicts re-calibrated from their evidence, all within cap"
     },
     {
-      "scope": "ep001",
+      "scope": "ep002",
       "area": "claims",
       "name": "Every verdict has a complete trace",
       "status": "pass",
       "detail": "4 claims: tool calls in the trace match the report, each ends in a verdict"
     },
     {
-      "scope": "ep002",
-      "area": "plan",
-      "name": "Plan has every required step, in order, and none failed",
-      "status": "pass",
-      "detail": "4 planned steps; 5 executed, all ok"
-    },
-    {
-      "scope": "ep002",
-      "area": "notes",
-      "name": "Summary length (spec mode)",
-      "status": "pass",
-      "detail": "208 words, accepted range 180–321"
-    },
-    {
-      "scope": "ep002",
-      "area": "notes",
-      "name": "Exactly 5 takeaways",
-      "status": "pass",
-      "detail": "5 takeaways"
-    },
-    {
-      "scope": "ep002",
-      "area": "notes",
-      "name": "Quotes verbatim at their timestamp and speaker",
-      "status": "pass",
-      "detail": "4 quotes re-matched against the transcript, all ≥ 0.90"
-    },
-    {
-      "scope": "ep002",
-      "area": "notes",
-      "name": "Topic tags well formed",
-      "status": "pass",
-      "detail": "7 kebab-case tags"
-    },
-    {
-      "scope": "ep002",
-      "area": "claims",
-      "name": "Every claim is grounded in its transcript line",
-      "status": "pass",
-      "detail": "7 claims re-matched at ≥ 0.85"
-    },
-    {
-      "scope": "ep002",
-      "area": "claims",
-      "name": "Confidence within the evidence cap; evidence ids unique",
-      "status": "pass",
-      "detail": "7 verdicts re-calibrated from their evidence, all within cap"
-    },
-    {
-      "scope": "ep002",
-      "area": "claims",
-      "name": "Every verdict has a complete trace",
-      "status": "pass",
-      "detail": "7 claims: tool calls in the trace match the report, each ends in a verdict"
-    },
-    {
       "scope": "ep003",
       "area": "plan",
       "name": "Plan has every required step, in order, and none failed",
@@ -160,7 +160,7 @@
       "area": "notes",
       "name": "Summary length (spec mode)",
       "status": "pass",
-      "detail": "201 words, accepted range 180–321"
+      "detail": "268 words, accepted range 180–321"
     },
     {
       "scope": "ep003",
@@ -174,35 +174,35 @@
       "area": "notes",
       "name": "Quotes verbatim at their timestamp and speaker",
       "status": "pass",
-      "detail": "4 quotes re-matched against the transcript, all ≥ 0.90"
+      "detail": "5 quotes re-matched against the transcript, all ≥ 0.90"
     },
     {
       "scope": "ep003",
       "area": "notes",
       "name": "Topic tags well formed",
       "status": "pass",
-      "detail": "7 kebab-case tags"
+      "detail": "8 kebab-case tags"
     },
     {
       "scope": "ep003",
       "area": "claims",
       "name": "Every claim is grounded in its transcript line",
       "status": "pass",
-      "detail": "5 claims re-matched at ≥ 0.85"
+      "detail": "4 claims re-matched at ≥ 0.85"
     },
     {
       "scope": "ep003",
       "area": "claims",
       "name": "Confidence within the evidence cap; evidence ids unique",
       "status": "pass",
-      "detail": "5 verdicts re-calibrated from their evidence, all within cap"
+      "detail": "4 verdicts re-calibrated from their evidence, all within cap"
     },
     {
       "scope": "ep003",
       "area": "claims",
       "name": "Every verdict has a complete trace",
       "status": "pass",
-      "detail": "5 claims: tool calls in the trace match the report, each ends in a verdict"
+      "detail": "4 claims: tool calls in the trace match the report, each ends in a verdict"
     },
     {
       "scope": "ep004",
@@ -215,8 +215,8 @@
       "scope": "ep004",
       "area": "notes",
       "name": "Summary length (spec mode)",
-      "status": "warn",
-      "detail": "150 words, outside 180–321 · accepted with a recorded warning"
+      "status": "pass",
+      "detail": "280 words, accepted range 180–321"
     },
     {
       "scope": "ep004",
@@ -237,28 +237,28 @@
       "area": "notes",
       "name": "Topic tags well formed",
       "status": "pass",
-      "detail": "7 kebab-case tags"
+      "detail": "8 kebab-case tags"
     },
     {
       "scope": "ep004",
       "area": "claims",
       "name": "Every claim is grounded in its transcript line",
       "status": "pass",
-      "detail": "4 claims re-matched at ≥ 0.85"
+      "detail": "5 claims re-matched at ≥ 0.85"
     },
     {
       "scope": "ep004",
       "area": "claims",
       "name": "Confidence within the evidence cap; evidence ids unique",
       "status": "pass",
-      "detail": "4 verdicts re-calibrated from their evidence, all within cap"
+      "detail": "5 verdicts re-calibrated from their evidence, all within cap"
     },
     {
       "scope": "ep004",
       "area": "claims",
       "name": "Every verdict has a complete trace",
       "status": "pass",
-      "detail": "4 claims: tool calls in the trace match the report, each ends in a verdict"
+      "detail": "5 claims: tool calls in the trace match the report, each ends in a verdict"
     }
   ]
 }
