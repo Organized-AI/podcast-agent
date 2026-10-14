@@ -21,7 +21,7 @@ def _run(tmp_path, data_dir):
 def test_manifest_records_versions_settings_and_hashes(tmp_path, data_dir):
     run = _run(tmp_path, data_dir)
     m = json.loads((run / "run_manifest.json").read_text())
-    assert m["schema_version"] == "1.1" and m["agent_version"] and m["settings"]["today"] == "2026-10-13"
+    assert m["schema_version"] == "1.2" and m["agent_version"] and m["settings"]["today"] == "2026-10-13"
     assert len(m["knowledge_base"]["sha256"]) == 64
     assert "logs/trace.jsonl" in m["outputs_sha256"] and m["trace_events"] > 50
     assert all(len(e["input"]["sha256"]) == 64 for e in m["episodes"])

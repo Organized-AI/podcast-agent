@@ -203,6 +203,8 @@ All settings are environment variables. [`config/settings.yaml`](config/settings
 | `AGENT_TODAY` | today | Pin the fact-checker's "today" for reproducible verdicts |
 | `MOCK_SEARCH_FAILURE_RATE` | `0` | Inject search failures to watch retries and graceful degradation |
 | `LLM_CACHE` | `true` | Content-addressed response cache in `.cache/llm` (rerun = free + identical) |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | unset | Turns on OpenTelemetry traces and metrics over OTLP/HTTP (e.g. `http://localhost:4318`); `OTEL_TRACES_EXPORTER=console` prints spans instead |
+| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | `false` | Adds prompts, completions and tool queries to spans; off by default so telemetry carries ids, counts, models and verdicts only |
 
 ## Project layout
 

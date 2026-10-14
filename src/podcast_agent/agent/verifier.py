@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import AliasChoices, BaseModel, Field, ValidationError
 
+from podcast_agent import telemetry
 from podcast_agent.agent.pipeline import EpisodeState, register
 from podcast_agent.llm.base import LLMRefusal
 from podcast_agent.llm.structured import extract_json
@@ -91,6 +92,24 @@ def calibrate(verdict: Verdict, raw: float, cited: list[Evidence]) -> float:
 
 
 def run_tool(ctx: RunContext, action: str, query: str, next_id: int, step: str) -> list[Evidence]:
+    """Run one tool call inside an ``execute_tool`` span; the query is recorded only with content capture on."""
+    attributes: dict[str, Any] = {"gen_ai.operation.name": "execute_tool", "gen_ai.tool.name": action,
+                                  "gen_ai.tool.type": "function"}
+    if telemetry.capture_content():
+        attributes["gen_ai.tool.call.arguments"] = query
+    with telemetry.span(f"execute_tool {action}", attributes=attributes) as span:
+        try:
+            results = _run_tool(ctx, action, query, next_id, step)
+        except ToolError as exc:
+            telemetry.mark_error(span, exc)
+            telemetry.TOOL_CALLS.add(1, {"gen_ai.tool.name": action, "outcome": "error"})
+            raise
+        span.set_attribute("podcast_agent.tool.results", len(results))
+        telemetry.TOOL_CALLS.add(1, {"gen_ai.tool.name": action, "outcome": "ok" if results else "empty"})
+        return results
+
+
+def _run_tool(ctx: RunContext, action: str, query: str, next_id: int, step: str) -> list[Evidence]:
     def on_retry(attempt: int, exc: Exception) -> None:
         ctx.trace.warn(step, f"{action} failed ({exc}); retry {attempt}", indent=1)
 
@@ -126,6 +145,25 @@ def format_observation(results: list[Evidence]) -> str:
 
 
 def verify_claim(
+    ctx: RunContext, claim: Claim, episode_title: str, max_steps: int, tools: list[str]
+) -> FactCheck:
+    """Verify one claim inside a ``verify_claim`` span that ends with the verdict and its confidence."""
+    attributes = {"podcast_agent.claim.id": claim.id, "podcast_agent.claim.type": claim.type,
+                  "podcast_agent.claim.time_sensitive": claim.time_sensitive}
+    with telemetry.span(f"verify_claim {claim.id}", attributes=attributes) as span:
+        fc = _verify_claim(ctx, claim, episode_title, max_steps, tools)
+        span.set_attributes({
+            "podcast_agent.verdict": fc.verdict.value,
+            "podcast_agent.verdict.confidence": fc.confidence,
+            "podcast_agent.verdict.raw_confidence": fc.raw_confidence,
+            "podcast_agent.claim.tool_calls": fc.tool_calls,
+            "podcast_agent.claim.evidence": len(fc.evidence),
+        })
+        telemetry.VERDICTS.add(1, {"podcast_agent.verdict": fc.verdict.value, "podcast_agent.claim.type": claim.type})
+        return fc
+
+
+def _verify_claim(
     ctx: RunContext, claim: Claim, episode_title: str, max_steps: int, tools: list[str]
 ) -> FactCheck:
     step = f"verify {claim.id}"

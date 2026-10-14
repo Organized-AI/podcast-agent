@@ -10,7 +10,7 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
-from podcast_agent import __version__
+from podcast_agent import __version__, telemetry
 from podcast_agent.agent.context import RunContext
 from podcast_agent.agent.pipeline import process_episode
 from podcast_agent.config import Settings
@@ -122,6 +122,16 @@ def _rel(path: Path, base: Path) -> str:
 
 
 def run_batch(ctx: RunContext, files: list[Path], out_dir: Path, run_id: str) -> tuple[list[EpisodeReport], list[str]]:
+    """Process every file into ``out_dir`` inside one root span, so a whole run is one trace."""
+    attributes = {"podcast_agent.run.id": run_id, "podcast_agent.run.inputs": len(files),
+                  "podcast_agent.llm.provider": ctx.llm.name}
+    with telemetry.span("run podcast-agent", attributes=attributes) as span:
+        reports, errors = _run_batch(ctx, files, out_dir, run_id)
+        span.set_attributes({"podcast_agent.run.episodes": len(reports), "podcast_agent.run.errors": len(errors)})
+        return reports, errors
+
+
+def _run_batch(ctx: RunContext, files: list[Path], out_dir: Path, run_id: str) -> tuple[list[EpisodeReport], list[str]]:
     out_dir.mkdir(parents=True, exist_ok=True)
     started_at = datetime.now(UTC).isoformat(timespec="seconds")
     inputs: dict[str, dict] = {}
@@ -165,7 +175,7 @@ def run_batch(ctx: RunContext, files: list[Path], out_dir: Path, run_id: str) ->
         hashed[_rel(trace_path, out_dir)] = sha256_file(trace_path)
     kb_path = Path(ctx.settings.kb_path)
     manifest = {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "run_id": run_id,
         "started_at": started_at,
         "finished_at": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -180,6 +190,7 @@ def run_batch(ctx: RunContext, files: list[Path], out_dir: Path, run_id: str) ->
         "today": ctx.settings.today,
         "settings": _settings_snapshot(ctx),
         "trace_events": ctx.trace.events_written if trace_path else None,
+        "otel_trace_id": telemetry.current_ids()[0],
         "outputs_sha256": hashed,
         "episodes": [
             {

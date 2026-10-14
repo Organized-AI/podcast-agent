@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
+from podcast_agent import telemetry
 from podcast_agent.models import (
     Claim,
     Episode,
@@ -55,6 +56,29 @@ def register(name: str) -> Callable[[StepFn], StepFn]:
 
 
 def process_episode(ctx: RunContext, episode: Episode, run_id: str) -> EpisodeReport:
+    """Plan and run every step for one episode inside an ``invoke_agent`` span."""
+    attributes = {"gen_ai.operation.name": "invoke_agent", "gen_ai.agent.name": "podcast-agent",
+                  "podcast_agent.run.id": run_id, "podcast_agent.episode.id": episode.episode_id,
+                  "podcast_agent.episode.words": episode.word_count,
+                  "podcast_agent.episode.utterances": len(episode.utterances)}
+    with telemetry.span("invoke_agent podcast-agent", attributes=attributes) as span:
+        report = _process_episode(ctx, episode, run_id)
+        failed = [r.step for r in report.steps if r.status == "failed"]
+        status = "failed" if len(failed) == len(report.steps) else ("partial" if failed else "ok")
+        span.set_attributes({
+            "podcast_agent.episode.status": status,
+            "podcast_agent.claims": len(report.fact_checks),
+            "podcast_agent.llm.calls": report.usage.llm_calls,
+            "gen_ai.usage.input_tokens": report.usage.input_tokens,
+            "gen_ai.usage.output_tokens": report.usage.output_tokens,
+        })
+        if failed:
+            span.set_attribute("podcast_agent.steps.failed", failed)
+        telemetry.EPISODES.add(1, {"podcast_agent.episode.status": status})
+        return report
+
+
+def _process_episode(ctx: RunContext, episode: Episode, run_id: str) -> EpisodeReport:
     # Importing the step modules registers them.
     from podcast_agent.agent import steps, verifier  # noqa: F401
     from podcast_agent.agent.planner import capability_catalog, make_plan
@@ -73,7 +97,10 @@ def process_episode(ctx: RunContext, episode: Episode, run_id: str) -> EpisodeRe
     started = time.perf_counter()
 
     t0 = time.perf_counter()
-    state.plan = make_plan(ctx, episode)
+    with telemetry.span("step plan", attributes={"podcast_agent.step.name": "plan"}) as span:
+        state.plan = make_plan(ctx, episode)
+        span.set_attributes({"podcast_agent.plan.steps": [p.step for p in state.plan.steps],
+                             "podcast_agent.plan.repaired": state.plan.repaired})
     results.append(StepResult(step="plan", status="ok", duration_ms=_ms(t0), detail=f"{len(state.plan.steps)} steps"))
 
     catalog = capability_catalog(ctx)
@@ -93,15 +120,18 @@ def process_episode(ctx: RunContext, episode: Episode, run_id: str) -> EpisodeRe
             continue
         ctx.trace.event("step", name, f"start — {planned.reason}" if planned.reason else "start")
         t0 = time.perf_counter()
-        try:
-            detail, attempts = fn(ctx, state, planned.params)
-            done.add(name)
-            results.append(StepResult(step=name, status="ok", duration_ms=_ms(t0), attempts=attempts, detail=detail))
-            ctx.trace.event("result", name, f"done in {_ms(t0) / 1000:.1f}s — {detail}")
-        except Exception as exc:  # isolate the failure, keep going
-            ctx.trace.error(name, f"failed: {exc}", traceback=traceback.format_exc(limit=4))
-            state.warnings.append(f"{name} failed: {exc}")
-            results.append(StepResult(step=name, status="failed", duration_ms=_ms(t0), detail=str(exc)))
+        with telemetry.span(f"step {name}", attributes={"podcast_agent.step.name": name}) as span:
+            try:
+                detail, attempts = fn(ctx, state, planned.params)
+                done.add(name)
+                results.append(StepResult(step=name, status="ok", duration_ms=_ms(t0), attempts=attempts, detail=detail))
+                span.set_attribute("podcast_agent.step.attempts", attempts)
+                ctx.trace.event("result", name, f"done in {_ms(t0) / 1000:.1f}s — {detail}")
+            except Exception as exc:  # isolate the failure, keep going
+                telemetry.mark_error(span, exc)
+                ctx.trace.error(name, f"failed: {exc}", traceback=traceback.format_exc(limit=4))
+                state.warnings.append(f"{name} failed: {exc}")
+                results.append(StepResult(step=name, status="failed", duration_ms=_ms(t0), detail=str(exc)))
 
     ctx.trace.event(
         "result", "done",

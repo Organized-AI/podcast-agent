@@ -15,6 +15,8 @@ from typing import Any
 from rich.console import Console
 from rich.markup import escape
 
+from podcast_agent import telemetry
+
 KIND_STYLE: dict[str, tuple[str, str]] = {
     "info": ("·", "white"),
     "ingest": ("▸", "cyan"),
@@ -32,6 +34,9 @@ KIND_STYLE: dict[str, tuple[str, str]] = {
     "result": ("✔", "bold green"),
 }
 
+
+# Trace events that also become events on the current OpenTelemetry span.
+SPAN_EVENT_KINDS = frozenset({"self_correct", "warn", "error", "verdict"})
 
 STEP_LABEL = {
     "normalize_transcript": "normalize",
@@ -75,8 +80,15 @@ class Tracer:
             "kind": kind,
             "message": message,
         }
+        trace_id, span_id = telemetry.current_ids()
+        if trace_id:  # links this line of the audit trail to the OpenTelemetry trace
+            record["trace_id"], record["span_id"] = trace_id, span_id
         if data:
             record["data"] = _jsonable(data)
+        if kind in SPAN_EVENT_KINDS:
+            telemetry.add_event(kind, step, message)
+        if kind == "self_correct":
+            telemetry.SELF_CORRECTIONS.add(1, {"podcast_agent.step.name": step.split()[0]})
         if self._jsonl:
             self._jsonl.write(json.dumps(record, ensure_ascii=False) + "\n")
             self._jsonl.flush()
