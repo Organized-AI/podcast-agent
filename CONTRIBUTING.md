@@ -37,7 +37,9 @@ Every behavior change ships with a test that fails before the change and passes 
 1. Open or pick an issue first, so the change has a stated purpose.
 2. Branch from `main`, keep the PR to one concern, and fill in the template (purpose, test plan, test result).
 3. Add a line under `[Unreleased]` in `CHANGELOG.md` for anything a user would notice.
-4. PRs are squash-merged once the PR Gate is green. Commit and PR titles are short and imperative ("Add trace context to the worker").
+4. PRs are squash-merged once the required checks are green. Commit and PR titles are short and imperative ("Add trace context to the worker").
+
+`main` is protected by a repository ruleset: no direct pushes, force pushes or deletion; changes land only through squash-merged pull requests whose required checks pass (PR Gate, gitleaks, zizmor, Trivy, CodeQL for Python and Actions, dependency review) and that add no high-severity CodeQL alert.
 
 ## Response times
 
@@ -49,7 +51,8 @@ Releases follow `X.Y.Z` with tags `vX.Y.Z`:
 
 1. Move the `[Unreleased]` entries into a `## [X.Y.Z] - YYYY-MM-DD` section of `CHANGELOG.md`.
 2. Bump `pyproject.toml`, `src/podcast_agent/__init__.py` and `deploy/helm/podcast-agent/Chart.yaml` together; `make drift` checks they agree.
-3. Merge, then tag `vX.Y.Z` on `main`. The release workflow re-tags the already-tested image, creates the GitHub Release from the changelog and opens the production bump PR.
+3. Check that [docs/OPENSSF-BEST-PRACTICES.md](docs/OPENSSF-BEST-PRACTICES.md) still holds.
+4. Merge, then tag `vX.Y.Z` on `main` (a tag ruleset stops `v*` tags from being moved or deleted). The release workflow re-tags the already-tested image, creates the GitHub Release from the changelog and opens the production bump PR.
 
 ## Out of scope
 

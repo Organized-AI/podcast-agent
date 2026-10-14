@@ -9,6 +9,9 @@ Work toward v0.2.0, tracked in the [v0.2.0 milestone](https://github.com/Organiz
 ### Added
 - Phase 0, foundation: `uv.lock` with strict gates (ruff with bandit rules, mypy, warnings as errors, a coverage floor), hermetic tests that block the network, `config/settings.yaml` generated from the code with a drift check, a version agreement check, `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue forms, a PR template, CODEOWNERS and pre-commit hooks.
 
+- `docs/OPENSSF-BEST-PRACTICES.md` maps each of the 67 OpenSSF Best Practices passing criteria to its evidence; `SECURITY.md` adds secure-design principles and the common errors the code guards against; the README adds badges, who the project is for and a support section with response times.
+- Repository rulesets: `main` only accepts squash-merged pull requests whose required checks pass, and `v*` tags cannot be moved or deleted.
+
 ### Changed
 - Repository layout follows vllm-project/semantic-router: the guide moved to `website/`, Compose to `deploy/compose/`, the embed script to `tools/guide/`, and the Makefile is split into `tools/make/*.mk`.
 - The Docker image installs from `uv.lock`.

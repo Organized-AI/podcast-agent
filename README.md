@@ -1,15 +1,20 @@
 # Podcast Agent — show notes and fact-checking for podcast transcripts
 
+[![ci](https://github.com/Organized-AI/podcast-agent/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Organized-AI/podcast-agent/actions/workflows/ci.yml)
+[![security](https://github.com/Organized-AI/podcast-agent/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/Organized-AI/podcast-agent/actions/workflows/security.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Organized-AI/podcast-agent/badge)](https://scorecard.dev/viewer/?uri=github.com/Organized-AI/podcast-agent)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **Interactive guide:** [podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev) · **Proof it runs:** [Audit trail tab](https://podcast-agent-guide.jordan-691.workers.dev/#audit) (a real Claude run, re-checkable in the browser) · **Source:** [github.com/organized-ai/podcast-agent](https://github.com/organized-ai/podcast-agent)
 
-An agentic AI system that takes raw podcast transcripts (`.json` or timestamped `.txt`) and produces publish-ready show notes for an ad agency:
+An agentic AI system that takes raw podcast transcripts (`.json` or timestamped `.txt`) and produces publish-ready show notes. It is for ad agencies and podcast producers who publish show notes and need every factual claim checked, with a record of how each verdict was reached. For each episode it writes:
 
 1. **Summary.** 200–300 words covering core themes, key discussions and the opinions shared.
 2. **Key notes.** 🔹 top 5 takeaways, 💬 notable quotes with timestamps (each verified word-for-word against the transcript), 🧭 tag-style topics.
 3. **Fact-check.** Check-worthy claims are extracted and verified by a tool-using agent against a local knowledge base and a (mock or real) web search. Each claim is marked ✅ verified, ⚠️ possibly outdated/inaccurate or ❓ unverifiable, with a calibrated confidence score and cited evidence.
 4. **Reasoning log.** A readable trace of every plan, tool call (with its stated purpose), observation, self-correction and verdict, plus Claude's own thinking summaries, plus a structured JSONL version.
 
-The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is live at **[podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev)** (source: [website/public/index.html](website/public/index.html); deploy your own copy as a Cloudflare Worker with `make guide-deploy`). Its **Audit trail** tab is filled from a real run by `make guide` (`scripts/embed_audit.py`).
+The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is live at **[podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev)** (source: [website/public/index.html](website/public/index.html); deploy your own copy as a Cloudflare Worker with `make guide-deploy`). Its **Audit trail** tab is filled from a real run by `make guide` (`tools/guide/embed_audit.py`).
 
 ## Where each requirement lives
 
@@ -234,6 +239,13 @@ samples/                  committed runs and captured proof
 | Add a new output (e.g. chapters) | Write a function in `agent/steps.py` decorated with `@register("…")`, add it to `capability_catalog()` in `planner.py`, render it in `report.py` |
 | Make fact-checking stricter | Change the caps in `verifier.calibrate()`; require 2 source types for ✅; raise `MAX_STEPS_PER_CLAIM` |
 | Demo resilience | `MOCK_SEARCH_FAILURE_RATE=0.6 podcast-agent run …` and watch retries and fallback in the log |
+
+## Support, contributing and security
+
+- **Questions and bugs:** open an [issue](https://github.com/Organized-AI/podcast-agent/issues/new/choose) using the bug or feature form. Every issue and pull request gets a response within **7 days**.
+- **Contributing:** see [CONTRIBUTING.md](CONTRIBUTING.md) (setup, quality gates, test policy) and [AGENTS.md](AGENTS.md) (repo map and rules for coding agents).
+- **Vulnerabilities:** report privately through [GitHub private vulnerability reporting](https://github.com/Organized-AI/podcast-agent/security/advisories/new), never in a public issue. Reports are acknowledged within 7 days; see [SECURITY.md](SECURITY.md).
+- **Practices:** how the project meets the OpenSSF Best Practices criteria is mapped in [docs/OPENSSF-BEST-PRACTICES.md](docs/OPENSSF-BEST-PRACTICES.md).
 
 ## Limitations and next steps
 
