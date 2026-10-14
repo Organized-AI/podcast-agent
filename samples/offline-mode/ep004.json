@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "run_id": "20261013-152710-7e9784",
-  "generated_at": "2026-10-13T20:27:10+00:00",
+  "run_id": "20261014-113451-ed70d4",
+  "generated_at": "2026-10-14T16:34:51+00:00",
   "episode": {
     "episode_id": "ep004",
     "title": "Space & Markets Roundup (synthetic test transcript built from the assignment's example)",
@@ -171,7 +171,9 @@
       "tools_used": [
         "search_knowledge_base",
         "web_search"
-      ]
+      ],
+      "method": "knowledge base + web search",
+      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-030)"
     },
     {
       "claim": {
@@ -211,7 +213,9 @@
       "tools_used": [
         "search_knowledge_base",
         "web_search"
-      ]
+      ],
+      "method": "knowledge base + web search",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-031 and web search)"
     },
     {
       "claim": {
@@ -251,7 +255,9 @@
       "tools_used": [
         "search_knowledge_base",
         "web_search"
-      ]
+      ],
+      "method": "knowledge base + web search",
+      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-032)"
     },
     {
       "claim": {
@@ -269,7 +275,9 @@
       "rationale": "Forward-looking prediction; it cannot be verified yet.",
       "evidence": [],
       "tool_calls": 0,
-      "tools_used": []
+      "tools_used": [],
+      "method": "reasoning step",
+      "verification": "❓ Unverifiable (future prediction)"
     }
   ],
   "steps": [
@@ -311,7 +319,7 @@
     {
       "step": "verify_claims",
       "status": "ok",
-      "duration_ms": 18,
+      "duration_ms": 16,
       "attempts": 4,
       "detail": "1 ✅ · 2 ⚠️ · 1 ❓ across 4 claims · 6 tool calls"
     }
@@ -326,5 +334,27 @@
   },
   "warnings": [
     "summary: the summary is 150 words; it must be 200–300 words — expand it using only the transcript"
+  ],
+  "fact_check_table": [
+    {
+      "claim": "NASA recently announced something about a new Mars mission: It’s launching in early 2026 — they’re planning to bring back samples.",
+      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-030)",
+      "confidence": 0.7
+    },
+    {
+      "claim": "The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-031 and web search)",
+      "confidence": 0.9
+    },
+    {
+      "claim": "On the markets side, people keep saying Bitcoin will reach $200K by 2025.",
+      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-032)",
+      "confidence": 0.75
+    },
+    {
+      "claim": "I think humans will walk on Mars before 2040.",
+      "verification": "❓ Unverifiable (future prediction)",
+      "confidence": 0.35
+    }
   ]
 }

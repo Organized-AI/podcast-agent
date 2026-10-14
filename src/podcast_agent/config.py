@@ -29,10 +29,15 @@ def _env_bool(name: str, default: bool) -> bool:
 @dataclass
 class Settings:
     # --- model provider -----------------------------------------------------------------
-    provider: str = field(default_factory=lambda: _env("LLM_PROVIDER", "auto"))  # auto|anthropic|openai|ollama|offline
+    provider: str = field(default_factory=lambda: _env("LLM_PROVIDER", "auto"))  # auto|anthropic|bedrock|openai|ollama|offline
     anthropic_api_key: str | None = field(default_factory=lambda: _env("ANTHROPIC_API_KEY"))
     anthropic_model: str = field(default_factory=lambda: _env("ANTHROPIC_MODEL", "claude-sonnet-5-5"))
     anthropic_fast_model: str = field(default_factory=lambda: _env("ANTHROPIC_FAST_MODEL", "claude-haiku-5-5"))
+    # Claude on Amazon Bedrock: AWS credentials come from the standard chain (env vars, ~/.aws, IAM role / IRSA).
+    bedrock_model: str | None = field(default_factory=lambda: _env("BEDROCK_MODEL"))
+    bedrock_fast_model: str | None = field(default_factory=lambda: _env("BEDROCK_FAST_MODEL"))
+    aws_region: str = field(default_factory=lambda: _env("AWS_REGION", _env("AWS_DEFAULT_REGION", "us-east-1")))
+    prompt_cache: bool = field(default_factory=lambda: _env_bool("PROMPT_CACHE", True))
     openai_api_key: str | None = field(default_factory=lambda: _env("OPENAI_API_KEY"))
     openai_base_url: str = field(default_factory=lambda: _env("OPENAI_BASE_URL", "https://api.openai.com/v1"))
     openai_model: str | None = field(default_factory=lambda: _env("OPENAI_MODEL"))

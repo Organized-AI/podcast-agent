@@ -69,6 +69,8 @@ flowchart LR
     workers -. "traces · metrics" .-> obs
 ```
 
+A static export of this diagram is in [architecture.svg](architecture.svg) for viewers that don't render Mermaid.
+
 The same view in plain text, for terminals and slides:
 
 ```

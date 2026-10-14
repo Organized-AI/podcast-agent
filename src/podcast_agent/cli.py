@@ -17,9 +17,9 @@ def _apply_overrides(settings: Settings, args: argparse.Namespace) -> Settings:
     if getattr(args, "provider", None):
         settings.provider = args.provider
     if getattr(args, "model", None):
-        settings.anthropic_model = settings.openai_model = settings.ollama_model = args.model
+        settings.anthropic_model = settings.openai_model = settings.ollama_model = settings.bedrock_model = args.model
     if getattr(args, "fast_model", None):
-        settings.anthropic_fast_model = settings.openai_fast_model = args.fast_model
+        settings.anthropic_fast_model = settings.openai_fast_model = settings.bedrock_fast_model = args.fast_model
     if getattr(args, "search", None):
         settings.search_provider = args.search
     if getattr(args, "max_claims", None):
@@ -77,7 +77,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             f"{approx}{r.usage.input_tokens:,}/{approx}{r.usage.output_tokens:,}",
         )
     console.print(table)
-    console.print(f"Outputs: [bold]{out_dir}/[/bold] (index.md, <episode>.json, <episode>.md, logs/run.log, logs/trace.jsonl)")
+    console.print(f"Outputs: [bold]{out_dir}/[/bold] (report.md, report.json, <episode>.md/.json, index.md, logs/run.log, logs/trace.jsonl)")
     return 1 if errors else 0
 
 
@@ -127,7 +127,7 @@ def main(argv: list[str] | None = None) -> int:
     run = sub.add_parser("run", help="Process transcript files or directories")
     run.add_argument("inputs", nargs="*", default=["data/transcripts"], help="files or directories (.json/.txt)")
     run.add_argument("--out", default="output", help="output directory (default: output)")
-    run.add_argument("--provider", choices=["auto", "anthropic", "openai", "ollama", "offline"])
+    run.add_argument("--provider", choices=["auto", "anthropic", "bedrock", "openai", "ollama", "offline"])
     run.add_argument("--model", help="main model id (e.g. claude-sonnet-5-5, llama3.1:8b)")
     run.add_argument("--fast-model", help="model used for planning and extraction")
     run.add_argument("--search", choices=["mock", "tavily", "none"], help="web search backend")
@@ -145,7 +145,7 @@ def main(argv: list[str] | None = None) -> int:
     worker = sub.add_parser("worker", help="Consume jobs from a queue (dir://path or SQS URL)")
     worker.add_argument("--queue", help="queue URI (default $QUEUE_URI or dir://queue)")
     worker.add_argument("--output", help="output dir or s3://bucket/prefix (default $OUTPUT_URI or output/jobs)")
-    worker.add_argument("--provider", choices=["auto", "anthropic", "openai", "ollama", "offline"])
+    worker.add_argument("--provider", choices=["auto", "anthropic", "bedrock", "openai", "ollama", "offline"])
     worker.add_argument("--once", action="store_true", help="drain the queue and exit")
     worker.add_argument("--quiet", action="store_true")
     worker.set_defaults(func=cmd_worker)

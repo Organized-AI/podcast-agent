@@ -13,7 +13,7 @@ from podcast_agent.config import Settings
 from podcast_agent.llm import build_provider
 from podcast_agent.models import EpisodeReport
 from podcast_agent.prompts import PROMPT_VERSION
-from podcast_agent.report import render_index, render_markdown
+from podcast_agent.report import render_combined, render_index, render_markdown
 from podcast_agent.tools.knowledge_base import KnowledgeBase
 from podcast_agent.tools.web_search import MockWebSearch, SearchTool, TavilySearch
 from podcast_agent.trace import Tracer
@@ -86,6 +86,17 @@ def run_batch(ctx: RunContext, files: list[Path], out_dir: Path, run_id: str) ->
         (out_dir / f"{stem}.md").write_text(render_markdown(report), encoding="utf-8")
     ctx.trace.episode_id = None
     (out_dir / "index.md").write_text(render_index(reports, run_id), encoding="utf-8")
+    # One combined file per run, as the assignment asks: summary, notes and fact-check table for every episode.
+    (out_dir / "report.md").write_text(render_combined(reports, run_id), encoding="utf-8")
+    combined = {
+        "schema_version": "1.0",
+        "run_id": run_id,
+        "prompt_version": PROMPT_VERSION,
+        "provider": ctx.llm.describe(),
+        "today": ctx.settings.today,
+        "episodes": [r.model_dump(mode="json") for r in reports],
+    }
+    (out_dir / "report.json").write_text(json.dumps(combined, indent=2, ensure_ascii=False), encoding="utf-8")
     manifest = {
         "run_id": run_id,
         "prompt_version": PROMPT_VERSION,
@@ -97,7 +108,7 @@ def run_batch(ctx: RunContext, files: list[Path], out_dir: Path, run_id: str) ->
             {
                 "episode_id": r.episode.episode_id,
                 "title": r.episode.title,
-                "outputs": [f"{r.episode.episode_id}.json", f"{r.episode.episode_id}.md"],
+                "outputs": [f"{r.episode.episode_id}.json", f"{r.episode.episode_id}.md", "report.md", "report.json"],
                 "usage": r.usage.model_dump(),
                 "steps": [s.model_dump() for s in r.steps],
             }

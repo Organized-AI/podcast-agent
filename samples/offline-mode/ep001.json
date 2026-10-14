@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "run_id": "20261013-152710-7e9784",
-  "generated_at": "2026-10-13T20:27:10+00:00",
+  "run_id": "20261014-113451-ed70d4",
+  "generated_at": "2026-10-14T16:34:51+00:00",
   "episode": {
     "episode_id": "ep001",
     "title": "The Future of Remote Work",
@@ -152,7 +152,9 @@
       "tools_used": [
         "search_knowledge_base",
         "web_search"
-      ]
+      ],
+      "method": "web search",
+      "verification": "✅ Verified true (confirmed by web search: How GitLab runs an all-remote company with a public handbook)"
     },
     {
       "claim": {
@@ -170,7 +172,9 @@
       "rationale": "Forward-looking prediction; it cannot be verified yet.",
       "evidence": [],
       "tool_calls": 0,
-      "tools_used": []
+      "tools_used": [],
+      "method": "reasoning step",
+      "verification": "❓ Unverifiable (future prediction)"
     },
     {
       "claim": {
@@ -188,7 +192,9 @@
       "rationale": "Forward-looking prediction; it cannot be verified yet.",
       "evidence": [],
       "tool_calls": 0,
-      "tools_used": []
+      "tools_used": [],
+      "method": "reasoning step",
+      "verification": "❓ Unverifiable (future prediction)"
     },
     {
       "claim": {
@@ -206,14 +212,16 @@
       "rationale": "Forward-looking prediction; it cannot be verified yet.",
       "evidence": [],
       "tool_calls": 0,
-      "tools_used": []
+      "tools_used": [],
+      "method": "reasoning step",
+      "verification": "❓ Unverifiable (future prediction)"
     }
   ],
   "steps": [
     {
       "step": "plan",
       "status": "ok",
-      "duration_ms": 5,
+      "duration_ms": 4,
       "attempts": 0,
       "detail": "4 steps"
     },
@@ -241,7 +249,7 @@
     {
       "step": "verify_claims",
       "status": "ok",
-      "duration_ms": 10,
+      "duration_ms": 9,
       "attempts": 4,
       "detail": "1 ✅ · 0 ⚠️ · 3 ❓ across 4 claims · 2 tool calls"
     }
@@ -254,5 +262,27 @@
     "cache_read_tokens": 0,
     "estimated": true
   },
-  "warnings": []
+  "warnings": [],
+  "fact_check_table": [
+    {
+      "claim": "Look at GitLab, Automattic, and Doist. They’ve literally written handbooks for everything.",
+      "verification": "✅ Verified true (confirmed by web search: How GitLab runs an all-remote company with a public handbook)",
+      "confidence": 0.72
+    },
+    {
+      "claim": "Slack is great, but if you rely on it for everything, people will burn out.",
+      "verification": "❓ Unverifiable (future prediction)",
+      "confidence": 0.35
+    },
+    {
+      "claim": "Local offices might become optional hubs, and async culture will become standard practice.",
+      "verification": "❓ Unverifiable (future prediction)",
+      "confidence": 0.35
+    },
+    {
+      "claim": "Remote-first companies will dominate talent acquisition.",
+      "verification": "❓ Unverifiable (future prediction)",
+      "confidence": 0.35
+    }
+  ]
 }

@@ -1,4 +1,7 @@
-"""Anthropic Messages API provider (default)."""
+"""Claude providers: the Anthropic API (default) and Claude on Amazon Bedrock.
+
+Both use the same Messages API shape, so Bedrock is the Anthropic provider with a different client.
+"""
 
 from __future__ import annotations
 
@@ -10,17 +13,29 @@ from podcast_agent.llm.base import LLMError, LLMProvider, LLMResponse
 class AnthropicProvider(LLMProvider):
     name = "anthropic"
 
-    def __init__(self, model: str, fast_model: str | None, api_key: str | None, timeout_s: float = 90):
+    def __init__(
+        self,
+        model: str,
+        fast_model: str | None,
+        api_key: str | None = None,
+        timeout_s: float = 90,
+        *,
+        client: Any = None,
+        prompt_cache: bool = True,
+    ):
         super().__init__(model, fast_model)
         try:
             import anthropic
         except ImportError as exc:  # pragma: no cover - dependency is declared
             raise LLMError("The 'anthropic' package is not installed") from exc
-        if not api_key:
-            raise LLMError("ANTHROPIC_API_KEY is not set")
-        # The SDK retries 408/409/429/5xx with exponential backoff; we raise the ceiling a little.
-        self._client = anthropic.Anthropic(api_key=api_key, timeout=timeout_s, max_retries=4)
         self._anthropic = anthropic
+        if client is None:
+            if not api_key:
+                raise LLMError("ANTHROPIC_API_KEY is not set")
+            # The SDK retries 408/409/429/5xx with exponential backoff; we raise the ceiling a little.
+            client = anthropic.Anthropic(api_key=api_key, timeout=timeout_s, max_retries=4)
+        self._client = client
+        self.prompt_cache = prompt_cache
 
     def _complete(
         self,
@@ -36,9 +51,12 @@ class AnthropicProvider(LLMProvider):
     ) -> LLMResponse:
         system_blocks: list[dict[str, Any]] = []
         if cache_prefix:
-            # Shared episode context first, marked cacheable: later steps on the same episode
-            # read it from Anthropic's prompt cache instead of paying full input price.
-            system_blocks.append({"type": "text", "text": cache_prefix, "cache_control": {"type": "ephemeral"}})
+            block: dict[str, Any] = {"type": "text", "text": cache_prefix}
+            if self.prompt_cache:
+                # Shared episode context first, marked cacheable: later steps on the same episode
+                # read it from the prompt cache instead of paying full input price.
+                block["cache_control"] = {"type": "ephemeral"}
+            system_blocks.append(block)
         system_blocks.append({"type": "text", "text": system})
         kwargs: dict[str, Any] = {
             "model": model,
@@ -51,7 +69,7 @@ class AnthropicProvider(LLMProvider):
         try:
             resp = self._client.messages.create(**kwargs)
         except self._anthropic.APIError as exc:
-            raise LLMError(f"Anthropic API error: {exc}") from exc
+            raise LLMError(f"{self.name} API error: {exc}") from exc
         text = "".join(getattr(block, "text", "") for block in resp.content if block.type == "text")
         usage = resp.usage
         return LLMResponse(
@@ -62,3 +80,28 @@ class AnthropicProvider(LLMProvider):
             cache_read_tokens=getattr(usage, "cache_read_input_tokens", 0) or 0,
             stop_reason=resp.stop_reason,
         )
+
+
+class BedrockProvider(AnthropicProvider):
+    """Claude on Amazon Bedrock. Credentials come from the AWS chain: env vars, ~/.aws profile, or an IAM role."""
+
+    name = "bedrock"
+
+    def __init__(
+        self,
+        model: str,
+        fast_model: str | None,
+        region: str,
+        timeout_s: float = 90,
+        *,
+        client: Any = None,
+        prompt_cache: bool = True,
+    ):
+        if client is None:
+            try:
+                import anthropic
+
+                client = anthropic.AnthropicBedrock(aws_region=region, timeout=timeout_s, max_retries=4)
+            except ImportError as exc:  # pragma: no cover
+                raise LLMError("Bedrock needs boto3: pip install 'podcast-agent[aws]'") from exc
+        super().__init__(model, fast_model, client=client, prompt_cache=prompt_cache)

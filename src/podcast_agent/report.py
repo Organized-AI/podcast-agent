@@ -4,25 +4,13 @@ from __future__ import annotations
 
 from collections import Counter
 
-from podcast_agent.models import EpisodeReport, FactCheck, Verdict
+from podcast_agent.models import EpisodeReport, Verdict
 
 SOURCE_LABEL = {"knowledge_base": "KB", "web_search": "Web", "model_knowledge": "Model"}
 
 
 def _cell(text: str) -> str:
     return text.replace("|", "\\|").replace("\n", " ").strip()
-
-
-def _basis(fc: FactCheck) -> str:
-    if not fc.evidence:
-        return {"anecdotal": "personal anecdote", "prediction": "forward-looking prediction"}.get(
-            fc.claim.type, "no adequate evidence found"
-        )
-    parts = []
-    for ev in sorted(fc.evidence, key=lambda e: e.source != "knowledge_base")[:2]:
-        title = ev.title if len(ev.title) <= 60 else ev.title[:57] + "…"
-        parts.append(f"{SOURCE_LABEL.get(ev.source, ev.source)}: {title}")
-    return "; ".join(parts)
 
 
 def verdict_counts(report: EpisodeReport) -> Counter:
@@ -57,13 +45,9 @@ def render_markdown(r: EpisodeReport) -> str:
 
     out += ["## Fact-check", ""]
     if r.fact_checks:
-        out += ["| # | Claim | Speaker · Time | Verification | Confidence |", "|---|---|---|---|---|"]
-        for fc in r.fact_checks:
-            c = fc.claim
-            out.append(
-                f"| {c.id} | {_cell(c.claim)} | {_cell(c.speaker)} · {c.timestamp} | "
-                f"{fc.verdict.emoji} {fc.verdict.label}<br><sub>{_cell(_basis(fc))}</sub> | {fc.confidence:.2f} |"
-            )
+        out += ["| Claim | Verification | Confidence |", "|---|---|---|"]
+        for row in r.fact_check_table:
+            out.append(f"| {_cell(row.claim)} | {_cell(row.verification)} | {row.confidence:.2f} |")
         counts = verdict_counts(r)
         out += [
             "",
@@ -71,14 +55,15 @@ def render_markdown(r: EpisodeReport) -> str:
             f"{counts[Verdict.UNVERIFIABLE]} ❓ unverifiable. Confidence is how strongly the evidence supports the "
             "verdict; unverifiable verdicts are capped at 0.50 and evidence-free verdicts at 0.60.</sub>",
             "",
-            "<details><summary>Evidence and reasoning for each claim</summary>",
+            "<details><summary>Evidence and reasoning for each claim (speaker, timestamp, sources)</summary>",
             "",
         ]
         for fc in r.fact_checks:
             tools = f" · {fc.tool_calls} tool call(s): {', '.join(fc.tools_used)}" if fc.tool_calls else ""
             out += [
-                f"**{fc.claim.id} — {fc.verdict.emoji} {fc.verdict.label} ({fc.confidence:.2f}; model reported "
-                f"{fc.raw_confidence:.2f})**{tools}  ",
+                f"**{fc.claim.id}. {_cell(fc.claim.claim)}**  ",
+                f"{fc.verdict.emoji} {fc.verdict.label} · confidence {fc.confidence:.2f} (model reported "
+                f"{fc.raw_confidence:.2f}) · method: {fc.method}{tools}  ",
                 f"_{fc.claim.type}{', time-sensitive' if fc.claim.time_sensitive else ''}_ · "
                 f"“{fc.claim.quote}” — {fc.claim.speaker} `[{fc.claim.timestamp}]`  ",
                 f"{fc.rationale}",
@@ -147,3 +132,28 @@ def render_index(reports: list[EpisodeReport], run_id: str) -> str:
     lines += ["", "Each episode also has a machine-readable `<episode_id>.json`. The agent's reasoning trace is in "
               "`logs/run.log` (human-readable) and `logs/trace.jsonl` (structured).", ""]
     return "\n".join(lines)
+
+
+def render_combined(reports: list[EpisodeReport], run_id: str) -> str:
+    """One Markdown file with every episode's summary, notes and fact-check table (the PDF's output file)."""
+    lines = ["# Podcast show notes and fact-checks", ""]
+    if not reports:
+        return "\n".join(lines + ["_No episodes processed._", ""])
+    r0 = reports[0]
+    lines += [
+        f"Run `{run_id}` · provider **{r0.provider}** ({r0.models.get('main')} / {r0.models.get('fast')}) · "
+        f"{len(reports)} episode(s)",
+        "",
+        "## Episodes",
+        "",
+    ]
+    for r in reports:
+        c = verdict_counts(r)
+        lines.append(f"- {r.episode.title} ({r.episode.episode_id}): {len(r.fact_checks)} claims, "
+                     f"{c[Verdict.VERIFIED]} ✅ · {c[Verdict.OUTDATED]} ⚠️ · {c[Verdict.UNVERIFIABLE]} ❓")
+    lines.append("")
+    for r in reports:
+        lines += ["---", ""]
+        for line in render_markdown(r).splitlines():
+            lines.append("#" + line if line.startswith("#") else line)  # nest each episode one level down
+    return "\n".join(lines) + "\n"

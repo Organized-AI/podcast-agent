@@ -10,7 +10,7 @@ import re
 from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 Role = Literal["host", "guest", "unknown"]
 
@@ -211,6 +211,51 @@ class FactCheck(BaseModel):
     tool_calls: int = 0
     tools_used: list[str] = Field(default_factory=list)
 
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def method(self) -> str:
+        """Which of the PDF's three verification methods produced the verdict."""
+        sources = {e.source for e in self.evidence if e.source != "model_knowledge"}
+        if sources == {"knowledge_base", "web_search"}:
+            return "knowledge base + web search"
+        if sources == {"knowledge_base"}:
+            return "knowledge base"
+        if sources == {"web_search"}:
+            return "web search"
+        return "reasoning step"
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def verification(self) -> str:
+        """Verification cell in the assignment's style, e.g. "✅ Verified true (confirmed by knowledge base KB-031)"."""
+        kb_ids = [m.group(1) for e in self.evidence if e.source == "knowledge_base"
+                  for m in [re.match(r"(KB-\d+)", e.title)] if m]
+        web = [e for e in self.evidence if e.source == "web_search"]
+        if self.verdict == Verdict.UNVERIFIABLE:
+            reason = {"anecdotal": "personal anecdote", "prediction": "future prediction"}.get(
+                self.claim.type, "no supporting source found")
+            return f"{self.verdict.emoji} {self.verdict.label} ({reason})"
+        if kb_ids:
+            basis = "knowledge base " + ", ".join(dict.fromkeys(kb_ids))
+            if web and self.verdict == Verdict.VERIFIED:
+                basis += " and web search"
+        elif web:
+            basis = f"web search: {web[0].title}"
+        else:
+            basis = "reasoning step, no external source"
+        if basis.startswith("reasoning"):
+            return f"{self.verdict.emoji} {self.verdict.label} ({basis})"
+        verb = "confirmed by" if self.verdict == Verdict.VERIFIED else "contradicted by"
+        return f"{self.verdict.emoji} {self.verdict.label} ({verb} {basis})"
+
+
+class FactCheckRow(BaseModel):
+    """One row of the assignment's fact-check table: Claim | Verification | Confidence."""
+
+    claim: str
+    verification: str
+    confidence: float
+
 
 # --------------------------------------------------------------------------- run metadata
 
@@ -258,3 +303,9 @@ class EpisodeReport(BaseModel):
     steps: list[StepResult] = Field(default_factory=list)
     usage: Usage = Field(default_factory=Usage)
     warnings: list[str] = Field(default_factory=list)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def fact_check_table(self) -> list[FactCheckRow]:
+        return [FactCheckRow(claim=fc.claim.claim, verification=fc.verification, confidence=fc.confidence)
+                for fc in self.fact_checks]

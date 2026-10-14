@@ -7,7 +7,24 @@ An agentic AI system that takes raw podcast transcripts (`.json` or timestamped 
 3. **Fact-check.** Check-worthy claims are extracted and verified by a tool-using agent against a local knowledge base and a (mock or real) web search. Each claim is marked ✅ verified, ⚠️ possibly outdated/inaccurate or ❓ unverifiable, with a calibrated confidence score and cited evidence.
 4. **Reasoning log.** A readable trace of every plan, thought, tool call, observation, self-correction and verdict, plus a structured JSONL version.
 
-The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. A lint-clean Helm chart is in `deploy/helm/podcast-agent`.
+The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is in **[docs/guide/index.html](docs/guide/index.html)** (open it in a browser).
+
+## Where each requirement lives
+
+| The assignment asks for | Where it is |
+|---|---|
+| A summary of each episode, about 200–300 words | `src/podcast_agent/agent/steps.py` → `summarize`; written to `output/report.md` |
+| Top 5 takeaways, quotes with timestamps, topic tags | `agent/steps.py` → `extract_notes` (quotes are checked word-for-word against the transcript) |
+| Fact-checking via search, a local knowledge base or a reasoning step, marked ✅ / ⚠️ / ❓ | `agent/verifier.py` (tool loop), `data/knowledge_base.json`, `data/mock_web_index.json`, `tools/` |
+| A multi-step agent that plans and executes on its own | `agent/planner.py` (model-written plan, validated and repaired), `agent/pipeline.py` (executor) |
+| Containerized, runs locally via Docker | `Dockerfile`, `docker-compose.yml`; see [Quickstart](#quickstart-docker) |
+| A model running locally or on a cloud provider (Bedrock, OpenAI, Anthropic) | `src/podcast_agent/llm/`: `LLM_PROVIDER=anthropic`, `bedrock`, `openai`, `ollama` or `offline` |
+| Readable logs of the agent's reasoning steps and plans | `output/logs/run.log` (readable) and `output/logs/trace.jsonl` (structured) |
+| An output JSON or Markdown file with summary, notes and fact-check table | `output/report.md` and `output/report.json` (plus one pair per episode) |
+| A deployment strategy with diagram and narrative | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/architecture.svg](docs/architecture.svg) |
+| A detailed README | This file, plus the interactive guide in `docs/guide/` |
+
+Sample outputs from a complete run are committed in [`samples/offline-mode/`](samples/offline-mode).
 
 ---
 
@@ -24,7 +41,9 @@ That processes every transcript in `data/transcripts/` and writes to `./output/`
 
 | File | Contents |
 |---|---|
-| `output/<episode_id>.md` | Show notes: summary, takeaways, quotes, topics, fact-check table with evidence, agent run details |
+| `output/report.md` | **The deliverable**: every episode's summary, key notes and fact-check table (Claim · Verification · Confidence) in one file |
+| `output/report.json` | The same for every episode, machine-readable, including a `fact_check_table` array per episode |
+| `output/<episode_id>.md` | One episode's show notes, fact-check table, evidence for each claim and agent run details |
 | `output/<episode_id>.json` | The same report, machine-readable (schema: `src/podcast_agent/models.py → EpisodeReport`) |
 | `output/index.md` | One row per episode: counts, verdict mix, LLM calls, tokens |
 | `output/logs/run.log` | Human-readable reasoning trace |
@@ -53,6 +72,16 @@ docker compose exec ollama ollama pull llama3.1:8b
 LLM_PROVIDER=ollama docker compose run --rm agent
 ```
 
+### Claude on Amazon Bedrock
+
+```bash
+# AWS credentials come from the usual chain: env vars, a mounted ~/.aws profile, or an IAM role.
+docker run --rm -t -v "$PWD/output:/app/output" -v "$HOME/.aws:/home/agent/.aws:ro" \
+  -e LLM_PROVIDER=bedrock -e AWS_PROFILE=default -e AWS_REGION=us-east-1 \
+  -e BEDROCK_MODEL=<Claude model or inference-profile ID from the Bedrock console> \
+  podcast-agent
+```
+
 ## Run without Docker
 
 ```bash
@@ -62,7 +91,7 @@ export ANTHROPIC_API_KEY=...            # or LLM_PROVIDER=offline
 .venv/bin/podcast-agent run data/transcripts/ep002_ai_healthcare.json --today 2026-10-13 --max-claims 5
 .venv/bin/podcast-agent kb "FDA autonomous AI"    # query the knowledge base directly
 .venv/bin/podcast-agent serve --port 8080         # HTTP API: POST /v1/process, GET /healthz
-.venv/bin/pytest -q                               # 23 tests, no network or API key needed
+.venv/bin/pytest -q                               # 29 tests, no network or API key needed
 ```
 
 ---
@@ -152,7 +181,9 @@ All settings are environment variables (see [`.env.example`](.env.example)); the
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `LLM_PROVIDER` | `auto` | `anthropic` · `openai` (any OpenAI-compatible server) · `ollama` · `offline`. `auto` picks Anthropic if a key is set, else offline. |
+| `LLM_PROVIDER` | `auto` | `anthropic` · `bedrock` · `openai` (any OpenAI-compatible server) · `ollama` · `offline`. `auto` picks Anthropic if a key is set, else offline; Bedrock is used only when named. |
+| `BEDROCK_MODEL` / `BEDROCK_FAST_MODEL` / `AWS_REGION` | none / main model / `us-east-1` | Claude model or inference-profile IDs on Bedrock; credentials from the AWS chain |
+| `PROMPT_CACHE` | `true` | Mark the transcript as a cacheable prompt prefix (Anthropic and Bedrock) |
 | `ANTHROPIC_MODEL` / `ANTHROPIC_FAST_MODEL` | `claude-sonnet-5-5` / `claude-haiku-5-5` | Main model (summary, notes, verification) / fast model (planning, claim extraction) |
 | `SEARCH_PROVIDER` | `mock` | `mock` (fixture in `data/mock_web_index.json`) · `tavily` (needs `TAVILY_API_KEY`) · `none` |
 | `KB_PATH` | `data/knowledge_base.json` | Curated facts with `as_of` dates; add entries freely |
@@ -181,7 +212,7 @@ data/transcripts/                               ep001–ep003 (provided) + ep004
 data/knowledge_base.json · mock_web_index.json  local KB (18 dated facts) · mock search corpus
 docs/DEPLOYMENT.md                              deployment strategy: diagram + narrative
 deploy/helm/podcast-agent/                      Helm chart: API + KEDA-scaled workers
-tests/                                          23 tests, including scripted-model tests of every correction path
+tests/                                          29 tests, including scripted-model tests of every correction path
 ```
 
 ## Making changes quickly

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "run_id": "20261013-152710-7e9784",
-  "generated_at": "2026-10-13T20:27:10+00:00",
+  "run_id": "20261014-113451-ed70d4",
+  "generated_at": "2026-10-14T16:34:51+00:00",
   "episode": {
     "episode_id": "ep002",
     "title": "AI in Healthcare: Hype or Reality?",
@@ -152,7 +152,9 @@
       "tool_calls": 1,
       "tools_used": [
         "search_knowledge_base"
-      ]
+      ],
+      "method": "knowledge base",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-011)"
     },
     {
       "claim": {
@@ -170,7 +172,9 @@
       "rationale": "Forward-looking prediction; it cannot be verified yet.",
       "evidence": [],
       "tool_calls": 0,
-      "tools_used": []
+      "tools_used": [],
+      "method": "reasoning step",
+      "verification": "❓ Unverifiable (future prediction)"
     },
     {
       "claim": {
@@ -200,7 +204,9 @@
       "tool_calls": 1,
       "tools_used": [
         "search_knowledge_base"
-      ]
+      ],
+      "method": "knowledge base",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-013)"
     },
     {
       "claim": {
@@ -230,7 +236,9 @@
       "tool_calls": 1,
       "tools_used": [
         "search_knowledge_base"
-      ]
+      ],
+      "method": "knowledge base",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-014)"
     },
     {
       "claim": {
@@ -251,7 +259,9 @@
       "tools_used": [
         "search_knowledge_base",
         "web_search"
-      ]
+      ],
+      "method": "reasoning step",
+      "verification": "❓ Unverifiable (no supporting source found)"
     },
     {
       "claim": {
@@ -281,7 +291,9 @@
       "tool_calls": 1,
       "tools_used": [
         "search_knowledge_base"
-      ]
+      ],
+      "method": "knowledge base",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-015)"
     },
     {
       "claim": {
@@ -299,7 +311,9 @@
       "rationale": "Forward-looking prediction; it cannot be verified yet.",
       "evidence": [],
       "tool_calls": 0,
-      "tools_used": []
+      "tools_used": [],
+      "method": "reasoning step",
+      "verification": "❓ Unverifiable (future prediction)"
     }
   ],
   "steps": [
@@ -313,28 +327,28 @@
     {
       "step": "summarize",
       "status": "ok",
-      "duration_ms": 1,
+      "duration_ms": 0,
       "attempts": 1,
       "detail": "208 words (single_pass, target 200–300)"
     },
     {
       "step": "extract_notes",
       "status": "ok",
-      "duration_ms": 6,
+      "duration_ms": 5,
       "attempts": 1,
       "detail": "5 takeaways · 4 verbatim quotes · 7 topics"
     },
     {
       "step": "extract_claims",
       "status": "ok",
-      "duration_ms": 4,
+      "duration_ms": 3,
       "attempts": 1,
       "detail": "7 check-worthy claims (5 factual, 2 prediction)"
     },
     {
       "step": "verify_claims",
       "status": "ok",
-      "duration_ms": 21,
+      "duration_ms": 18,
       "attempts": 7,
       "detail": "4 ✅ · 0 ⚠️ · 3 ❓ across 7 claims · 6 tool calls"
     }
@@ -347,5 +361,42 @@
     "cache_read_tokens": 0,
     "estimated": true
   },
-  "warnings": []
+  "warnings": [],
+  "fact_check_table": [
+    {
+      "claim": "Some hospitals use AI for reading X-rays or flagging urgent cases.",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-011)",
+      "confidence": 0.9
+    },
+    {
+      "claim": "The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.",
+      "verification": "❓ Unverifiable (future prediction)",
+      "confidence": 0.35
+    },
+    {
+      "claim": "Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-013)",
+      "confidence": 0.75
+    },
+    {
+      "claim": "AI learns from existing clinical data, which may be skewed.",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-014)",
+      "confidence": 0.71
+    },
+    {
+      "claim": "Hospitals want faster reads and fewer errors.",
+      "verification": "❓ Unverifiable (no supporting source found)",
+      "confidence": 0.3
+    },
+    {
+      "claim": "The pandemic accelerated digital health adoption, including AI tools.",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-015)",
+      "confidence": 0.9
+    },
+    {
+      "claim": "AI copilots that suggest treatment plans, but a human will always make the final call.",
+      "verification": "❓ Unverifiable (future prediction)",
+      "confidence": 0.35
+    }
+  ]
 }
