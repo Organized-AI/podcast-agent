@@ -48,6 +48,23 @@ run podcast-agent                              podcast_agent.run.id, inputs, epi
 
 Self-corrections, warnings, errors and verdicts from the reasoning trace also appear as span events (`podcast_agent.self_correct`, …) on the span they happened in.
 
+## Across the API and the worker
+
+In production the API queues work and stateless workers run it. The trace follows the job:
+
+```
+POST /v1/jobs                      SERVER span (FastAPI's native OpenTelemetry), continues the caller's traceparent
+└── fastapi.endpoint
+        ↓  the job carries W3C trace context (traceparent, tracestate)
+    process <queue>                CONSUMER span in the worker: messaging.system, queue name, job id, attempt, outcome
+    └── invoke_agent podcast-agent
+        └── step … → chat / execute_tool
+```
+
+- `POST /v1/jobs` validates the transcript, queues it on `QUEUE_URI` and returns `202` with the `job_id` and `trace_id`. `POST /v1/process` runs synchronously in the request's trace (local use).
+- Directory queues (`dir://`) keep the context in a `<file>.tracecontext` sidecar; SQS jobs carry it in the message body as `trace_context`. A job returned to the queue for a retry keeps its context, so every attempt lands in the same trace.
+- FastAPI (0.143+) creates the SERVER spans and records `http.server.request.duration` and `http.server.active_requests` through the same providers. `/healthz` is excluded so probes don't flood the backend.
+
 ## Metrics
 
 | Metric | Type | Attributes |
@@ -58,6 +75,7 @@ Self-corrections, warnings, errors and verdicts from the reasoning trace also ap
 | `podcast_agent.verdicts` | counter | `podcast_agent.verdict`, `podcast_agent.claim.type` |
 | `podcast_agent.self_corrections` | counter | `podcast_agent.step.name` |
 | `podcast_agent.tool_calls` | counter | `gen_ai.tool.name`, `outcome` (ok, empty, error) |
+| `http.server.request.duration`, `http.server.active_requests` | histogram, gauge | from FastAPI: method, route, status code |
 
 Responses served from the local response cache get a span (with `podcast_agent.llm.response_cache_hit=true`) but no token or duration metrics, because no model call was made.
 

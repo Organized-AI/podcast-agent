@@ -8,12 +8,9 @@ from typing import Any
 
 import pytest
 from conftest import make_ctx
-from opentelemetry import metrics, trace
-from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry import trace
 from opentelemetry.sdk.metrics.export import InMemoryMetricReader
-from opentelemetry.sdk.trace import ReadableSpan, TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+from opentelemetry.sdk.trace import ReadableSpan
 from opentelemetry.trace import StatusCode
 from rich.console import Console
 
@@ -22,22 +19,6 @@ from podcast_agent.llm.base import LLMError, LLMProvider
 from podcast_agent.runtime import run_batch
 from podcast_agent.trace import Tracer
 from podcast_agent.transcript import load_episode
-
-
-@pytest.fixture(scope="session")
-def otel() -> tuple[InMemorySpanExporter, InMemoryMetricReader]:
-    """One in-memory SDK for the session: OpenTelemetry allows a global provider to be set only once."""
-    saved = os.environ.pop("OTEL_SDK_DISABLED", None)  # providers read it when they are created
-    try:
-        exporter, reader = InMemorySpanExporter(), InMemoryMetricReader()
-        provider = TracerProvider()
-        provider.add_span_processor(SimpleSpanProcessor(exporter))
-        trace.set_tracer_provider(provider)
-        metrics.set_meter_provider(MeterProvider(metric_readers=[reader]))
-    finally:
-        if saved is not None:
-            os.environ["OTEL_SDK_DISABLED"] = saved
-    return exporter, reader
 
 
 def _metric_points(reader: InMemoryMetricReader) -> dict[str, list[Any]]:
