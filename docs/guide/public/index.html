@@ -1,0 +1,1294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Podcast Agent Guide</title>
+<meta name="description" content="Interactive architecture guide to the podcast agent: how it plans, writes show notes, fact-checks claims, runs, changes and deploys.">
+<link rel="icon" href="brand/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: the Organized AI learning-path shell (sticky contents rail + one reading column of numbered modules), dark-first with Organized AI yellow. */
+:root{--bg:#0b0b0a;--panel:#141412;--line:#2a2822;--ink:#f4f2ea;--mute:#9b978a;--accent:#fbe04d;--brand:#fbe04d;--on-brand:#0b0b0a;--bad:#f27c7c;--chip:#1c1b17;
+  --pill-y:#fbe04d;--pill-b:#a8d8ff;--pill-p:#ffb8c9;--pill-g:#b9f0c8;--pill-ink:#14130f;
+  --c-notes:#b9f0c8;--c-fact:#a8d8ff;--c-trace:#ffb8c9;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;--sans:"IBM Plex Sans",system-ui,sans-serif;--serif:"Source Serif 4",Georgia,serif;color-scheme:dark}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#faf9f4;--panel:#fff;--line:#e4e1d6;--ink:#111110;--mute:#5f5b50;--accent:#8a6c00;--brand:#f5d528;--on-brand:#0b0b0a;--bad:#b42323;--chip:#f1efe6;--c-notes:#1f7a45;--c-fact:#2b62a8;--c-trace:#a33a5b;color-scheme:light}}
+:root[data-theme="light"]{--bg:#faf9f4;--panel:#fff;--line:#e4e1d6;--ink:#111110;--mute:#5f5b50;--accent:#8a6c00;--brand:#f5d528;--on-brand:#0b0b0a;--bad:#b42323;--chip:#f1efe6;--c-notes:#1f7a45;--c-fact:#2b62a8;--c-trace:#a33a5b;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans)}
+code{font-family:var(--mono);font-size:.9em;background:var(--chip);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 80px;overflow-x:clip}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line)}
+.brand{display:inline-flex;align-items:center;gap:10px}
+.brand-sep{width:1px;height:22px;background:var(--line)}
+h1{font:600 20px/1.2 var(--mono);margin:0}
+.nav{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.tab{background:var(--chip);border:1px solid var(--line);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer;font:500 13px var(--mono);min-height:36px}
+.tab[aria-selected=true]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.progress-line{font:12px var(--mono);color:var(--mute);margin:10px 0 18px}
+.kick{display:block;font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.brand-img{width:30px;height:30px;border-radius:8px;display:block;box-shadow:0 0 0 1px var(--line)}
+.brand-wm{height:16px;width:auto;display:inline}
+.wm-dark{display:none}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .wm-light{display:none}:root:not([data-theme="dark"]) .wm-dark{display:inline}}
+:root[data-theme="light"] .wm-light{display:none}:root[data-theme="light"] .wm-dark{display:inline}
+/* hero */
+.hero{border:1px solid var(--line);border-radius:12px;padding:26px 24px;margin:0 0 28px;background:linear-gradient(180deg,color-mix(in srgb,var(--brand) 6%,var(--panel)),var(--panel))}
+.hero h2{font:600 clamp(26px,4vw,38px)/1.15 var(--mono);margin:8px 0 10px;letter-spacing:-.01em;text-wrap:balance}
+.hero p{font:17px/1.6 var(--serif);color:var(--mute);max-width:62ch;margin:0 0 20px}
+.hero p b{color:var(--ink);font-weight:600}
+.facts{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+.fact{font:500 12px var(--mono);padding:5px 9px;border-radius:4px;border:1px solid var(--line);background:var(--chip);color:var(--mute)}
+.fact b{color:var(--ink);font-weight:500}
+.hero .fig{margin:0 0 10px;background:var(--bg)}
+.sys-cap{font:11.5px var(--mono);color:var(--mute);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:0 2px;margin:0 0 18px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.stats>div{padding:14px 16px;border-right:1px solid var(--line);display:grid;gap:2px}
+.stats>div:last-child{border-right:0}
+.stats span{font:11px var(--mono);color:var(--mute)}
+.stats b{font:600 28px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.stats b i{font-style:normal;font-size:15px;color:var(--mute);font-weight:400}
+.stats .xp b{color:var(--accent)}
+.stats small{font:10.5px/1.35 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+@media(max-width:720px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats>div:nth-child(2){border-right:0}.stats>div:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+/* layout */
+.grid{display:grid;grid-template-columns:230px minmax(0,1fr);gap:36px;align-items:start}
+.toc{position:sticky;top:76px;max-height:calc(100vh - 96px);overflow:auto;display:grid;grid-template-columns:3px 1fr;gap:14px;padding-right:4px}
+.rail{background:var(--line);border-radius:2px;position:relative;overflow:hidden}
+.rail i{position:absolute;inset:0;background:var(--brand);transform-origin:top;transform:scaleY(0)}
+.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.toc ol ol{gap:2px;margin-top:6px}
+.tch{font:600 11px var(--mono);color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.toc a{display:flex;gap:8px;align-items:baseline;padding:4px 8px;border-radius:6px;color:var(--mute);text-decoration:none;font:13px/1.35 var(--sans)}
+.toc a em{font:11px var(--mono);font-style:normal;opacity:.7}
+.toc a:hover{color:var(--ink)}
+.toc a.on{background:var(--chip);color:var(--ink)}
+.toc a.on em{color:var(--accent);opacity:1}
+.toc a.done::after{content:"✓";margin-left:auto;color:var(--accent);font-size:12px}
+@media(max-width:900px){.grid{grid-template-columns:1fr;gap:16px}
+  .toc{top:calc(var(--toph,60px) + env(safe-area-inset-top,0px));z-index:4;background:var(--bg);grid-template-columns:1fr;padding:6px 0;max-height:none;overflow-x:auto;overflow-y:hidden}
+  .rail,.tch{display:none}.toc>ol{display:flex;gap:0}.toc ol ol{display:flex;margin:0;gap:4px}
+  .toc a{white-space:nowrap;border:1px solid var(--line);border-radius:999px;padding:4px 10px}}
+.main{max-width:800px;min-width:0}
+.chapter{margin-bottom:40px}
+.chead{padding:8px 0 22px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.chead h2{font:600 30px/1.2 var(--serif);margin:6px 0 6px}
+.chead p{font:17px/1.6 var(--serif);color:var(--mute);margin:0;max-width:62ch}
+.sec{padding:30px 0 34px;border-bottom:1px solid var(--line);scroll-margin-top:120px}
+.sec h3{font:600 26px/1.25 var(--serif);margin:8px 0 6px}
+.sec>p{font:17px/1.68 var(--serif);margin:0 0 14px;max-width:68ch}
+.sec>p.goal{font:500 15px/1.5 var(--sans);color:var(--mute);margin-bottom:18px}
+.sec.done h3::after{content:" ✓";color:var(--accent);font-size:.8em}
+.sec .prose{display:grid;gap:14px;margin:0 0 14px}
+.sec .prose p{font:17px/1.68 var(--serif);margin:0;max-width:68ch}
+.sec .prose b,.callout b,.card b{font-weight:600}
+.subhead{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:26px 0 10px}
+/* figures */
+.fig{margin:22px 0 18px;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:16px 16px 0;overflow:hidden}
+.fig figcaption{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid var(--line);margin:16px -16px 0;padding:10px 16px;font:11.5px/1.4 var(--mono);color:var(--mute)}
+.fig figcaption b{color:var(--ink);letter-spacing:.06em}
+.sheet-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.sheet-bar .label{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-right:auto}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.scroll svg{display:block;width:100%;min-width:680px;height:auto}
+.hero .scroll svg{min-width:780px}
+.btn{background:var(--chip);border:1px solid var(--line);color:var(--ink);padding:8px 14px;border-radius:8px;cursor:pointer;font:500 13px var(--mono);min-height:40px}
+.btn.go{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.btn:disabled{opacity:.45;cursor:default}
+.fig .btn,.stepnav .btn{min-height:34px;padding:6px 12px;border-radius:999px;font:500 12.5px var(--mono)}
+.fig .btn[aria-pressed="true"]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.fig .btn.notes[aria-pressed="true"]{background:var(--c-notes);border-color:var(--c-notes);color:var(--bg)}
+.fig .btn.fact[aria-pressed="true"]{background:var(--c-fact);border-color:var(--c-fact);color:var(--bg)}
+.fig .btn.trace[aria-pressed="true"]{background:var(--c-trace);border-color:var(--c-trace);color:var(--bg)}
+.fig .btn.fail[aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:var(--bg)}
+/* svg drawn with the tokens */
+svg text{font-family:var(--mono);fill:var(--ink)}
+svg .t-title{font:600 14px var(--mono);fill:var(--ink)}
+svg .t-sub{font:11.5px var(--mono);fill:var(--mute)}
+svg .t-chip{font:500 12px var(--mono);fill:var(--ink)}
+svg .t-small{font:11px var(--mono);fill:var(--mute)}
+svg .box{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+svg .box-strong{fill:var(--panel);stroke:var(--mute);stroke-width:1.5}
+svg .box-llm{fill:color-mix(in srgb,var(--brand) 9%,var(--panel));stroke:var(--accent);stroke-width:1.6}
+svg .box-notes{fill:color-mix(in srgb,var(--c-notes) 12%,var(--panel));stroke:var(--c-notes);stroke-width:1.6}
+svg .box-fact{fill:color-mix(in srgb,var(--c-fact) 12%,var(--panel));stroke:var(--c-fact);stroke-width:1.6}
+svg .box-trace{fill:color-mix(in srgb,var(--c-trace) 12%,var(--panel));stroke:var(--c-trace);stroke-width:1.6}
+svg .chipbox{fill:var(--bg);stroke:var(--line);stroke-width:1.2}
+svg .wire{stroke:var(--mute);stroke-width:1.6;fill:none}
+svg .wire-acc{stroke:var(--accent);stroke-width:2.2;fill:none}
+svg .wire-notes{stroke:var(--c-notes);stroke-width:2.2;fill:none}
+svg .wire-fact{stroke:var(--c-fact);stroke-width:2.2;fill:none}
+svg .wire-trace{stroke:var(--c-trace);stroke-width:2.2;fill:none}
+svg .wire-warn{stroke:var(--bad);stroke-width:2;fill:none;stroke-dasharray:6 5}
+svg .route{fill:none;stroke:none}
+svg .mk{fill:var(--mute)} svg .mk-acc{fill:var(--accent)} svg .mk-notes{fill:var(--c-notes)} svg .mk-fact{fill:var(--c-fact)} svg .mk-trace{fill:var(--c-trace)} svg .mk-warn{fill:var(--bad)}
+svg .packet{stroke:var(--bg);stroke-width:2}
+.map [data-r]{transition:opacity .25s}
+.map.focus-notes [data-r]:not([data-r~="notes"]),.map.focus-fact [data-r]:not([data-r~="fact"]),.map.focus-trace [data-r]:not([data-r~="trace"]){opacity:.16}
+/* clickable components */
+svg [data-node]{cursor:pointer;outline:none}
+svg [data-node]:hover rect,svg [data-node]:focus-visible rect{stroke:var(--accent);stroke-width:2.2}
+svg [data-node].sel rect{stroke:var(--accent);stroke-width:2.6}
+svg [data-node]:focus-visible rect{stroke-dasharray:4 3}
+.node-detail{border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:8px;background:var(--bg);padding:14px 16px;margin:12px 0 0;display:grid;gap:8px;min-height:168px}
+.node-detail h4{margin:0;font:600 17px/1.3 var(--mono)}
+.node-detail p{margin:0;font:15.5px/1.6 var(--serif);max-width:72ch}
+.node-detail dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:6px 12px;margin:4px 0 0;font:13.5px/1.5 var(--sans)}
+.node-detail dt{font:500 10.5px/1.9 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.node-detail dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.node-detail .nd-link{font:500 12.5px var(--mono);justify-self:start}
+@media(max-width:560px){.node-detail dl{grid-template-columns:1fr}.node-detail dt{line-height:1.2;margin-top:4px}}
+/* flow diagrams */
+.flow{display:grid}
+.frow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;align-items:center}
+.rl{font:500 12px var(--mono);border:1px solid var(--line);border-radius:6px;padding:6px 10px;text-align:center;background:var(--bg)}
+.pills{display:flex;gap:6px;flex-wrap:wrap;min-width:0}
+.pill{font:500 12.5px var(--mono);padding:7px 11px;border-radius:6px;color:var(--pill-ink);overflow-wrap:anywhere;border:1px solid rgba(0,0,0,.18);text-align:left}
+.pill.y{background:var(--pill-y)}.pill.b{background:var(--pill-b)}.pill.p{background:var(--pill-p)}.pill.g{background:var(--pill-g)}
+.pill.n{background:var(--chip);color:var(--mute);border-color:var(--line)}
+button.pill{cursor:pointer;min-height:34px}
+button.pill:hover{outline:2px solid var(--ink);outline-offset:1px}
+button.pill.sel{outline:2px solid var(--ink);outline-offset:2px}
+.pill small{display:block;font:11px var(--mono);opacity:.75}
+.arrow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;height:26px}
+.arrow i{grid-column:2;justify-self:center;width:2px;height:100%;background:var(--mute);position:relative}
+.arrow i::after{content:"";position:absolute;left:50%;bottom:-1px;border:5px solid transparent;border-top:6px solid var(--mute);transform:translate(-50%,50%)}
+@media(max-width:620px){.frow,.arrow{grid-template-columns:1fr;gap:6px}.rl{justify-self:start}.arrow i{grid-column:1}}
+/* concepts */
+.concepts{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0 12px}
+.concepts>span{font:500 11px var(--mono);color:var(--mute);text-transform:uppercase;letter-spacing:.08em;margin-right:4px}
+.chip{background:var(--chip);border:1px solid var(--line);border-radius:4px;padding:4px 9px;font:500 12px var(--mono);cursor:pointer;min-height:30px}
+.chip[aria-expanded=true]{border-color:var(--brand);color:var(--accent)}
+.pop{border-left:3px solid var(--brand);padding:6px 0 6px 14px;margin:0 0 18px}
+.pop b{font:600 13px var(--mono);display:block;margin-bottom:4px}
+.pop p{margin:0;font:15.5px/1.6 var(--serif);color:var(--ink);max-width:66ch}
+/* cards, callouts, tables */
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card .ct{margin:0;font:600 14.5px/1.35 var(--mono);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.card p{margin:0;font:15px/1.6 var(--serif)}
+.card ul{margin:0;padding-left:1.1em;display:grid;gap:4px;font:15px/1.5 var(--serif)}
+.sec .tag{font:500 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:4px;border:1px solid var(--line);background:var(--chip);color:var(--mute);line-height:1.3}
+.sec .tag.acc{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.sec .tag.notes{color:var(--c-notes);border-color:color-mix(in srgb,var(--c-notes) 45%,var(--line))}
+.sec .tag.fact{color:var(--c-fact);border-color:color-mix(in srgb,var(--c-fact) 45%,var(--line))}
+.sec .tag.warn{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,var(--line))}
+.callout{border-left:3px solid var(--brand);padding:6px 0 6px 14px;margin:18px 0;font:15.5px/1.62 var(--serif);max-width:68ch}
+.callout.notes{border-left-color:var(--c-notes)}.callout.fact{border-left-color:var(--c-fact)}.callout.warn{border-left-color:var(--bad)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel);margin:18px 0}
+.tbl table{border-collapse:collapse;width:100%;min-width:620px;font:14px/1.5 var(--sans)}
+.tbl th,.tbl td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);background:var(--chip)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td code{white-space:nowrap}
+.tbl td.mono{font:600 14px var(--mono);font-variant-numeric:tabular-nums;color:var(--accent);white-space:nowrap}
+.tbl td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.tbl th.num{text-align:right}
+.tbl td.muted{color:var(--mute)}
+.rule{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:6px 0 14px}
+.rule>div{padding:14px 16px;border-right:1px solid var(--line);display:grid;gap:4px;align-content:start;background:var(--panel)}
+.rule>div:last-child{border-right:0}
+.rule .big{font:600 26px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.rule .muted{font:14px/1.5 var(--serif);color:var(--mute)}
+.rule .tag{justify-self:start}
+@media(max-width:720px){.rule{grid-template-columns:1fr 1fr}.rule>div:nth-child(2){border-right:0}.rule>div:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+/* try blocks */
+.try{margin:0 0 20px}
+.try .kick{color:var(--mute);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.copy{all:unset;cursor:pointer;color:var(--accent);font:500 11.5px var(--mono);letter-spacing:0;text-transform:none}
+.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:12.5px/1.6 var(--mono);overflow:auto;white-space:pre;margin:0;max-width:100%}
+pre .c{color:var(--mute)} pre .k{color:var(--accent)}
+.recipe{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:16px;margin:0 0 14px;display:grid;gap:10px}
+.recipe h4{margin:0;font:600 15px/1.35 var(--mono);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.recipe p{margin:0;font:15px/1.6 var(--serif);max-width:68ch}
+.recipe .try{margin:0}
+.recipe pre{background:var(--bg)}
+/* quiz */
+.quiz{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--panel);margin-bottom:16px}
+.qq{font:600 17px/1.45 var(--serif);margin:6px 0 12px}
+.opts{display:grid;gap:6px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:10px;align-items:baseline;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:14.5px/1.4 var(--sans);min-height:44px}
+.opt em{font:600 12px var(--mono);font-style:normal;color:var(--mute)}
+.opt:hover:not([disabled]){border-color:var(--brand)}
+.opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opt[disabled]{cursor:default}
+.opt.right{border-color:var(--accent);background:color-mix(in srgb,var(--brand) 12%,transparent)}
+.opt.right em{color:var(--accent)}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.why{font:15px/1.55 var(--serif);margin:12px 0 0}
+.foot-row{display:flex;justify-content:flex-end}
+.xpfly{position:fixed;transform:translateX(-50%);z-index:60;pointer-events:none;font:600 13px var(--mono);color:var(--on-brand);background:var(--brand);padding:4px 10px;border-radius:999px;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+/* sequence stepper */
+.stepper{display:grid;gap:12px}
+.seqfig .scroll svg{min-width:660px}
+#seq .t-small{font-size:12px}
+#seq .t-chip{font-size:12.5px}
+.steptext{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg);display:grid;gap:8px;min-height:150px;margin-bottom:16px}
+.steptext .n{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.steptext h3{font:600 19px/1.3 var(--serif);margin:0}
+.steptext p{font:15.5px/1.6 var(--serif);margin:0}
+.stepnav{display:flex;gap:8px;flex-wrap:wrap}
+.sec.done .steptext h3::after{content:none}
+svg .msg{transition:opacity .2s}
+svg .msg.future{opacity:.16}
+svg .msg.now line,svg .msg.now path{stroke-width:3.2}
+svg .lifeline{stroke:var(--line);stroke-width:1.4;stroke-dasharray:3 5}
+svg .stepnum{fill:var(--ink)} svg .stepnum-t{fill:var(--bg);font:600 10px var(--mono)}
+/* log legend */
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;margin:14px 0}
+.legend div{display:flex;gap:10px;align-items:baseline;border:1px solid var(--line);border-radius:6px;padding:7px 10px;background:var(--panel);font:13px/1.4 var(--sans)}
+.legend b{font:600 14px var(--mono);min-width:1.6em;text-align:center}
+/* flip cards */
+.fc-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.fc-bar .sp{flex:1}
+.fc-call{border-left:3px solid var(--brand);padding:6px 0 6px 14px;margin:0 0 18px;max-width:72ch}
+.fc-call b{display:block;font:600 13px var(--mono)}
+.fc-call span{font:16px/1.55 var(--serif);color:var(--mute)}
+.fc-deck{margin:0 0 30px}
+.fc-deck h3{font:600 24px/1.25 var(--serif);margin:4px 0 2px}
+.fc-deck>p{font:15.5px/1.5 var(--serif);color:var(--mute);margin:0 0 14px}
+.fc-grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:760px){.fc-grid{grid-template-columns:1fr 1fr}}
+.fc-cell{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fc{all:unset;box-sizing:border-box;display:grid;cursor:pointer;perspective:1200px;border-radius:10px}
+.fc:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.fc-in{display:grid;transform-style:preserve-3d;transition:transform .5s}
+.fc[aria-pressed="true"] .fc-in{transform:rotateY(180deg)}
+.fc-face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:14px;min-height:170px;padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.fc-back{transform:rotateY(180deg);border-color:var(--brand);background:linear-gradient(180deg,color-mix(in srgb,var(--brand) 7%,var(--panel)),var(--panel))}
+.fc:hover .fc-front{border-color:color-mix(in srgb,var(--brand) 50%,var(--line))}
+.fc-q{font:600 17.5px/1.45 var(--serif)}
+.fc-a{font:15.5px/1.6 var(--serif)}
+.fc-know{align-self:flex-start;background:none;border:1px solid var(--line);border-radius:999px;color:var(--mute);font:500 11.5px var(--mono);padding:4px 10px;cursor:pointer;min-height:30px}
+.fc-know[aria-pressed=true]{border-color:var(--brand);color:var(--accent)}
+.fc-cell.known .fc-front{opacity:.72}
+/* glossary */
+.gl-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 18px}
+.gl-filter{display:flex;gap:6px;flex-wrap:wrap}
+.gl-tools input{font:14px var(--mono);padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);min-width:0;flex:1 1 220px;max-width:360px;min-height:36px}
+.gl-count{font:12px var(--mono);color:var(--mute);font-variant-numeric:tabular-nums;margin-left:auto}
+.gl{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.gc{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:16px;display:flex;flex-direction:column;gap:8px;scroll-margin-top:120px}
+.gc h4{margin:0;font:600 15px var(--mono)}
+.gtag{display:inline-flex;align-items:center;gap:6px;font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.gtag svg{width:16px;height:16px;fill:none;stroke:var(--accent);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.gc p{margin:0;font:15px/1.58 var(--serif)}
+[hidden]{display:none!important}
+.foot{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--mute);font:12px var(--mono)}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.fc-in{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand"><img class="brand-img" src="brand/icon.jpg" alt=""><img class="brand-wm wm-light" src="brand/wordmark-yellow.png" alt="Organized AI"><img class="brand-wm wm-dark" src="brand/wordmark-black.png" alt="Organized AI"></span>
+    <span class="brand-sep" aria-hidden="true"></span>
+    <h1>Podcast Agent Guide</h1>
+    <nav class="nav" role="tablist" aria-label="Views">
+      <button class="tab" role="tab" id="t-path" aria-selected="true" data-view="path">Learning path</button>
+      <button class="tab" role="tab" id="t-cards" aria-selected="false" data-view="cards">Flip cards</button>
+      <button class="tab" role="tab" id="t-gloss" aria-selected="false" data-view="gloss">Glossary</button>
+    </nav>
+  </header>
+  <p class="progress-line" id="pline">0 of 15 modules done · 0 of 15 questions right · 0 of 15 cards known · 0 XP</p>
+  <main id="view">
+  <div id="v-path">
+    <header class="hero"><span class="kick">Learning path</span><h2>Follow one transcript from raw text to fact-checked show notes.</h2>
+      <p>The podcast agent turns raw transcripts into show notes for an ad agency. It <b>plans</b> its own steps, writes a <b>summary</b> and <b>key notes</b>, then <b>fact-checks</b> each claim in a tool-using loop against a dated knowledge base and web search. Every model output is validated and corrected, and every decision is written to a readable log. Fifteen short modules across five chapters, each ending with one question. Click any box in the map to see what it does, where it lives in the code and how to change it.</p>
+      <div class="facts"><span class="fact">entry points <b>run · serve · worker</b></span>
+    <span class="fact">steps <b>5</b></span>
+    <span class="fact">providers <b>anthropic · bedrock · openai · ollama · offline</b></span>
+    <span class="fact">knowledge base <b>18 dated facts</b></span>
+    <span class="fact">tests <b>29</b></span>
+    <span class="fact">image <b>python:3.12-slim</b></span></div>
+      <figure class="fig hero-fig">
+        <div class="sheet-bar"><span class="label">FIG. 1 · SYSTEM MAP</span>
+      <button class="btn" data-focus="all" aria-pressed="true">All paths</button>
+      <button class="btn notes" data-focus="notes" aria-pressed="false">Show notes</button>
+      <button class="btn fact" data-focus="fact" aria-pressed="false">Fact-check loop</button>
+      <button class="btn trace" data-focus="trace" aria-pressed="false">Reasoning log</button></div>
+        <div class="scroll">
+    <svg id="map" class="map" viewBox="0 0 1000 560" role="group" aria-label="System map. Transcripts enter through run, serve or worker. The agent plans and runs five steps, calls the model layer and its providers, uses the knowledge base and web search tools for fact-checking, and writes reports and logs. Each box is a button that opens its details.">
+      <defs>
+        <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+        <marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-acc"/></marker>
+        <marker id="an" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-notes"/></marker>
+        <marker id="af" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-fact"/></marker>
+        <marker id="at" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-trace"/></marker>
+      </defs>
+
+      <text x="20" y="30" class="t-small">ENTRY POINTS</text>
+      <text x="230" y="30" class="t-small">THE AGENT · podcast_agent</text>
+      <text x="520" y="30" class="t-small">MODEL LAYER AND TOOLS</text>
+      <text x="770" y="30" class="t-small">PROVIDERS AND OUTPUTS</text>
+
+      <!-- entry -->
+      <g data-r="notes fact trace" data-node="input" tabindex="0" role="button" aria-label="Transcripts"><rect class="box" x="20" y="50" width="160" height="50" rx="8"/><text x="34" y="72" class="t-chip">transcripts</text><text x="34" y="89" class="t-small">.json · .txt</text></g>
+      <g data-r="notes fact trace"><path class="wire" d="M20,75 H10 V273 H16" marker-end="url(#a)"/><path class="wire" d="M10,153 H16" marker-end="url(#a)"/><path class="wire" d="M10,213 H16" marker-end="url(#a)"/></g>
+      <g data-r="notes fact trace" data-node="run" tabindex="0" role="button" aria-label="run, the command line entry point"><rect class="box" x="20" y="130" width="160" height="46" rx="8"/><text x="34" y="150" class="t-chip">run · CLI</text><text x="34" y="166" class="t-small">Docker default</text></g>
+      <g data-r="notes fact trace" data-node="serve" tabindex="0" role="button" aria-label="serve, the HTTP API"><rect class="box" x="20" y="190" width="160" height="46" rx="8"/><text x="34" y="210" class="t-chip">serve · HTTP API</text><text x="34" y="226" class="t-small">POST /v1/process</text></g>
+      <g data-r="notes fact trace" data-node="worker" tabindex="0" role="button" aria-label="worker, the queue consumer"><rect class="box" x="20" y="250" width="160" height="46" rx="8"/><text x="34" y="270" class="t-chip">worker · queue</text><text x="34" y="286" class="t-small">dir:// or SQS</text></g>
+      <g data-r="notes fact trace"><line class="wire" x1="180" y1="153" x2="218" y2="153" marker-end="url(#a)"/><line class="wire" x1="180" y1="213" x2="218" y2="213" marker-end="url(#a)"/><line class="wire" x1="180" y1="273" x2="218" y2="273" marker-end="url(#a)"/></g>
+      <text x="20" y="330" class="t-small">Same pipeline behind</text>
+      <text x="20" y="346" class="t-small">all three entry points.</text>
+
+      <!-- agent -->
+      <g data-r="notes fact trace"><rect class="box-strong" x="220" y="50" width="250" height="430" rx="12"/></g>
+      <g data-r="notes fact trace" data-node="pipeline" tabindex="0" role="button" aria-label="Executor"><rect x="228" y="56" width="234" height="38" rx="6" fill="transparent" stroke="none"/><text x="235" y="76" class="t-title">executor</text><text x="235" y="90" class="t-small">pipeline.py · runs the plan</text></g>
+      <g data-r="notes fact trace" data-node="ingest" tabindex="0" role="button" aria-label="Ingest"><rect class="chipbox" x="235" y="100" width="220" height="30" rx="6"/><text x="247" y="120" class="t-chip">ingest · transcript.py</text></g>
+      <g data-r="notes fact trace" data-node="plan" tabindex="0" role="button" aria-label="Planner"><rect class="box-llm" x="235" y="140" width="220" height="30" rx="6"/><text x="247" y="160" class="t-chip">plan · planner.py</text></g>
+      <g data-r="notes" data-node="normalize" tabindex="0" role="button" aria-label="normalize_transcript step"><rect class="chipbox" x="235" y="180" width="220" height="30" rx="6"/><text x="247" y="200" class="t-chip">normalize_transcript</text></g>
+      <g data-r="notes" data-node="summarize" tabindex="0" role="button" aria-label="summarize step"><rect class="box-notes" x="235" y="220" width="220" height="30" rx="6"/><text x="247" y="240" class="t-chip">summarize</text></g>
+      <g data-r="notes" data-node="notes" tabindex="0" role="button" aria-label="extract_notes step"><rect class="box-notes" x="235" y="260" width="220" height="30" rx="6"/><text x="247" y="280" class="t-chip">extract_notes</text></g>
+      <g data-r="fact" data-node="claims" tabindex="0" role="button" aria-label="extract_claims step"><rect class="box-fact" x="235" y="300" width="220" height="30" rx="6"/><text x="247" y="320" class="t-chip">extract_claims</text></g>
+      <g data-r="fact" data-node="verify" tabindex="0" role="button" aria-label="verify_claims step"><rect class="box-fact" x="235" y="340" width="220" height="30" rx="6"/><text x="247" y="360" class="t-chip">verify_claims · tool loop</text></g>
+      <g data-r="notes fact trace"><text x="235" y="398" class="t-small">validate · self-correct · isolate</text><text x="235" y="413" class="t-small">failures per step</text></g>
+      <g data-r="trace" data-node="trace" tabindex="0" role="button" aria-label="Reasoning trace"><rect class="box-trace" x="235" y="430" width="220" height="34" rx="6"/><text x="247" y="452" class="t-chip">trace · run.log + jsonl</text></g>
+
+      <!-- agent → model layer -->
+      <g data-r="notes fact"><line class="wire-acc" x1="470" y1="150" x2="518" y2="150" marker-end="url(#aa)"/><text x="474" y="140" class="t-small">model</text><text x="474" y="168" class="t-small">calls</text></g>
+      <!-- model layer -->
+      <g data-r="notes fact"><rect class="box-llm" x="520" y="50" width="200" height="210" rx="12"/><text x="535" y="76" class="t-title">LLM layer</text><text x="535" y="92" class="t-small">llm/</text></g>
+      <g data-r="notes fact" data-node="structured" tabindex="0" role="button" aria-label="Structured outputs"><rect class="chipbox" x="535" y="104" width="170" height="40" rx="6"/><text x="547" y="121" class="t-chip">structured outputs</text><text x="547" y="136" class="t-small">validate · retry ≤ 3</text></g>
+      <g data-r="notes fact" data-node="cache" tabindex="0" role="button" aria-label="Response cache"><rect class="chipbox" x="535" y="152" width="170" height="40" rx="6"/><text x="547" y="169" class="t-chip">response cache</text><text x="547" y="184" class="t-small">.cache/llm</text></g>
+      <g data-r="notes fact" data-node="providerif" tabindex="0" role="button" aria-label="Provider interface"><rect class="chipbox" x="535" y="200" width="170" height="40" rx="6"/><text x="547" y="217" class="t-chip">provider interface</text><text x="547" y="232" class="t-small">tier: main · fast</text></g>
+
+      <!-- verify → tools -->
+      <g data-r="fact"><line class="wire-fact" x1="455" y1="355" x2="518" y2="355" marker-end="url(#af)"/><text x="474" y="345" class="t-small">tool</text><text x="474" y="373" class="t-small">calls</text></g>
+      <!-- tools -->
+      <g data-r="fact"><rect class="box-fact" x="520" y="290" width="200" height="150" rx="12"/><text x="535" y="316" class="t-title">Tools</text><text x="535" y="332" class="t-small">tools/</text></g>
+      <g data-r="fact" data-node="kb" tabindex="0" role="button" aria-label="Knowledge base tool"><rect class="chipbox" x="535" y="342" width="170" height="40" rx="6"/><text x="547" y="359" class="t-chip">knowledge base</text><text x="547" y="374" class="t-small">BM25 · as-of dates</text></g>
+      <g data-r="fact" data-node="web" tabindex="0" role="button" aria-label="Web search tool"><rect class="chipbox" x="535" y="390" width="170" height="40" rx="6"/><text x="547" y="407" class="t-chip">web search</text><text x="547" y="422" class="t-small">mock · Tavily · retries</text></g>
+
+      <!-- model layer → providers -->
+      <g data-r="notes fact"><path class="wire-acc" d="M720,150 H744"/><path class="wire-acc" d="M744,80 V224"/>
+        <path class="wire-acc" d="M744,80 H766" marker-end="url(#aa)"/><path class="wire-acc" d="M744,128 H766" marker-end="url(#aa)"/><path class="wire-acc" d="M744,176 H766" marker-end="url(#aa)"/><path class="wire-acc" d="M744,224 H766" marker-end="url(#aa)"/></g>
+      <g data-r="notes fact" data-node="anthropic" tabindex="0" role="button" aria-label="Anthropic API provider"><rect class="box" x="770" y="60" width="210" height="40" rx="8"/><text x="784" y="77" class="t-chip">Anthropic API</text><text x="784" y="92" class="t-small">Sonnet 5.5 · Haiku 5.5</text></g>
+      <g data-r="notes fact" data-node="bedrock" tabindex="0" role="button" aria-label="Amazon Bedrock provider"><rect class="box" x="770" y="108" width="210" height="40" rx="8"/><text x="784" y="125" class="t-chip">Amazon Bedrock</text><text x="784" y="140" class="t-small">AWS credential chain</text></g>
+      <g data-r="notes fact" data-node="openai" tabindex="0" role="button" aria-label="OpenAI-compatible and Ollama provider"><rect class="box" x="770" y="156" width="210" height="40" rx="8"/><text x="784" y="173" class="t-chip">OpenAI-compatible</text><text x="784" y="188" class="t-small">Ollama · vLLM · local</text></g>
+      <g data-r="notes fact" data-node="offline" tabindex="0" role="button" aria-label="Offline heuristics provider"><rect class="box" x="770" y="204" width="210" height="40" rx="8"/><text x="784" y="221" class="t-chip">offline heuristics</text><text x="784" y="236" class="t-small">no key · no network</text></g>
+
+      <!-- outputs -->
+      <g data-r="notes fact trace"><rect class="box-strong" x="770" y="290" width="210" height="190" rx="12"/><text x="785" y="316" class="t-title">Outputs</text><text x="785" y="332" class="t-small">output/</text></g>
+      <g data-r="notes fact" data-node="report" tabindex="0" role="button" aria-label="Combined report"><rect class="box-notes" x="785" y="342" width="180" height="36" rx="6"/><text x="797" y="365" class="t-chip">report.md · .json</text></g>
+      <g data-r="notes fact" data-node="episode" tabindex="0" role="button" aria-label="Per-episode files"><rect class="chipbox" x="785" y="386" width="180" height="36" rx="6"/><text x="797" y="409" class="t-chip">&lt;episode&gt;.md · .json</text></g>
+      <g data-r="trace" data-node="logs" tabindex="0" role="button" aria-label="Logs and manifest"><rect class="box-trace" x="785" y="430" width="180" height="36" rx="6"/><text x="797" y="453" class="t-chip">logs/ · manifest</text></g>
+
+      <!-- agent → outputs -->
+      <g data-r="notes fact trace"><path class="wire" d="M345,480 V520 H875 V482" marker-end="url(#a)"/><text x="360" y="513" class="t-small">reports and logs, written once per run</text></g>
+
+      <!-- packet routes -->
+      <path id="r-notes" class="route" d="M10,153 H230 V235 H500 V150 H744 V80 H770"/>
+      <path id="r-fact" class="route" d="M240,315 V355 H600 V200 H744 V128 H770"/>
+      <path id="r-trace" class="route" d="M240,447 V520 H875 V470"/>
+      <circle id="p-notes" class="packet" r="6" cx="-20" cy="-20" style="fill:var(--c-notes)" data-r="notes"/>
+      <circle id="p-fact" class="packet" r="6" cx="-20" cy="-20" style="fill:var(--c-fact)" data-r="fact"/>
+      <circle id="p-trace" class="packet" r="6" cx="-20" cy="-20" style="fill:var(--c-trace)" data-r="trace"/>
+    </svg>
+        </div>
+        <div class="node-detail" id="nd-map" aria-live="polite"></div>
+        <figcaption><span><b>FIG. 1</b> · The agent owns the plan and the steps. The model layer owns every model call. Tools give the fact-checker evidence; outputs and logs record everything.</span></figcaption>
+      </figure>
+      <div class="sys-cap"><span>The whole path: transcript → plan → steps → model and tools → reports and logs</span><span>Click a box for details · pick a path to follow its packet</span></div>
+      <div class="stats"><div><span>[ 01 ]</span><b>5</b><small>chapters</small></div>
+      <div><span>[ 02 ]</span><b data-s="done">0<i>/15</i></b><small>modules done</small></div>
+      <div><span>[ 03 ]</span><b data-s="right">0<i>/15</i></b><small>questions right</small></div>
+      <div class="xp"><span>[ 04 ]</span><b data-s="xp" data-n="0">0</b><small>XP · 10 a module, 15 a right answer, 100 a chapter</small></div></div>
+    </header>
+
+    <div class="grid"><nav class="toc" aria-label="Modules"><div class="rail"><i></i></div><ol>
+      <li><span class="tch">[ 01 ] The shape</span><ol><li><a href="#m1" data-toc="m1"><em>01</em>The brief</a></li><li><a href="#m2" data-toc="m2"><em>02</em>Transcript in</a></li><li><a href="#m3" data-toc="m3"><em>03</em>The plan</a></li></ol></li>
+      <li><span class="tch">[ 02 ] Show notes</span><ol><li><a href="#m4" data-toc="m4"><em>04</em>Self-correction</a></li><li><a href="#m5" data-toc="m5"><em>05</em>Summary</a></li><li><a href="#m6" data-toc="m6"><em>06</em>Key notes</a></li></ol></li>
+      <li><span class="tch">[ 03 ] Fact-check</span><ol><li><a href="#m7" data-toc="m7"><em>07</em>Finding claims</a></li><li><a href="#m8" data-toc="m8"><em>08</em>One claim, step by step</a></li><li><a href="#m9" data-toc="m9"><em>09</em>Verdicts and confidence</a></li></ol></li>
+      <li><span class="tch">[ 04 ] Run and change</span><ol><li><a href="#m10" data-toc="m10"><em>10</em>Run it</a></li><li><a href="#m11" data-toc="m11"><em>11</em>Read the log</a></li><li><a href="#m12" data-toc="m12"><em>12</em>Change it live</a></li></ol></li>
+      <li><span class="tch">[ 05 ] Deploy</span><ol><li><a href="#m13" data-toc="m13"><em>13</em>To production</a></li><li><a href="#m14" data-toc="m14"><em>14</em>Cost, scale, failure</a></li><li><a href="#m15" data-toc="m15"><em>15</em>Security and quality</a></li></ol></li>
+    </ol></nav>
+    <article class="main">
+
+<!-- ============================== CHAPTER 1 ============================== -->
+<section class="chapter" id="c1"><header class="chead"><span class="kick">Chapter 1 of 5</span><h2>The shape: what goes in, what comes out, who decides</h2><p>The assignment, the transcript formats the agent reads, and how it plans its own work.</p></header>
+
+  <section class="sec" id="m1" data-sid="m1">
+    <span class="kick">[ 01 ] · Module 1 of 15</span>
+    <h3>What the agency asked for</h3>
+    <p class="goal">Know the four tasks, the deliverables and where each one lives.</p>
+    <div class="prose">
+      <p>An ad agency gets raw podcast transcripts and needs three things for each episode: a <b>summary</b> of about 200–300 words, <b>key notes</b> for show notes and social posts, and a <b>fact-check</b> of the claims made on air. The brief also asks for a <b>deployment strategy</b> with a diagram and a narrative.</p>
+      <p>Two goals sit behind the tasks: show a multi-step agent that plans and executes on its own, and show a deployment that would hold up in real use. The table maps each requirement to the place it is answered.</p>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>The brief asks for</th><th>Where it is</th></tr></thead>
+      <tbody>
+        <tr><td>Summary, about 200–300 words: themes, discussions, opinions</td><td><code>agent/steps.py</code> → <code>summarize</code></td></tr>
+        <tr><td>Top 5 takeaways, quotes with timestamps, topic tags</td><td><code>agent/steps.py</code> → <code>extract_notes</code></td></tr>
+        <tr><td>Fact-check via search, a local knowledge base or reasoning; ✅ ⚠️ ❓</td><td><code>agent/verifier.py</code>, <code>tools/</code>, <code>data/</code></td></tr>
+        <tr><td>A multi-step agent that plans and executes</td><td><code>agent/planner.py</code>, <code>agent/pipeline.py</code></td></tr>
+        <tr><td>Runs locally in Docker; model local or in the cloud</td><td><code>Dockerfile</code>, <code>llm/</code> (Anthropic, Bedrock, OpenAI-compatible, Ollama)</td></tr>
+        <tr><td>Readable logs of reasoning steps</td><td><code>output/logs/run.log</code>, <code>trace.jsonl</code></td></tr>
+        <tr><td>One JSON or Markdown output with summary, notes, fact-check table</td><td><code>output/report.md</code>, <code>output/report.json</code></td></tr>
+        <tr><td>Deployment strategy: diagram and narrative</td><td><code>docs/DEPLOYMENT.md</code>, <code>docs/architecture.svg</code>, chapter 5</td></tr>
+      </tbody></table></div>
+    <div class="callout">The fact-check table uses the brief's three columns. A row reads like <code>✅ Verified true (confirmed by knowledge base KB-031)</code>, followed by a confidence such as <code>0.90</code>. Speaker, timestamp and the evidence for each claim sit in a details block below the table.</div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="report-md-report-json" aria-expanded="false">report.md / report.json</button><button type="button" class="chip" data-concept="fact-check-table" aria-expanded="false">fact_check_table</button><button type="button" class="chip" data-concept="verdict" aria-expanded="false">Verdict</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m1"><span class="kick">Check yourself · +15 XP</span><p class="qq">Where does a reviewer find every episode's summary, notes and fact-check table in one file?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>output/logs/run.log</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>output/report.md (and report.json)</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>data/knowledge_base.json</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m1">Mark module done · +10 XP</button></div>
+  </section>
+
+  <section class="sec" id="m2" data-sid="m2">
+    <span class="kick">[ 02 ] · Module 2 of 15</span>
+    <h3>One transcript in</h3>
+    <p class="goal">Know the two input formats, how speakers are resolved and what cleanup keeps.</p>
+    <div class="prose">
+      <p>The agent reads <b>JSON</b> in the assignment's shape (episode id, title, host, guests and a list of timestamped lines) or <b>plain text</b> with lines like <code>[00:02:14] Host: …</code>. Text files may start with header lines (<code>Title:</code>, <code>Host:</code>, <code>Guests:</code>); a line without a timestamp continues the previous one.</p>
+      <p>Short labels are resolved to full names and roles: <code>Dr. Priya</code> becomes Dr. Priya Patel, guest; <code>Host</code> becomes the named host. Every line keeps its timestamp in seconds, so "01:20" and "00:01:20" compare equal.</p>
+      <p>When the planner sees filler, <b>normalize_transcript</b> removes um, uh, stutters ("the the") and filler phrases ("you know"). The cleaned text is what the model reads. The <b>raw text stays on every line</b>, so a quote can still be matched against exactly what was said.</p>
+    </div>
+    <div class="try"><span class="kick">Before and after cleanup <button type="button" class="copy">Copy</button></span>
+<pre><span class="c"># raw    [00:03:05] Guest: Um, yeah. The the samples were collected by the Perseverance rover, which, uh, landed in Jezero Crater in February 2021.</span>
+<span class="k"># clean</span>  [00:03:05] Guest: Yeah. The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.</pre></div>
+    <div class="cols">
+      <div class="card"><h4 class="ct">ep001–ep003 <span class="tag">provided</span></h4><p>The three JSON transcripts from the brief: remote work, AI in healthcare, bootstrapping versus fundraising. Each is 190–325 words.</p></div>
+      <div class="card"><h4 class="ct">ep004 <span class="tag acc">synthetic</span></h4><p>A text transcript built from the brief's own example lines, with fillers and stutters added. It exercises the text parser and the fact-checker.</p></div>
+    </div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="episode" aria-expanded="false">Episode</button><button type="button" class="chip" data-concept="normalize-transcript" aria-expanded="false">normalize_transcript</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m2"><span class="kick">Check yourself · +15 XP</span><p class="qq">Cleanup removes "um" from a line. What happens to the original wording?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>It is kept as raw text, so quotes can be matched against it</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>It is discarded to save tokens</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>It is sent to the model alongside the clean text</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m2">Mark module done · +10 XP</button></div>
+  </section>
+
+  <section class="sec" id="m3" data-sid="m3">
+    <span class="kick">[ 03 ] · Module 3 of 15</span>
+    <h3>The agent writes its own plan</h3>
+    <p class="goal">Know what the model decides, what the validator guarantees and what happens when the planner fails.</p>
+    <div class="prose">
+      <p>Before any work, the agent <b>profiles</b> the episode: word count, lines, speakers, sections, filler tokens and "claim signals" (numbers, years, named entities, prediction words). The fast model reads that profile and a <b>capability catalog</b> of five steps, then returns a plan: which steps, in what order, with what parameters, and one sentence of reasoning for each.</p>
+      <p>The model chooses the summary strategy (single pass or map-reduce), the claim budget (3 up to <code>MAX_CLAIMS</code>), the tools the fact-checker may use and its tool budget (2–6 calls per claim). A deterministic <b>validator</b> then enforces the guardrails. It adds missing required steps, puts <code>verify_claims</code> after <code>extract_claims</code>, removes duplicates and clamps parameters into range. Each repair is logged. If the planner fails outright, a fixed fallback plan runs, so autonomy never costs a deliverable.</p>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Capability</th><th>Required</th><th>Parameters the model sets</th></tr></thead>
+      <tbody>
+        <tr><td><code>normalize_transcript</code></td><td class="muted">no</td><td class="muted">none; planned when filler is found</td></tr>
+        <tr><td><code>summarize</code></td><td>yes</td><td><code>strategy</code>: single_pass or map_reduce</td></tr>
+        <tr><td><code>extract_notes</code></td><td>yes</td><td class="muted">none</td></tr>
+        <tr><td><code>extract_claims</code></td><td>yes</td><td><code>max_claims</code>: 3 to MAX_CLAIMS (default 8)</td></tr>
+        <tr><td><code>verify_claims</code></td><td>yes, after extract_claims</td><td><code>max_steps_per_claim</code> 2–6; <code>tools</code></td></tr>
+      </tbody></table></div>
+    <div class="try"><span class="kick">The plan in the log <button type="button" class="copy">Copy</button></span>
+<pre>plan  ◆ goal: Publish-ready show notes and a fact-check table for 'Space &amp; Markets Roundup'.
+plan     ◆ 1. normalize_transcript — 11 filler/repeated tokens detected; clean before quoting.
+plan     ◆ 2. summarize {'strategy': 'single_pass'} — 122 words fits within the single-pass budget.
+plan     ◆ 3. extract_notes — Required show-notes deliverable.
+plan     ◆ 4. extract_claims {'max_claims': 8} — Claim signals (entities=8, years=4, predictions=3) …
+plan     ◆ 5. verify_claims {'max_steps_per_claim': 4, 'tools': ['search_knowledge_base', 'web_search']} — …</pre></div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="capability-catalog" aria-expanded="false">Capability catalog</button><button type="button" class="chip" data-concept="plan-validator" aria-expanded="false">Plan validator</button><button type="button" class="chip" data-concept="tier-main-fast" aria-expanded="false">Tier (main / fast)</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m3"><span class="kick">Check yourself · +15 XP</span><p class="qq">The planner returns a plan without extract_notes. What happens?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>The run skips key notes</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>The validator adds the step, logs the repair and the run continues</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>The run stops with an error</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m3">Mark module done · +10 XP</button></div>
+  </section>
+</section>
+
+<!-- ============================== CHAPTER 2 ============================== -->
+<section class="chapter" id="c2"><header class="chead"><span class="kick">Chapter 2 of 5</span><h2>Writing the show notes</h2><p>The loop that keeps every model output honest, then the summary and the key notes it produces.</p></header>
+
+  <section class="sec" id="m4" data-sid="m4">
+    <span class="kick">[ 04 ] · Module 4 of 15</span>
+    <h3>Structured outputs and self-correction</h3>
+    <p class="goal">Know the three checks every model answer passes and what happens when one fails.</p>
+    <div class="prose">
+      <p>Every model step goes through one function, <code>call_structured()</code>. The answer must <b>parse as JSON</b> (code fences and stray prose are tolerated), match a <b>Pydantic schema</b>, and pass the step's own <b>rules</b>: a word count, exactly five takeaways, quotes that exist in the transcript, timestamps that exist. When a check fails, the specific problems are sent back to the model and it tries again, up to three attempts. After that the last valid answer is kept and a warning goes into the report.</p>
+      <p>Because this loop lives in the agent rather than in a vendor feature, it works the same on Claude, Bedrock, OpenAI-compatible servers, Ollama and the offline mode, and every rejection is visible in the log.</p>
+    </div>
+    <figure class="fig">
+      <div class="sheet-bar"><span class="label">FIG. 2 · THE SELF-CORRECTION LOOP</span></div>
+      <div class="flow">
+        <div class="frow"><span class="rl">prompt</span><div class="pills"><span class="pill y">task prompt + system prompt</span><span class="pill n">cached transcript prefix</span></div></div>
+        <div class="arrow"><i></i></div>
+        <div class="frow"><span class="rl">model</span><div class="pills"><span class="pill b wide">JSON answer</span></div></div>
+        <div class="arrow"><i></i></div>
+        <div class="frow"><span class="rl">checks</span><div class="pills"><span class="pill b">1 · parse JSON</span><span class="pill b">2 · Pydantic schema</span><span class="pill b">3 · step rules</span></div></div>
+        <div class="arrow"><i></i></div>
+        <div class="frow"><span class="rl">outcome</span><div class="pills"><span class="pill g">all pass → accept</span><span class="pill p">problems → back to the model (≤ 3 attempts)</span><span class="pill n">still failing → keep last valid + warning</span></div></div>
+      </div>
+      <figcaption><span><b>FIG. 2</b> · One loop for every step. The validators differ per step; the mechanism does not.</span></figcaption>
+    </figure>
+    <div class="try"><span class="kick">What a correction looks like in the log <button type="button" class="copy">Copy</button></span>
+<pre>summarize  ⇄ claude-sonnet-5-5 · 12,310 → 412 tok · 4.1s
+summarize  ↻ attempt 1/3 rejected — the summary is 171 words; it must be 200–300 words — expand it using only the transcript
+summarize  ⇄ claude-sonnet-5-5 · 12,734 (+12,288 cached) → 436 tok · 3.8s · attempt 2
+summarize  ✔ done in 8.2s — 238 words (single_pass, target 200–300)</pre></div>
+    <p class="muted" style="font:13px var(--mono)">Illustrative values. Your run's numbers are in output/logs/run.log.</p>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="call-structured" aria-expanded="false">call_structured</button><button type="button" class="chip" data-concept="self-correction" aria-expanded="false">Self-correction</button><button type="button" class="chip" data-concept="response-cache" aria-expanded="false">Response cache</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m4"><span class="kick">Check yourself · +15 XP</span><p class="qq">A step's answer is valid JSON and matches the schema but breaks a step rule three times. What ends up in the report?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>Nothing; the step fails</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>A made-up placeholder</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>The last valid answer, with a warning listing the unresolved problem</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m4">Mark module done · +10 XP</button></div>
+  </section>
+
+  <section class="sec" id="m5" data-sid="m5">
+    <span class="kick">[ 05 ] · Module 5 of 15</span>
+    <h3>The summary: 200–300 words</h3>
+    <p class="goal">Know how length is enforced, when map-reduce kicks in and why the transcript is cached.</p>
+    <div class="prose">
+      <p>The prompt asks for 200–300 words covering core themes, the key discussions in order and the opinions shared, attributed by name, in third person and present tense. The validator accepts 180–321 words, since the brief says "about", and rejects timestamps or bullet points. A miss goes back to the model with the exact count.</p>
+      <p>For a normal episode the summary is written in a <b>single pass</b>. The transcript is sent as a prefix shared by summary, notes and claim extraction, and on Anthropic and Bedrock that prefix is marked for <b>prompt caching</b>, so later steps read it at a fraction of the input price. Above <code>MAP_REDUCE_THRESHOLD_WORDS</code> (15,000 words, roughly 1.5–2 hours of speech) the planner switches to <b>map-reduce</b>: the fast model writes notes for segments of about 1,500 words, cut at section boundaries, and the main model reduces them into one summary.</p>
+    </div>
+    <div class="cols">
+      <div class="card"><h4 class="ct">spec <span class="tag acc">default</span></h4><p>Targets 200–300 words for every episode, as the brief asks.</p></div>
+      <div class="card"><h4 class="ct">adaptive</h4><p>Lowers the floor to about 60% of a very short transcript. The provided episodes are only 190–325 words, so a 200-word summary would be nearly as long as the source.</p></div>
+    </div>
+    <div class="callout notes">Set the mode with <code>SUMMARY_LENGTH_MODE=spec</code> or <code>adaptive</code>. It is a one-line change you can make and rerun in under a minute.</div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="summarize" aria-expanded="false">summarize</button><button type="button" class="chip" data-concept="prompt-cache-prefix" aria-expanded="false">Prompt cache prefix</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m5"><span class="kick">Check yourself · +15 XP</span><p class="qq">When does the planner choose map-reduce summarization?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>Whenever there are more than two speakers</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>When the transcript is longer than MAP_REDUCE_THRESHOLD_WORDS (15,000 by default)</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>When the first summary fails validation</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m5">Mark module done · +10 XP</button></div>
+  </section>
+
+  <section class="sec" id="m6" data-sid="m6">
+    <span class="kick">[ 06 ] · Module 6 of 15</span>
+    <h3>Key notes: takeaways, quotes, topics</h3>
+    <p class="goal">Know the contract for each list and how quotes are grounded in the transcript.</p>
+    <div class="cols">
+      <div class="card"><h4 class="ct">🔹 Takeaways <span class="tag notes">exactly 5</span></h4><p>One standalone sentence each, most important first, attributed when it is an opinion, with the timestamp of the line that supports it.</p></div>
+      <div class="card"><h4 class="ct">💬 Quotes <span class="tag notes">3–5</span></h4><p>Verbatim spans of a single line, suitable for social posts. Each must match the transcript at 0.90 or better.</p></div>
+      <div class="card"><h4 class="ct">🧭 Topics <span class="tag notes">5–8</span></h4><p>Tag-style labels normalized to kebab-case, such as <code>async-communication</code>.</p></div>
+    </div>
+    <div class="prose">
+      <p>Quotes are where models drift, so they are <b>grounded, not trusted</b>. Each quote is fuzzy-matched against single transcript lines, both cleaned and raw. A paraphrase scores below 0.90 and goes back to the model with the closest line's timestamp. When the words match but the model gave the wrong timestamp or speaker, the agent corrects both from the matched line and logs the fix.</p>
+    </div>
+    <div class="try"><span class="kick">A repaired quote in the log <button type="button" class="copy">Copy</button></span>
+<pre>notes  ↻ quote 1: timestamp [00:15] → [00:45] (matched the source line)
+notes  ↻ quote 1: speaker 'Mark' → 'Mark Rivera'
+notes     👁  quote [00:45] Mark Rivera: “Being remote doesn’t just mean a location; it means structured processes and trust.” (match 1.00)</pre></div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="extract-notes" aria-expanded="false">extract_notes</button><button type="button" class="chip" data-concept="verbatim-match" aria-expanded="false">Verbatim match</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m6"><span class="kick">Check yourself · +15 XP</span><p class="qq">The model returns a quote with the right words but the wrong timestamp. What does the agent do?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>Corrects the timestamp and speaker from the matched line and logs the fix</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>Drops the quote</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>Publishes it as given</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m6">Mark module done · +10 XP</button></div>
+  </section>
+</section>
+
+<!-- ============================== CHAPTER 3 ============================== -->
+<section class="chapter" id="c3"><header class="chead"><span class="kick">Chapter 3 of 5</span><h2>Fact-checking, the agentic part</h2><p>How claims are found, how one claim moves through the tool loop, and how the verdict and confidence are set.</p></header>
+
+  <section class="sec" id="m7" data-sid="m7">
+    <span class="kick">[ 07 ] · Module 7 of 15</span>
+    <h3>Finding the claims worth checking</h3>
+    <p class="goal">Know what counts as a claim, how it is rewritten and how it stays tied to the transcript.</p>
+    <div class="prose">
+      <p>The fast model reads the transcript and returns the statements that should be checked before publishing: facts about organisations, products, regulations, events, markets, dates and numbers, plus predictions and personal anecdotes that listeners might take as fact. Pure opinion, advice, questions and pleasantries are left out.</p>
+      <p>Each claim is <b>decontextualized</b>, rewritten as a sentence that makes sense on its own: "They've written handbooks" becomes "GitLab, Automattic and Doist have written handbooks…". It gets a <b>type</b> (factual, statistical, historical, prediction, anecdotal), a <b>time-sensitive</b> flag, the speaker, the timestamp and a quote. The quote must match its line at 0.85 or better, or the claim is dropped. The planner's claim budget caps how many are checked.</p>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Type</th><th>Example from the transcripts</th><th>Usual outcome</th></tr></thead>
+      <tbody>
+        <tr><td><code>factual</code></td><td>Some hospitals use AI for reading X-rays or flagging urgent cases.</td><td>Checked against the knowledge base and web</td></tr>
+        <tr><td><code>historical</code></td><td>Perseverance landed in Jezero Crater in February 2021.</td><td>Checked; dates matter</td></tr>
+        <tr><td><code>prediction</code></td><td>Bitcoin will reach $200K by 2025.</td><td>Checkable once the deadline has passed</td></tr>
+        <tr><td><code>anecdotal</code></td><td>I built a SaaS with no outside capital; we reached break-even in 18 months.</td><td>❓ Unverifiable (personal anecdote)</td></tr>
+      </tbody></table></div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="extract-claims" aria-expanded="false">extract_claims</button><button type="button" class="chip" data-concept="time-sensitive" aria-expanded="false">Time-sensitive</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m7"><span class="kick">Check yourself · +15 XP</span><p class="qq">Why is each claim rewritten as a standalone sentence?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>To make it shorter</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>So the search queries and the verdict refer to a clear subject instead of "they" or "it"</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>To hide the speaker's name</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m7">Mark module done · +10 XP</button></div>
+  </section>
+
+  <section class="sec" id="m8" data-sid="m8">
+    <span class="kick">[ 08 ] · Module 8 of 15</span>
+    <h3>One claim, step by step</h3>
+    <p class="goal">Follow a claim through the tool loop, with and without web search.</p>
+    <div class="prose"><p>Each claim gets its own loop. Every turn, the model answers with one JSON object: a <b>thought</b>, an <b>action</b> (<code>search_knowledge_base</code>, <code>web_search</code> or <code>finish</code>) and its input. The agent runs the tool and sends back an <b>observation</b>: numbered evidence with dates and relevance. Step through the Bitcoin claim from the brief's own example, then switch to "Search outage".</p></div>
+    <figure class="fig seqfig">
+      <div class="sheet-bar">
+        <span class="label">FIG. 3 · ONE CLAIM</span>
+        <button class="btn fact" id="modeHappy" aria-pressed="true">Search answers</button>
+        <button class="btn fail" id="modeFail" aria-pressed="false">Search outage</button>
+      </div>
+      <div class="stepper">
+        <div class="scroll"><svg id="seq" viewBox="0 0 900 640" role="img" aria-label="Sequence diagram of one claim moving through the verification loop"></svg></div>
+        <div class="steptext" aria-live="polite">
+          <span class="n" id="stepN">Step 1 of 12</span>
+          <h3 id="stepT"></h3>
+          <p id="stepB"></p>
+          <div class="stepnav"><button class="btn" id="prev">Back</button><button class="btn" id="next">Next step</button><button class="btn" id="reset">Restart</button></div>
+        </div>
+      </div>
+      <figcaption><span><b>FIG. 3</b> · Values are illustrative. The loop, its budget and its guardrails are exactly as built.</span></figcaption>
+    </figure>
+    <div class="cols">
+      <div class="card"><h4 class="ct">Budget</h4><p>At most <code>max_steps_per_claim</code> tool calls (2–6, set by the planner), then the model must finish.</p></div>
+      <div class="card"><h4 class="ct">Guardrails</h4><p>Evidence ids the model never saw are rejected. Unparseable turns are retried, at most twice.</p></div>
+      <div class="card"><h4 class="ct">Last resort</h4><p>A loop that never produces a valid verdict lands as ❓ unverifiable at 0.20, flagged for human review.</p></div>
+    </div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="react-loop" aria-expanded="false">ReAct loop</button><button type="button" class="chip" data-concept="evidence-id" aria-expanded="false">Evidence id</button><button type="button" class="chip" data-concept="with-retries" aria-expanded="false">with_retries</button><button type="button" class="chip" data-concept="tool-budget" aria-expanded="false">Tool budget</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m8"><span class="kick">Check yourself · +15 XP</span><p class="qq">Web search times out during a claim. What happens?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>The whole run fails</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>It is retried 3 times, then the error is given to the model as an observation and it can finish on the knowledge base</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>The claim is skipped silently</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m8">Mark module done · +10 XP</button></div>
+  </section>
+
+  <section class="sec" id="m9" data-sid="m9">
+    <span class="kick">[ 09 ] · Module 9 of 15</span>
+    <h3>Verdicts and confidence</h3>
+    <p class="goal">Know the three verdicts, the confidence caps and how a row is phrased.</p>
+    <div class="cols">
+      <div class="card"><h4 class="ct">✅ Verified true</h4><p>Reliable, current evidence supports the claim as stated.</p></div>
+      <div class="card"><h4 class="ct">⚠️ Possibly outdated/inaccurate</h4><p>Evidence contradicts it, shows it overstated, or shows it was true once but has changed.</p></div>
+      <div class="card"><h4 class="ct">❓ Unverifiable</h4><p>No adequate evidence, a personal anecdote, or a prediction whose deadline has not passed.</p></div>
+    </div>
+    <div class="prose"><p>Confidence means <b>how strongly the evidence supports the verdict</b>, not how likely the claim is to be true. The model reports a number and the agent caps it by the evidence actually gathered. Both values are stored, so you can see when the cap applied.</p></div>
+    <div class="rule">
+      <div><span class="tag">❓ verdict</span><span class="big">≤ 0.50</span><span class="muted">Insufficient evidence by definition</span></div>
+      <div><span class="tag warn">no tool evidence</span><span class="big">≤ 0.60</span><span class="muted">Reasoning step only</span></div>
+      <div><span class="tag fact">one source type</span><span class="big">≤ 0.90</span><span class="muted">Knowledge base or web</span></div>
+      <div><span class="tag notes">both agree</span><span class="big">≤ 0.95</span><span class="muted">Knowledge base and web</span></div>
+    </div>
+    <div class="prose"><p>Each row records its <b>method</b>, one of the brief's three: knowledge base, web search, or reasoning step. The verification text follows the brief's style:</p></div>
+    <div class="tbl"><table>
+      <thead><tr><th>Claim</th><th>Verification</th><th class="num">Confidence</th></tr></thead>
+      <tbody>
+        <tr><td>NASA recently announced a new Mars mission; it's launching in early 2026 to bring back samples.</td><td>⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-030)</td><td class="num">0.70</td></tr>
+        <tr><td>The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.</td><td>✅ Verified true (confirmed by knowledge base KB-031 and web search)</td><td class="num">0.90</td></tr>
+        <tr><td>Bitcoin will reach $200K by 2025.</td><td>⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-032)</td><td class="num">0.75</td></tr>
+        <tr><td>Humans will walk on Mars before 2040.</td><td>❓ Unverifiable (future prediction)</td><td class="num">0.35</td></tr>
+      </tbody></table></div>
+    <div class="callout fact">The brief's example table marks the NASA claim true at 0.92 and the Bitcoin claim unverifiable at 0.40. Checked against current evidence, both are ⚠️. Mars Sample Return was restructured in 2025, with Earth return now 2035–2039, so "launching in 2026" comes from the 2020 plan. The Bitcoin prediction's deadline has passed, and its 2025 peak was about $126,000 on October 6, 2025.</div>
+    <p class="muted" style="font:13px var(--mono)">Rows from the committed offline-mode run (samples/offline-mode/report.md).</p>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="calibration" aria-expanded="false">Calibration</button><button type="button" class="chip" data-concept="method" aria-expanded="false">method</button><button type="button" class="chip" data-concept="as-of-date" aria-expanded="false">as_of date</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m9"><span class="kick">Check yourself · +15 XP</span><p class="qq">The model says 0.99 for a ✅ verdict backed by the knowledge base and the web. What confidence is reported?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>0.99</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>0.90</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>0.95</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m9">Mark module done · +10 XP</button></div>
+  </section>
+</section>
+
+<!-- ============================== CHAPTER 4 ============================== -->
+<section class="chapter" id="c4"><header class="chead"><span class="kick">Chapter 4 of 5</span><h2>Run it, read it, change it</h2><p>Running on any provider, reading the reasoning log, and the changes you can make and rerun in minutes.</p></header>
+
+  <section class="sec" id="m10" data-sid="m10">
+    <span class="kick">[ 10 ] · Module 10 of 15</span>
+    <h3>Run it on any model</h3>
+    <p class="goal">Run the image with Claude, Bedrock, a local model or no model at all.</p>
+    <div class="try"><span class="kick">Build and run with Claude <button type="button" class="copy">Copy</button></span>
+<pre>cp .env.example .env                 <span class="c"># add ANTHROPIC_API_KEY=…</span>
+docker build -t podcast-agent .
+docker run --rm -t --env-file .env -v "$PWD/output:/app/output" podcast-agent</pre></div>
+    <div class="try"><span class="kick">No key: offline mode <button type="button" class="copy">Copy</button></span>
+<pre>docker run --rm -t -e LLM_PROVIDER=offline -v "$PWD/output:/app/output" podcast-agent</pre></div>
+    <div class="try"><span class="kick">Claude on Amazon Bedrock <button type="button" class="copy">Copy</button></span>
+<pre>docker run --rm -t -v "$PWD/output:/app/output" -v "$HOME/.aws:/home/agent/.aws:ro" \
+  -e LLM_PROVIDER=bedrock -e AWS_PROFILE=default -e AWS_REGION=us-east-1 \
+  -e BEDROCK_MODEL=&lt;model or inference-profile id&gt; podcast-agent</pre></div>
+    <div class="try"><span class="kick">A local model with Ollama <button type="button" class="copy">Copy</button></span>
+<pre>docker compose --profile local-llm up -d ollama
+docker compose exec ollama ollama pull llama3.1:8b
+LLM_PROVIDER=ollama docker compose run --rm agent</pre></div>
+    <div class="tbl"><table>
+      <thead><tr><th>Provider</th><th>Select with</th><th>Main / fast model</th></tr></thead>
+      <tbody>
+        <tr><td>Anthropic API</td><td><code>ANTHROPIC_API_KEY</code> (auto)</td><td>claude-sonnet-5-5 / claude-haiku-5-5</td></tr>
+        <tr><td>Amazon Bedrock</td><td><code>LLM_PROVIDER=bedrock</code> + <code>BEDROCK_MODEL</code></td><td>your Bedrock model ids</td></tr>
+        <tr><td>OpenAI-compatible</td><td><code>LLM_PROVIDER=openai</code> + <code>OPENAI_MODEL</code></td><td>any chat-completions server</td></tr>
+        <tr><td>Ollama</td><td><code>LLM_PROVIDER=ollama</code></td><td><code>OLLAMA_MODEL</code> (llama3.1:8b)</td></tr>
+        <tr><td>Offline</td><td><code>LLM_PROVIDER=offline</code> (auto with no key)</td><td>deterministic heuristics</td></tr>
+      </tbody></table></div>
+    <div class="callout">Offline mode runs the whole pipeline, including planning, validation, the tool loop, reports and logs, with no key or network. It tests the plumbing, not model quality. Pin the fact-checker's date with <code>--today 2026-10-13</code> for repeatable verdicts.</div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="llm-provider" aria-expanded="false">LLM_PROVIDER</button><button type="button" class="chip" data-concept="offline-provider" aria-expanded="false">Offline provider</button><button type="button" class="chip" data-concept="docker-image" aria-expanded="false">Docker image</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m10"><span class="kick">Check yourself · +15 XP</span><p class="qq">You have no API key on hand and need to show the full pipeline running. What do you run?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>LLM_PROVIDER=offline, which runs every step with deterministic heuristics</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>Nothing; the agent needs a model</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>The unit tests only</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m10">Mark module done · +10 XP</button></div>
+  </section>
+
+  <section class="sec" id="m11" data-sid="m11">
+    <span class="kick">[ 11 ] · Module 11 of 15</span>
+    <h3>Read the reasoning log</h3>
+    <p class="goal">Read a run from plan to verdict and find any decision in seconds.</p>
+    <div class="prose"><p>Every event goes to three places: the console, <code>output/logs/run.log</code> for people, and <code>output/logs/trace.jsonl</code> for machines. Each JSONL record carries <code>run_id</code>, <code>episode_id</code>, <code>step</code>, <code>kind</code> and <code>message</code>, which is what you would ship to an observability stack. <code>run_manifest.json</code> adds the provider, prompt version, per-step timings and token usage.</p></div>
+    <div class="legend">
+      <div><b>◆</b>plan and its steps</div><div><b>▶</b>step starts</div><div><b>⇄</b>model call: tokens, cache, time</div>
+      <div><b>💭</b>the model's thought</div><div><b>🔧</b>tool call</div><div><b>👁</b>observation or result</div>
+      <div><b>↻</b>self-correction</div><div><b>⚖️</b>verdict and confidence</div><div><b>⚠</b>warning · <b>✖</b> error</div>
+    </div>
+    <div class="try"><span class="kick">Find things fast <button type="button" class="copy">Copy</button></span>
+<pre>grep '↻' output/logs/run.log                      <span class="c"># every self-correction</span>
+grep '⚖️' output/logs/run.log                      <span class="c"># every verdict</span>
+grep 'verify C3' output/logs/run.log              <span class="c"># one claim end to end</span>
+jq -r 'select(.kind=="action") | .message' output/logs/trace.jsonl</pre></div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="run-log" aria-expanded="false">run.log</button><button type="button" class="chip" data-concept="trace-jsonl" aria-expanded="false">trace.jsonl</button><button type="button" class="chip" data-concept="run-manifest-json" aria-expanded="false">run_manifest.json</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m11"><span class="kick">Check yourself · +15 XP</span><p class="qq">Which file would you send to an observability stack?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>output/report.md</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>output/logs/trace.jsonl, with one structured event per line</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>data/mock_web_index.json</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m11">Mark module done · +10 XP</button></div>
+  </section>
+
+  <section class="sec" id="m12" data-sid="m12">
+    <span class="kick">[ 12 ] · Module 12 of 15</span>
+    <h3>Change it live</h3>
+    <p class="goal">Make the common changes quickly and know what each one touches.</p>
+    <div class="prose"><p>Every recipe below can be made and rerun quickly. The fastest loop is local Python with offline mode or a pinned date; the Docker image works the same once rebuilt, or with <code>data/</code> mounted.</p></div>
+    <div class="try"><span class="kick">One-time local setup <button type="button" class="copy">Copy</button></span>
+<pre>python3 -m venv .venv &amp;&amp; .venv/bin/pip install -e ".[dev]"
+source .venv/bin/activate
+podcast-agent run data/transcripts/ep004_pdf_example.txt --out output --provider offline --today 2026-10-13</pre></div>
+
+    <div class="recipe"><h4>Add a fact the checker can use <span class="tag fact">data only</span></h4>
+      <p>Append an entry to <code>data/knowledge_base.json</code> with an id, title, content, source, url, <code>as_of</code> date and tags. Check retrieval, then rerun one episode. With Docker, mount <code>data/</code> so the new fact is used without rebuilding.</p>
+      <div class="try"><span class="kick">Try it <button type="button" class="copy">Copy</button></span>
+<pre>podcast-agent kb "Mars Sample Return launch"
+podcast-agent run data/transcripts/ep004_pdf_example.txt --out output --provider offline
+docker run --rm -t -e LLM_PROVIDER=offline -v "$PWD/data:/app/data:ro" -v "$PWD/output:/app/output" podcast-agent</pre></div></div>
+
+    <div class="recipe"><h4>Swap the model or provider <span class="tag acc">config only</span></h4>
+      <p>No code change. The provider interface maps a tier (main or fast) to each vendor's model.</p>
+      <div class="try"><span class="kick">Try it <button type="button" class="copy">Copy</button></span>
+<pre>podcast-agent run --model claude-opus-5-5 --fast-model claude-haiku-5-5
+podcast-agent run --provider ollama --model llama3.1:8b
+LLM_PROVIDER=bedrock BEDROCK_MODEL=&lt;id&gt; podcast-agent run</pre></div></div>
+
+    <div class="recipe"><h4>Show resilience: break web search <span class="tag warn">demo</span></h4>
+      <p>Inject failures into the mock search engine and watch retries, the error observation and the knowledge-base fallback in the log. Confidence drops to the one-source cap instead of the run failing.</p>
+      <div class="try"><span class="kick">Try it <button type="button" class="copy">Copy</button></span>
+<pre>MOCK_SEARCH_FAILURE_RATE=1 podcast-agent run data/transcripts/ep004_pdf_example.txt --out output --provider offline
+grep -E 'retry|unavailable|⚖️' output/logs/run.log</pre></div></div>
+
+    <div class="recipe"><h4>Change summary length or claim budget <span class="tag acc">config only</span></h4>
+      <div class="try"><span class="kick">Try it <button type="button" class="copy">Copy</button></span>
+<pre>SUMMARY_LENGTH_MODE=adaptive podcast-agent run --provider offline
+podcast-agent run --max-claims 4 --provider offline
+MAX_STEPS_PER_CLAIM=6 podcast-agent run --provider offline</pre></div></div>
+
+    <div class="recipe"><h4>Make fact-checking stricter <span class="tag fact">one function</span></h4>
+      <p>The caps live in <code>calibrate()</code> in <code>agent/verifier.py</code>. For example, require the knowledge base and the web to agree before a ✅ can exceed 0.6:</p>
+      <div class="try"><span class="kick">agent/verifier.py <button type="button" class="copy">Copy</button></span>
+<pre>    elif len(sources) == 1:
+        cap = 0.6 if verdict == Verdict.VERIFIED else 0.9   <span class="c"># was 0.9 for every verdict</span></pre></div></div>
+
+    <div class="recipe"><h4>Add a new step, such as chapters <span class="tag notes">three files</span></h4>
+      <p>Register a function, add it to the capability catalog so the planner can schedule it, and render it in the report. The validator and executor pick it up automatically.</p>
+      <div class="try"><span class="kick">agent/steps.py <button type="button" class="copy">Copy</button></span>
+<pre><span class="k">@register("extract_chapters")</span>
+def extract_chapters(ctx, state, params):
+    res = call_structured(ctx, step="extract_chapters", schema=ChaptersOut, system=CHAPTERS_SYSTEM,
+                          prompt=CHAPTERS_PROMPT, cache_prefix=episode_context(state.episode))
+    state.chapters = res.value.chapters
+    return f"{len(state.chapters)} chapters", res.attempts
+<span class="c"># planner.py: add "extract_chapters" to capability_catalog() and CANONICAL_ORDER
+# report.py:  render state.chapters in render_markdown()</span></pre></div></div>
+
+    <div class="recipe"><h4>Edit a prompt <span class="tag acc">prompts.py</span></h4>
+      <p>All prompts are in <code>prompts.py</code>. Bump <code>PROMPT_VERSION</code> after an edit: it busts the response cache and is recorded in the run manifest, so every output can be traced to the prompt that produced it.</p></div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="register" aria-expanded="false">@register</button><button type="button" class="chip" data-concept="prompt-version" aria-expanded="false">PROMPT_VERSION</button><button type="button" class="chip" data-concept="mock-web-search" aria-expanded="false">Mock web search</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m12"><span class="kick">Check yourself · +15 XP</span><p class="qq">You add a new step function with @register. What else must change before the planner can schedule it?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>Nothing</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>The Dockerfile</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>Its entry in capability_catalog() (and CANONICAL_ORDER), plus rendering in the report</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m12">Mark module done · +10 XP</button></div>
+  </section>
+</section>
+
+<!-- ============================== CHAPTER 5 ============================== -->
+<section class="chapter" id="c5"><header class="chead"><span class="kick">Chapter 5 of 5</span><h2>Deploying it for an agency</h2><p>The production shape, what it costs and how it scales and fails, and how data, quality and operations are handled.</p></header>
+
+  <section class="sec" id="m13" data-sid="m13">
+    <span class="kick">[ 13 ] · Module 13 of 15</span>
+    <h3>From laptop to production</h3>
+    <p class="goal">Know the production components and the life of one job. Click a component for details.</p>
+    <div class="prose"><p>Episodes arrive in bursts and nobody waits on a spinner, so production is <b>asynchronous</b>: the API only accepts work and queues it, and stateless workers run exactly the agent you ran locally. The worker, the queue adapters, the Docker image and a lint-clean Helm chart are built; the managed services below are the proposed design.</p></div>
+    <figure class="fig">
+      <div class="sheet-bar"><span class="label">FIG. 4 · PRODUCTION</span></div>
+      <div class="flow" id="prod">
+        <div class="frow"><span class="rl">agency</span><div class="pills"><button type="button" class="pill n" data-node="p-ui">Review UI<small>producers · editors</small></button><button type="button" class="pill n" data-node="p-drop">Transcript drop<small>S3 · Drive · RSS</small></button><button type="button" class="pill n" data-node="p-cms">CMS · Slack<small>webhooks out</small></button></div></div>
+        <div class="arrow"><i></i></div>
+        <div class="frow"><span class="rl">edge</span><div class="pills"><button type="button" class="pill y" data-node="p-alb">ALB + WAF<small>OIDC single sign-on</small></button></div></div>
+        <div class="arrow"><i></i></div>
+        <div class="frow"><span class="rl">EKS · Helm</span><div class="pills"><button type="button" class="pill g" data-node="p-api">API pods<small>FastAPI · HPA</small></button><button type="button" class="pill g" data-node="p-workers">Agent workers<small>KEDA 0 → N</small></button><button type="button" class="pill g" data-node="p-gw">Model gateway<small>budgets · failover</small></button></div></div>
+        <div class="arrow"><i></i></div>
+        <div class="frow"><span class="rl">queue · data</span><div class="pills"><button type="button" class="pill b" data-node="p-sqs">SQS + DLQ</button><button type="button" class="pill b" data-node="p-s3">S3 + KMS</button><button type="button" class="pill b" data-node="p-pg">Aurora + pgvector</button><button type="button" class="pill b" data-node="p-redis">Redis cache</button></div></div>
+        <div class="arrow"><i></i></div>
+        <div class="frow"><span class="rl">models · tools</span><div class="pills"><button type="button" class="pill p" data-node="p-bedrock">Claude on Bedrock<small>primary · PrivateLink</small></button><button type="button" class="pill p" data-node="p-anthropic">Anthropic API<small>failover</small></button><button type="button" class="pill p" data-node="p-vllm">vLLM<small>optional · self-hosted</small></button><button type="button" class="pill p" data-node="p-search">Search API<small>allow-listed</small></button></div></div>
+        <div class="arrow"><i></i></div>
+        <div class="frow"><span class="rl">operations</span><div class="pills"><button type="button" class="pill n" data-node="p-obs">OTel · Grafana · Langfuse</button><button type="button" class="pill n" data-node="p-secrets">Secrets Manager + IRSA</button><button type="button" class="pill n" data-node="p-gitops">Terraform · Argo CD</button></div></div>
+      </div>
+      <div class="node-detail" id="nd-prod" aria-live="polite"></div>
+      <figcaption><span><b>FIG. 4</b> · One image, two roles: API pods accept work, workers run the agent. Static diagram: docs/architecture.svg.</span></figcaption>
+    </figure>
+    <div class="subhead">Life of a job</div>
+    <div class="tbl"><table>
+      <thead><tr><th>#</th><th>Stage</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1</td><td>Ingest</td><td>The transcript lands in S3 (KMS-encrypted). A job row with an idempotency key (hash of transcript, prompt version and models) goes to Postgres, and the job is queued on SQS.</td></tr>
+        <tr><td class="mono">2</td><td>Execute</td><td>A worker long-polls SQS and runs the agent. Every model call goes through the model gateway.</td></tr>
+        <tr><td class="mono">3</td><td>Persist</td><td>Reports and the trace go to S3 and Postgres. <code>report.json</code> is written last as the commit marker; only then is the message deleted.</td></tr>
+        <tr><td class="mono">4</td><td>Review</td><td>Editors see the notes beside the fact-check table. ⚠️ verdicts, ❓ on factual claims and low confidence are routed for attention.</td></tr>
+        <tr><td class="mono">5</td><td>Publish</td><td>Approved notes go to the CMS or social scheduler by webhook, and Slack gets a "ready for review" notice.</td></tr>
+      </tbody></table></div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="idempotency-key" aria-expanded="false">Idempotency key</button><button type="button" class="chip" data-concept="dead-letter-queue" aria-expanded="false">Dead-letter queue</button><button type="button" class="chip" data-concept="model-gateway" aria-expanded="false">Model gateway</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m13"><span class="kick">Check yourself · +15 XP</span><p class="qq">A worker is evicted halfway through an episode. What happens to the job?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>The message was never deleted, so SQS redelivers it and another worker runs it</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>The episode is lost</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>An editor must resubmit it</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m13">Mark module done · +10 XP</button></div>
+  </section>
+
+  <section class="sec" id="m14" data-sid="m14">
+    <span class="kick">[ 14 ] · Module 14 of 15</span>
+    <h3>Cost, scale and failure</h3>
+    <p class="goal">Know the unit cost, the real scaling ceiling and how each failure is handled.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Step · 60-minute episode</th><th>Model</th><th class="num">In tokens</th><th class="num">Out tokens</th><th class="num">Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Plan</td><td>Haiku 5.5</td><td class="num">0.8k</td><td class="num">0.2k</td><td class="num">$0.0002</td></tr>
+        <tr><td>Summarize (writes prompt cache)</td><td>Sonnet 5.5</td><td class="num">12.3k</td><td class="num">0.45k</td><td class="num">$0.035</td></tr>
+        <tr><td>Key notes (reads prompt cache)</td><td>Sonnet 5.5</td><td class="num">12.3k</td><td class="num">0.8k</td><td class="num">$0.010</td></tr>
+        <tr><td>Claim extraction</td><td>Haiku 5.5</td><td class="num">12.5k</td><td class="num">1.2k</td><td class="num">$0.002</td></tr>
+        <tr><td>Verification, 10 claims</td><td>Sonnet 5.5</td><td class="num">40k</td><td class="num">4.5k</td><td class="num">$0.125</td></tr>
+        <tr><td><b>Total</b></td><td></td><td class="num"><b>78k</b></td><td class="num"><b>7k</b></td><td class="num"><b>≈ $0.17</b></td></tr>
+      </tbody></table></div>
+    <p class="muted" style="font:13px var(--mono)">List prices checked 2026-10-13: Sonnet 5.5 $2 / $10 and Haiku 5.5 $0.10 / $0.50 per million input / output tokens; cache reads 0.05× input; Batch API 50% off.</p>
+    <div class="prose"><p>Verification dominates, so the first lever is <b>tiered verification</b>: run the loop on Haiku and escalate only ⚠️ or low-confidence claims to Sonnet, which brings an episode to about $0.09. Backlog goes through the Batch API at half price. At agency volumes the fixed infrastructure costs more than the tokens: 500 episodes a month is under $100 of model spend.</p>
+      <p><b>Scale:</b> workers are stateless and KEDA scales them on queue depth, about 2 messages per replica, from zero. The real ceiling is the model provider's rate limit, so the gateway meters tokens per minute, priority queues keep rush jobs ahead of backfills, and the replica cap sits below the provider quota.</p></div>
+    <div class="tbl"><table>
+      <thead><tr><th>Failure</th><th>Handling</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Malformed or invalid model output</td><td>Validated, fed back, up to 3 attempts; kept with a warning</td><td><span class="tag notes">built</span></td></tr>
+        <tr><td>Planner fails</td><td>Validator repairs; fixed fallback plan</td><td><span class="tag notes">built</span></td></tr>
+        <tr><td>Search outage</td><td>3 retries, then an observation; falls back to the knowledge base</td><td><span class="tag notes">built</span></td></tr>
+        <tr><td>One step fails</td><td>Only its dependents are skipped; the report ships with warnings</td><td><span class="tag notes">built</span></td></tr>
+        <tr><td>Worker crash or eviction</td><td>Message not deleted, so it is redelivered; SIGTERM drains the current job</td><td><span class="tag notes">built</span></td></tr>
+        <tr><td>Duplicate delivery</td><td>Idempotency key; finished jobs acknowledged without new model calls</td><td><span class="tag notes">built</span></td></tr>
+        <tr><td>Provider 429 / 5xx</td><td>SDK retries with backoff; gateway fails over Bedrock → Anthropic → self-hosted</td><td><span class="tag acc">retries built</span></td></tr>
+        <tr><td>Zone or region loss</td><td>Multi-AZ EKS and Aurora; S3 replication and snapshots</td><td><span class="tag">proposed</span></td></tr>
+      </tbody></table></div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="keda-scaledobject" aria-expanded="false">KEDA ScaledObject</button><button type="button" class="chip" data-concept="tool-budget" aria-expanded="false">Tool budget</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m14"><span class="kick">Check yourself · +15 XP</span><p class="qq">What actually limits how fast this system can process a big backlog?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>The number of Kubernetes nodes</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>The model provider's rate limit, which the gateway meters and the replica cap respects</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>Postgres write speed</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m14">Mark module done · +10 XP</button></div>
+  </section>
+
+  <section class="sec" id="m15" data-sid="m15">
+    <span class="kick">[ 15 ] · Module 15 of 15</span>
+    <h3>Security, observability and quality</h3>
+    <p class="goal">Know how data is protected, how a run is observed and how quality is measured over time.</p>
+    <div class="cols">
+      <div class="card"><h4 class="ct">Security and privacy</h4><ul><li>SSO with producer, editor and admin roles</li><li>Tenant isolation: row-level security, per-tenant S3 prefixes and KMS keys</li><li>Bedrock over PrivateLink; no training on customer data</li><li>IRSA and External Secrets; no static keys; read-only root filesystem</li><li>Tools are read-only and allow-listed, so a malicious page can at most sway a verdict a human reviews</li></ul></div>
+      <div class="card"><h4 class="ct">Observability</h4><ul><li>trace.jsonl events become OpenTelemetry spans: one trace per episode</li><li>Model payloads in Langfuse or Arize Phoenix</li><li>Metrics: latency per step, tokens and dollars per tenant, cache hit rate, self-correction rate, quote match rate, verdict mix, queue depth, DLQ count</li><li>SLOs: 99% of jobs without manual help; p95 under 5 minutes per hour of audio</li></ul></div>
+      <div class="card"><h4 class="ct">Quality</h4><ul><li>A golden set of labeled transcripts and claims runs in CI on every prompt or model change</li><li>Deterministic gates: summary length, 5 takeaways, 100% verbatim quotes</li><li>Fact-check accuracy per verdict class against labels</li><li>Editor overrides feed the golden set</li></ul></div>
+    </div>
+    <div class="subhead">Pick the footprint for the client</div>
+    <div class="tbl"><table>
+      <thead><tr><th>Footprint</th><th>When</th><th>Shape</th></tr></thead>
+      <tbody>
+        <tr><td>Single VM</td><td>Pilot, one team</td><td><code>docker compose</code> and a <code>worker</code> on a <code>dir://</code> queue</td></tr>
+        <tr><td>Serverless AWS</td><td>Low ops, spiky volume</td><td>API Gateway + Lambda, SQS, Fargate tasks running <code>worker</code>, S3, Aurora Serverless</td></tr>
+        <tr><td>Cloudflare</td><td>Global edge, minimal ops</td><td>Workers API, Queues, R2, D1, AI Gateway; the agent in Cloudflare Containers</td></tr>
+        <tr><td>Kubernetes</td><td>Multi-tenant enterprise</td><td>EKS, AKS, GKE or OKE with this Helm chart and Argo CD</td></tr>
+        <tr><td>Self-hosted</td><td>Regulated or confidential</td><td>Same chart; open-weight model on vLLM; internal knowledge base; external search off</td></tr>
+      </tbody></table></div>
+    <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="irsa" aria-expanded="false">IRSA</button><button type="button" class="chip" data-concept="external-secrets" aria-expanded="false">External Secrets</button><button type="button" class="chip" data-concept="helm-chart" aria-expanded="false">Helm chart</button></div>
+    <div class="pop" hidden></div>
+    <div class="quiz" data-quiz="m15"><span class="kick">Check yourself · +15 XP</span><p class="qq">A web page in search results contains instructions aimed at the model. What limits the damage?</p>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>Nothing; the agent follows them</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>Tools are read-only and allow-listed, and a human reviews verdicts before anything is published</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>The page is cached</span></button></div><p class="why" hidden></p></div>
+    <div class="foot-row"><button type="button" class="btn go" data-done="m15">Mark module done · +10 XP</button></div>
+  </section>
+</section>
+
+    </article></div>
+  </div>
+  <div id="v-cards" hidden></div>
+  <div id="v-gloss" hidden></div>
+  </main>
+  <footer class="foot"><span>Podcast Agent Guide · an Organized AI study asset · Austin, TX</span><span>·</span><span>Built for the Seekr forward-deployed engineering take-home. No secrets or account ids appear on this page.</span></footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script>
+(function(){
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const G0=window.gsap||null, ST=window.ScrollTrigger||null, RM=matchMedia('(prefers-reduced-motion: reduce)').matches, anim=!!G0&&!RM;
+if(G0&&ST) gsap.registerPlugin(ScrollTrigger);
+if(G0&&window.MotionPathPlugin) gsap.registerPlugin(MotionPathPlugin);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const XP={section:10,correct:15,chapter:100};
+const TOTAL=15;
+const CHAPTERS=[{id:'c1',steps:['m1','m2','m3']},{id:'c2',steps:['m4','m5','m6']},{id:'c3',steps:['m7','m8','m9']},{id:'c4',steps:['m10','m11','m12']},{id:'c5',steps:['m13','m14','m15']}];
+const QUIZ={
+ m1:{a:1,why:'report.md and report.json hold every episode’s summary, key notes and fact-check table in one file. Per-episode files and logs sit next to them.'},
+ m2:{a:0,why:'Every line keeps its raw text. The model reads the cleaned text, and quotes are matched against both.'},
+ m3:{a:1,why:'The validator adds any missing required step, fixes the order and clamps parameters, and logs each repair. A deliverable is never skipped.'},
+ m4:{a:2,why:'After three attempts the last valid answer is kept and the unresolved problem is written to the report’s warnings.'},
+ m5:{a:1,why:'Above 15,000 words the planner picks map-reduce: segment notes from the fast model, reduced by the main model into one summary.'},
+ m6:{a:0,why:'The words match, so the quote is kept; the timestamp and speaker are taken from the matched transcript line, and the fix is logged.'},
+ m7:{a:1,why:'A standalone claim names its subject, so searches find the right evidence and the verdict is about something a reader can identify.'},
+ m8:{a:1,why:'with_retries() tries 3 times with backoff, then the error goes to the model as an observation. It can still finish on knowledge-base evidence.'},
+ m9:{a:2,why:'Knowledge base and web together allow up to 0.95, so 0.99 is capped to 0.95. One source type would cap at 0.90.'},
+ m10:{a:0,why:'Offline mode runs planning, validation, the tool loop, reports and logs with deterministic heuristics and no network.'},
+ m11:{a:1,why:'trace.jsonl has one structured event per line with run_id, episode_id, step and kind, ready for an observability stack.'},
+ m12:{a:2,why:'The planner can only schedule steps in the capability catalog, and the canonical order is used when it repairs a plan. Render the result so it appears in the report.'},
+ m13:{a:0,why:'Messages are deleted only after outputs are written, so an evicted job is redelivered. The idempotency key prevents duplicate work if it had already finished.'},
+ m14:{a:1,why:'Workers scale out easily; the model provider’s tokens-per-minute limit is the real ceiling, so the gateway meters it and KEDA’s replica cap sits below it.'},
+ m15:{a:1,why:'The agent’s tools only read, from allow-listed sources, and every verdict is reviewed before publishing, so injected text can at most sway a verdict a human checks.'}
+};
+
+/* ---------- components (FIG 1 and FIG 4) ---------- */
+// [layer, title, what it does, code, knobs, change it, module]
+const NODES={
+ input:['Input','Transcripts','JSON in the take-home format, or timestamped text such as [00:02:14] Host: … . Text files may start with Title, Host and Guests header lines; a line without a timestamp continues the previous line.','data/transcripts/ · transcript.py → load_episode()','Any .json or .txt file or folder passed to run','Drop a file into data/transcripts/ and rerun. The format is detected from the content.','m2'],
+ run:['Entry point','run (CLI)','Processes every transcript in a folder and writes reports and logs. It is the Docker image’s default command.','cli.py → cmd_run · runtime.py → run_batch()','--provider · --model · --fast-model · --max-claims · --today · --no-cache · --quiet','podcast-agent run data/transcripts --out output --provider offline','m10'],
+ serve:['Entry point','serve (HTTP API)','FastAPI app with GET /healthz and POST /v1/process (JSON transcript or text). Model clients, the knowledge base and search are built once and shared across requests.','server.py','--host · --port (8080)','podcast-agent serve, then curl localhost:8080/healthz','m10'],
+ worker:['Entry point','worker (queue)','Long-polls a queue, runs the agent, writes outputs, then acknowledges. Jobs are idempotent; transient failures are retried, invalid input is dead-lettered, and SIGTERM finishes the current job.','worker.py → run_worker()','QUEUE_URI (dir:// or an SQS URL) · OUTPUT_URI (folder or s3://) · WORKER_MAX_ATTEMPTS','podcast-agent worker --queue dir://queue --once','m13'],
+ pipeline:['Agent','Executor','Runs the plan step by step. A failed step is recorded and only its dependents are skipped, so a search outage costs the fact-check table, not the summary. Assembles the typed report.','agent/pipeline.py → process_episode() · @register','—','Register a new step with @register("name") and add it to the catalog.','m12'],
+ ingest:['Agent','Ingest','Parses a file into an Episode: timestamps to seconds, short labels resolved to full names and roles (Dr. Priya → Dr. Priya Patel, guest).','transcript.py → parse_json_transcript · parse_txt_transcript · resolve_speaker','—','Add a "Guests: A, B" header to a text transcript to name its speakers.','m2'],
+ plan:['Agent','Planner','Profiles the episode, then the fast model writes a plan from the capability catalog. A validator enforces required steps, order and parameter ranges and repairs mistakes; a fixed plan runs if the model fails.','agent/planner.py → make_plan · validate_plan · repair_plan','MAX_CLAIMS · MAX_STEPS_PER_CLAIM · MAP_REDUCE_THRESHOLD_WORDS','Add a capability to capability_catalog() and the planner can schedule it.','m3'],
+ normalize:['Agent · step','normalize_transcript','Removes um, uh, stutters and filler phrases. The raw text stays on every line, so quotes can still be matched against what was said.','transcript.py → clean_text · normalize_episode','Planned only when the profile finds filler tokens','Edit FILLER_WORDS or FILLER_PHRASES in transcript.py.','m2'],
+ summarize:['Agent · step','summarize','Writes the 200–300-word summary in a single pass with the transcript as a cached prefix, or by map-reduce over ~1,500-word segments for long episodes. The word count is validated and retried.','agent/steps.py → summarize · summary_bounds','SUMMARY_LENGTH_MODE (spec · adaptive) · MAP_REDUCE_THRESHOLD_WORDS (15,000)','SUMMARY_LENGTH_MODE=adaptive podcast-agent run --provider offline','m5'],
+ notes:['Agent · step','extract_notes','Exactly 5 takeaways, 3–5 quotes and 5–8 topic tags. Every quote is matched to one transcript line at 0.90 or better; paraphrases go back to the model, and wrong timestamps or speakers are corrected from the matched line.','agent/steps.py → extract_notes · locate_span','VERBATIM_THRESHOLD = 0.9','Edit NOTES_PROMPT in prompts.py, then bump PROMPT_VERSION.','m6'],
+ claims:['Agent · step','extract_claims','Finds check-worthy statements and rewrites each as a standalone claim with a type and a time-sensitive flag. Each must quote its transcript line at 0.85 or better.','agent/steps.py → extract_claims','max_claims set by the planner (3 to MAX_CLAIMS, default 8)','podcast-agent run --max-claims 4','m7'],
+ verify:['Agent · step','verify_claims','A tool loop per claim: thought, action, observation, until the model calls finish with a verdict, confidence and evidence ids. Tool budget per claim; unknown ids rejected; confidence capped by the evidence found.','agent/verifier.py → verify_claim · calibrate','MAX_STEPS_PER_CLAIM (2–6, default 4) · tools chosen by the planner','Change the caps in calibrate() to make it stricter.','m8'],
+ trace:['Agent','Reasoning trace','Every plan, thought, tool call, observation, self-correction and verdict, written to the console, logs/run.log and logs/trace.jsonl.','trace.py → Tracer.event','--quiet hides per-call model lines','tail -f output/logs/run.log during a run','m11'],
+ structured:['Model layer','Structured outputs','Every model step returns JSON that must parse, match a Pydantic schema and pass the step’s rules. Problems go back to the model for up to 3 attempts; then the last valid answer is kept with a warning.','llm/structured.py → call_structured · extract_json','MAX_ATTEMPTS (3)','Add a rule to a step’s validate() function.','m4'],
+ cache:['Model layer','Response cache','Content-addressed cache of model responses keyed on provider, model, prompts and settings. Reruns are free and identical; truncated answers are never cached.','llm/cache.py → CachedProvider','LLM_CACHE · LLM_CACHE_DIR (.cache/llm) · --no-cache','Pass --no-cache, or delete .cache/llm, for fresh calls.','m4'],
+ providerif:['Model layer','Provider interface','Steps ask for a tier (main for quality, fast for planning and extraction) and an optional cacheable prefix. Each provider maps that to its own API.','llm/base.py → LLMProvider · llm/__init__.py → build_provider()','LLM_PROVIDER · PROMPT_CACHE','podcast-agent run --provider bedrock','m10'],
+ anthropic:['Provider','Anthropic API','The default. Claude Sonnet 5.5 writes the summary and notes and runs verification; Haiku 5.5 plans and extracts claims. The transcript prefix is marked for prompt caching.','llm/anthropic_provider.py → AnthropicProvider','ANTHROPIC_API_KEY · ANTHROPIC_MODEL · ANTHROPIC_FAST_MODEL','podcast-agent run --model claude-opus-5-5','m10'],
+ bedrock:['Provider','Claude on Amazon Bedrock','The same Messages API through the Bedrock client. Credentials come from the AWS chain: environment variables, a mounted ~/.aws profile, or an IAM role.','llm/anthropic_provider.py → BedrockProvider','LLM_PROVIDER=bedrock · BEDROCK_MODEL · BEDROCK_FAST_MODEL · AWS_REGION','Set BEDROCK_MODEL to the model or inference-profile id from the Bedrock console.','m10'],
+ openai:['Provider','OpenAI-compatible · Ollama','One client for OpenAI, Ollama, vLLM and LM Studio, with retries on 408, 409, 425, 429 and 5xx. This is how the agent runs on a local model.','llm/openai_provider.py → OpenAICompatibleProvider','OPENAI_API_KEY · OPENAI_BASE_URL · OPENAI_MODEL · OLLAMA_BASE_URL · OLLAMA_MODEL','podcast-agent run --provider ollama --model llama3.1:8b','m10'],
+ offline:['Provider','Offline heuristics','Deterministic stand-ins for every model task, so the whole pipeline runs in CI with no key or network. Token counts are estimates. It tests the plumbing, not model quality.','llm/offline.py · heuristics.py','LLM_PROVIDER=offline (picked automatically when no key is set)','podcast-agent run --provider offline --today 2026-10-13','m10'],
+ kb:['Tool','Knowledge base','18 curated facts, each with a source and an as-of date, ranked with BM25. Searched first; the dates are what separate ✅ from ⚠️.','tools/knowledge_base.py · data/knowledge_base.json','KB_PATH','podcast-agent kb "Mars Sample Return"','m9'],
+ web:['Tool','Web search','A mock engine over 17 dated pages, including stale ones, with injectable latency and failures, or Tavily for live search. Failures are retried 3 times, then reported to the agent.','tools/web_search.py · data/mock_web_index.json','SEARCH_PROVIDER (mock · tavily · none) · MOCK_SEARCH_FAILURE_RATE · MOCK_SEARCH_LATENCY_MS','MOCK_SEARCH_FAILURE_RATE=1 podcast-agent run --provider offline','m8'],
+ report:['Output','report.md · report.json','The brief’s output file: every episode’s summary, key notes and fact-check table (Claim · Verification · Confidence) in one place.','report.py → render_combined · runtime.py → run_batch','—','Open output/report.md after any run.','m1'],
+ episode:['Output','Per-episode files','<episode>.md adds the evidence and reasoning for each claim and the agent run: plan, steps, timings and tokens. <episode>.json is the full typed report.','report.py → render_markdown · models.py → EpisodeReport','—','Read the details block under each fact-check table.','m9'],
+ logs:['Output','Logs and manifest','logs/run.log is the readable trace and logs/trace.jsonl the structured one. run_manifest.json records the provider, prompt version, step timings and token usage.','trace.py · runtime.py','—','grep "↻" output/logs/run.log lists every self-correction.','m11'],
+ 'p-ui':['Agency','Review UI','Editors see show notes beside the fact-check table. ⚠️ verdicts, ❓ on factual claims and low confidence are routed for attention. Overrides are stored and become evaluation data.','Proposed','Confidence threshold for routing','—','m13'],
+ 'p-drop':['Agency','Transcript drop','Uploads, a watched S3 bucket, Google Drive or an RSS feed. Each new transcript becomes a job.','Proposed (worker.py reads s3:// transcripts today)','—','—','m13'],
+ 'p-cms':['Agency','CMS · Slack','Approved notes go to the CMS or social scheduler by webhook; Slack gets a "ready for review" notice.','Proposed','—','—','m13'],
+ 'p-alb':['Edge','ALB + WAF','The only public entry point, with OIDC single sign-on for producer, editor and admin roles.','Proposed','—','—','m15'],
+ 'p-api':['Compute','API pods','The same image running serve. It accepts work, stores the transcript and queues a job; it never runs the agent in the request.','server.py · Helm chart: Deployment, Service, HPA, PDB','api.autoscaling (2–6 replicas at 70% CPU)','—','m13'],
+ 'p-workers':['Compute','Agent workers','The same image running worker. KEDA scales them on SQS depth, about 2 messages per replica, from zero to a cap set below the provider’s rate limit.','worker.py · Helm chart: Deployment + KEDA ScaledObject','worker.keda.maxReplicas · messagesPerReplica · terminationGracePeriodSeconds (900)','—','m14'],
+ 'p-gw':['Compute','Model gateway','One place for model routing, retries, per-tenant budgets and failover from Bedrock to the Anthropic API to a self-hosted model.','Proposed (retries and provider choice are built)','Per-tenant token budgets','—','m14'],
+ 'p-sqs':['Queue','SQS + dead-letter queue','At-least-once delivery. A message is deleted only after the outputs are written; after maxReceiveCount it moves to the dead-letter queue and raises an alarm.','worker.py → SQSQueue','Visibility timeout (900 s) · maxReceiveCount','—','m13'],
+ 'p-s3':['Data','S3 + KMS','Transcripts, reports and traces, encrypted with KMS. report.json is written last as the commit marker.','worker.py → S3Store','OUTPUT_URI=s3://bucket/prefix','—','m13'],
+ 'p-pg':['Data','Aurora Postgres + pgvector','Jobs, reports and the knowledge base, with hybrid BM25 and embedding retrieval replacing today’s file-based BM25.','Proposed','Row-level security per tenant','—','m15'],
+ 'p-redis':['Data','Redis cache','The shared home for the response cache and search results, so every worker benefits from every other worker’s calls.','Proposed (the cache is local files today)','—','—','m14'],
+ 'p-bedrock':['Models','Claude on Bedrock','The primary provider in production, reached over PrivateLink so transcripts never cross the public internet.','llm/anthropic_provider.py → BedrockProvider','BEDROCK_MODEL · AWS_REGION · IRSA role','—','m10'],
+ 'p-anthropic':['Models','Anthropic API','The failover provider, used when Bedrock is throttled or unavailable.','llm/anthropic_provider.py → AnthropicProvider','ANTHROPIC_API_KEY from Secrets Manager','—','m10'],
+ 'p-vllm':['Models','vLLM on GPU nodes','An open-weight model for self-hosted or air-gapped clients, through the OpenAI-compatible provider.','llm/openai_provider.py','OPENAI_BASE_URL · OPENAI_MODEL','—','m15'],
+ 'p-search':['Tools','Search API','Live web search with a domain allow-list, results cached in Redis.','tools/web_search.py → TavilySearch','SEARCH_PROVIDER=tavily · TAVILY_API_KEY','—','m8'],
+ 'p-obs':['Operations','Observability','trace.jsonl events become OpenTelemetry spans: one trace per episode, one span per step, model call and tool call. Metrics feed Grafana; payloads go to Langfuse.','trace.py (events already carry run_id, episode_id, step and kind)','Sampling, retention','—','m15'],
+ 'p-secrets':['Operations','Secrets Manager + IRSA','API keys come from AWS Secrets Manager through External Secrets; AWS access uses IAM roles for service accounts. No static keys in the image or chart.','Helm chart: ExternalSecret, ServiceAccount','externalSecrets.remoteKey · serviceAccount.annotations','—','m15'],
+ 'p-gitops':['Operations','Terraform · Argo CD','Terraform builds the VPC, EKS, Aurora, SQS, S3 and IAM per environment. Argo CD promotes the Helm release from dev to staging to prod by pull request, with canary rollouts for the API.','deploy/helm/podcast-agent (built) · Terraform (proposed)','values.yaml per environment','—','m13']
+};
+function nodeHtml(id){const n=NODES[id]; if(!n) return '';
+  const rows=[['Code',n[3]],['Knobs',n[4]],['Change it',n[5]]].filter(r=>r[1]&&r[1]!=='—');
+  return `<span class="kick">${esc(n[0])}</span><h4>${esc(n[1])}</h4><p>${esc(n[2])}</p>
+   ${rows.length?`<dl>${rows.map(([k,v])=>`<dt>${k}</dt><dd>${k==='Code'||k==='Change it'?`<code>${esc(v)}</code>`:esc(v)}</dd>`).join('')}</dl>`:''}
+   <a class="nd-link" href="#${n[6]}" data-goto="${n[6]}">Read module ${n[6].slice(1)} →</a>`;}
+function wireNodes(scope,panel,first){
+  const nodes=$$('[data-node]',scope);
+  const pick=el=>{nodes.forEach(x=>x.classList.toggle('sel',x===el)); if(el.tagName==='BUTTON') nodes.forEach(x=>x.setAttribute&&x.tagName==='BUTTON'&&x.setAttribute('aria-pressed',x===el)); panel.innerHTML=nodeHtml(el.dataset.node);
+    $$('[data-goto]',panel).forEach(a=>a.onclick=e=>{e.preventDefault(); document.getElementById(a.dataset.goto)?.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'});});
+    if(anim) gsap.fromTo(panel,{opacity:.4,y:4},{opacity:1,y:0,duration:.3});};
+  nodes.forEach(el=>{el.addEventListener('click',()=>pick(el)); el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(el);}});});
+  const start=nodes.find(n=>n.dataset.node===first); if(start){ start.classList.add('sel'); panel.innerHTML=nodeHtml(first); $$('[data-goto]',panel).forEach(a=>a.onclick=e=>{e.preventDefault(); document.getElementById(a.dataset.goto)?.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'});}); }
+}
+
+/* ---------- flip cards and glossary content ---------- */
+const cards=[
+ ['Which five steps can the planner schedule, and which is optional?','normalize_transcript, summarize, extract_notes, extract_claims and verify_claims. Only normalize_transcript is optional, and verify_claims must come after extract_claims.'],
+ ['What happens when the planner’s plan is missing a required step?','The validator adds it, fixes the order if a dependency is broken, clamps parameters into range and logs each repair. If the planner fails outright, a fixed fallback plan runs.'],
+ ['What three checks does every model answer pass?','It parses as JSON, matches the Pydantic schema and passes the step’s own rules. Problems go back to the model, up to three attempts.'],
+ ['How is a quote proven verbatim?','It is fuzzy-matched against single transcript lines and needs 0.90 or better. The matched line also supplies the correct timestamp and speaker.'],
+ ['When does summarization switch to map-reduce?','Above 15,000 words. Segments of about 1,500 words are noted first, cut at section boundaries, then reduced into one summary.'],
+ ['Why is the transcript sent as a shared prefix?','Summary, notes and claim extraction reuse it, so on Anthropic and Bedrock later calls read it from the prompt cache at a fraction of the input price.'],
+ ['What does one turn of the verification loop contain?','One JSON object: a thought, an action (search_knowledge_base, web_search or finish) and its input. The tool result comes back as an observation with evidence ids.'],
+ ['When is a prediction checkable?','When its deadline has passed. "Bitcoin will reach $200K by 2025" is checkable now: the 2025 peak was about $126,000.'],
+ ['State the confidence caps.','Unverifiable at most 0.50. No tool evidence at most 0.60. One source type at most 0.90. Knowledge base and web agreeing at most 0.95.'],
+ ['What happens when web search is down?','Three tries with backoff, then the error goes to the model as an observation. It finishes on the knowledge base, with confidence capped at 0.90.'],
+ ['What if a claim’s loop never finishes?','It hits the tool budget and the turn cap, and the claim is recorded as ❓ unverifiable at 0.20 for human review.'],
+ ['How do you run the full pipeline with no API key?','LLM_PROVIDER=offline, which auto mode picks when no key is set. Deterministic heuristics run every step; it tests plumbing, not model quality.'],
+ ['Where is the brief’s output file?','output/report.md and output/report.json: every episode’s summary, notes and fact-check table in one place.'],
+ ['What scales the workers in production?','KEDA, on SQS queue depth: about 2 messages per replica, from zero up to a cap set below the model provider’s rate limit.'],
+ ['Why can a redelivered job never be billed twice?','Jobs are keyed by a hash of the transcript, prompt version and models, and report.json is written last as the commit marker. A finished job is acknowledged without new model calls.']];
+const DECKS=[{id:'d1',name:'Plan and write',sub:'How the agent plans, validates every answer and writes the show notes.',cards:[1,2,3,4,5,6]},
+ {id:'d2',name:'Fact-check',sub:'The tool loop, the verdicts and the caps that keep confidence honest.',cards:[7,8,9,10,11]},
+ {id:'d3',name:'Run and deploy',sub:'Running without a key, the output file and the production shape.',cards:[12,13,14,15]}];
+const G=[
+ ['Episode','The parsed transcript: id, title, host, guests and timestamped lines, each with a resolved speaker, a role, cleaned text and raw text.','Agent'],
+ ['Capability catalog','The five steps the planner may schedule, with which are required, what they depend on and which parameters they take.','Agent'],
+ ['Plan validator','Deterministic check on the model’s plan: required steps present, dependencies in order, no duplicates, parameters in range. Repairs and logs any problem.','Agent'],
+ ['Executor','pipeline.py: runs the plan, isolates a failed step so only its dependents are skipped, and assembles the typed report.','Agent'],
+ ['@register','Decorator that adds a step function to the executor’s registry under a capability name.','Agent'],
+ ['normalize_transcript','Optional step that removes fillers, stutters and filler phrases while keeping the raw text on every line.','Agent'],
+ ['summarize','Step that writes the 200–300-word summary, single pass or map-reduce, with the word count validated.','Agent'],
+ ['extract_notes','Step that returns 5 takeaways, 3–5 verbatim quotes with timestamps and 5–8 kebab-case topic tags.','Agent'],
+ ['extract_claims','Step that finds check-worthy statements and rewrites each as a standalone, typed claim with a supporting quote.','Agent'],
+ ['Verbatim match','A quote counts as verbatim when it fuzzy-matches a single transcript line at 0.90 or better, against the cleaned or the raw text.','Agent'],
+ ['Time-sensitive','Flag on a claim whose truth can change over time, such as schedules, counts, prices or "currently". It sends the fact-checker to look for current evidence.','Agent'],
+ ['ReAct loop','The verification pattern: the model alternates thought, action and observation until it has enough evidence to finish.','Agent'],
+ ['Tool budget','The maximum tool calls per claim (2–6, set by the planner). Past it, the model must finish; a loop that never finishes lands as ❓ at 0.20.','Agent'],
+ ['Verdict','✅ verified true, ⚠️ possibly outdated or inaccurate, or ❓ unverifiable.','Agent'],
+ ['Calibration','Capping the model’s confidence by the evidence gathered: 0.50 for ❓, 0.60 with no tool evidence, 0.90 for one source type, 0.95 for two.','Agent'],
+ ['call_structured','The function every model step goes through: prompt, parse JSON, validate schema and rules, feed problems back, retry up to three times.','Model layer'],
+ ['Self-correction','Sending a step’s specific validation problems back to the model so it can fix them, shown as ↻ in the log.','Model layer'],
+ ['Tier (main / fast)','How a step asks for a model: main (Sonnet 5.5) for quality-critical work, fast (Haiku 5.5) for planning and extraction.','Model layer'],
+ ['Prompt cache prefix','The transcript block shared by summary, notes and claims, marked cacheable on Anthropic and Bedrock.','Model layer'],
+ ['Response cache','Local content-addressed cache of model responses. Reruns are free and identical; --no-cache bypasses it.','Model layer'],
+ ['LLM_PROVIDER','Selects anthropic, bedrock, openai, ollama or offline. auto picks Anthropic when a key is set, otherwise offline.','Model layer'],
+ ['Offline provider','Deterministic heuristics standing in for every model task, so the pipeline runs with no key or network.','Model layer'],
+ ['PROMPT_VERSION','Version string for prompts.py. Bump it after any prompt edit; it busts the response cache and is recorded in the manifest.','Model layer'],
+ ['Knowledge base','18 curated facts with sources and as-of dates in data/knowledge_base.json, ranked with BM25.','Tools'],
+ ['as_of date','The date a knowledge-base fact was last confirmed. Compared with today’s date, it separates ✅ from ⚠️.','Tools'],
+ ['BM25','The ranking function used for the knowledge base and the mock search engine. Production would add embeddings for hybrid retrieval.','Tools'],
+ ['Mock web search','A search engine over 17 dated pages in data/mock_web_index.json, including stale ones, with injectable latency and failures.','Tools'],
+ ['with_retries','Helper that retries a failing tool call three times with exponential backoff before giving up.','Tools'],
+ ['Evidence id','The label (E1, E2, …) given to each search result. The model must cite only ids it was shown.','Tools'],
+ ['report.md / report.json','The brief’s output file: every episode’s summary, notes and fact-check table in one place.','Outputs'],
+ ['fact_check_table','The three-column rows (claim, verification, confidence) in each episode’s JSON, matching the brief’s example.','Outputs'],
+ ['method','Which verification method produced a verdict: knowledge base, web search, knowledge base + web search, or reasoning step.','Outputs'],
+ ['run.log','The human-readable reasoning trace for a run.','Outputs'],
+ ['trace.jsonl','The structured trace: one JSON event per line with run_id, episode_id, step, kind and message.','Outputs'],
+ ['run_manifest.json','Per-run record of provider, models, prompt version, step timings and token usage.','Outputs'],
+ ['Docker image','python:3.12-slim, multi-stage, non-root user 10001, about 360 MB. Entry points run, serve and worker.','Deploy'],
+ ['Helm chart','deploy/helm/podcast-agent: API with HPA and PDB, workers with a KEDA ScaledObject, ConfigMap, ExternalSecret, NetworkPolicy and an IRSA service account.','Deploy'],
+ ['KEDA ScaledObject','Scales workers on SQS queue depth, from zero to a set maximum.','Deploy'],
+ ['IRSA','IAM roles for service accounts: pods get AWS permissions without static keys.','Deploy'],
+ ['External Secrets','Syncs API keys from AWS Secrets Manager into a Kubernetes secret.','Deploy'],
+ ['Idempotency key','Hash of transcript, prompt version and models. A redelivered job that already finished is acknowledged without rerunning.','Deploy'],
+ ['Dead-letter queue','Where a job goes after too many failed attempts, or at once if its input is invalid, so it stops blocking the queue.','Deploy'],
+ ['Model gateway','The proposed single service for model routing, retries, per-tenant budgets and provider failover.','Deploy']];
+const slug=t=>t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const CONCEPTS=Object.fromEntries(G.map(([t,d,g])=>[slug(t),[t,g,d]]));
+
+let done=new Set(store.get('pa-steps',[])), quiz=store.get('pa-quiz',{}), known=new Set(store.get('pa-known',[]));
+
+/* ---------- progress ---------- */
+function xp(){const correct=Object.entries(quiz).filter(([id,a])=>QUIZ[id]&&QUIZ[id].a===a).length; const ch=CHAPTERS.filter(c=>c.steps.every(s=>done.has(s))).length; return {xp:done.size*XP.section+correct*XP.correct+ch*XP.chapter,correct,ch};}
+function pline(){const x=xp(); $('#pline').textContent=`${done.size} of ${TOTAL} modules done · ${x.correct} of ${TOTAL} questions right · ${known.size} of ${cards.length} cards known · ${x.xp} XP`;}
+function refresh(){
+  const x=xp(), b=$('[data-s="xp"]'); pline(); if(!b) return;
+  const old=+b.dataset.n; b.dataset.n=x.xp;
+  if(anim){const o={v:old}; gsap.to(o,{v:x.xp,duration:.8,ease:'power2.out',onUpdate:()=>b.textContent=Math.round(o.v)});} else b.textContent=x.xp;
+  $('[data-s="done"]').innerHTML=`${done.size}<i>/${TOTAL}</i>`; $('[data-s="right"]').innerHTML=`${x.correct}<i>/${TOTAL}</i>`;
+}
+function fly(from,text){ if(!anim) return; const r=from.getBoundingClientRect(),t=document.createElement('span'); t.className='xpfly'; t.textContent=text; t.style.left=r.left+r.width/2+'px'; t.style.top=r.top+'px'; document.body.appendChild(t);
+  gsap.fromTo(t,{y:0,opacity:0,scale:.8},{y:-46,opacity:1,scale:1,duration:.5,ease:'back.out(2)'}); gsap.to(t,{opacity:0,y:-70,duration:.4,delay:.9,onComplete:()=>t.remove()}); }
+
+/* ---------- learning path: quiz, done, key ideas, copy ---------- */
+function paintPath(){
+  $$('[data-quiz]').forEach(box=>{const id=box.dataset.quiz, ans=quiz[id], q=QUIZ[id]; if(ans==null) return;
+    $$('.opt',box).forEach((b,j)=>{b.disabled=true; if(j===q.a) b.classList.add('right'); else if(j===ans) b.classList.add('wrong');});
+    const why=$('.why',box); why.innerHTML=`${ans===q.a?'<b>Right.</b> ':'<b>Not quite.</b> '}${esc(q.why)}`; why.hidden=false;});
+  $$('[data-done]').forEach(btn=>{const on=done.has(btn.dataset.done); btn.classList.toggle('go',!on); btn.textContent=on?'✓ Done · mark not done':`Mark module done · +${XP.section} XP`;
+    btn.closest('.sec').classList.toggle('done',on); $(`[data-toc="${btn.dataset.done}"]`)?.classList.toggle('done',on);});
+}
+$$('[data-quiz]').forEach(box=>{const id=box.dataset.quiz, q=QUIZ[id];
+  $$('.opt',box).forEach(btn=>btn.onclick=()=>{ if(quiz[id]!=null) return; const k=+btn.dataset.opt; quiz[id]=k; store.set('pa-quiz',quiz);
+    $$('.opt',box).forEach((b,j)=>{b.disabled=true; if(j===q.a) b.classList.add('right'); else if(j===k) b.classList.add('wrong');});
+    const why=$('.why',box); why.innerHTML=`${k===q.a?'<b>Right.</b> ':'<b>Not quite.</b> '}${esc(q.why)}`; why.hidden=false;
+    if(anim){ if(k===q.a){gsap.fromTo(btn,{scale:.96},{scale:1,duration:.5,ease:'back.out(3)'}); fly(btn,`+${XP.correct} XP`);} else gsap.fromTo(btn,{x:0},{keyframes:[{x:-6},{x:6},{x:-4},{x:0}],duration:.35}); }
+    refresh(); });});
+$$('[data-done]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.done, was=done.has(id), ch=CHAPTERS.find(c=>c.steps.includes(id)), chWas=ch.steps.every(s=>done.has(s));
+  was?done.delete(id):done.add(id); store.set('pa-steps',[...done]); paintPath();
+  if(!was&&anim){ fly(btn,`+${XP.section} XP`); if(!chWas&&ch.steps.every(s=>done.has(s))) setTimeout(()=>fly(btn,`Chapter complete · +${XP.chapter} XP`),450); }
+  refresh(); });
+$$('.chip[data-concept]').forEach(ch=>ch.onclick=()=>{
+  const sec=ch.closest('.sec'), pop=$('.pop',sec), open=ch.getAttribute('aria-expanded')==='true';
+  $$('.chip',sec).forEach(c=>c.setAttribute('aria-expanded','false'));
+  if(open){pop.hidden=true;return}
+  const c=CONCEPTS[ch.dataset.concept]; if(!c) return; pop.innerHTML=`<b>${esc(c[0])}</b><p>${esc(c[2])}</p>`; pop.hidden=false; ch.setAttribute('aria-expanded','true');
+  if(anim) gsap.fromTo(pop,{opacity:0,y:6},{opacity:1,y:0,duration:.3});
+});
+$$('.copy').forEach(b=>b.onclick=async()=>{const pre=b.closest('.try').querySelector('pre'); const text=pre.textContent;
+  try{await navigator.clipboard.writeText(text); b.textContent='Copied';}catch(e){const r=document.createRange(); r.selectNodeContents(pre); const s=getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent='Selected';}
+  setTimeout(()=>b.textContent='Copy',1400);});
+$$('[data-toc]').forEach(a=>a.onclick=e=>{e.preventDefault(); document.getElementById(a.dataset.toc)?.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'});});
+
+/* ---------- FIG 1: path focus, packets, components ---------- */
+const map=document.getElementById('map');
+if(anim && window.MotionPathPlugin){
+  [['notes',5.2,0],['fact',4.4,1.2],['trace',3.6,2.2]].forEach(([r,d,delay])=>{
+    gsap.to('#p-'+r,{duration:d,repeat:-1,delay,ease:'power1.inOut',repeatDelay:.6,motionPath:{path:'#r-'+r,align:'#r-'+r,alignOrigin:[.5,.5]}});
+  });
+}
+$$('[data-focus]').forEach(b=>b.addEventListener('click',()=>{
+  $$('[data-focus]').forEach(x=>x.setAttribute('aria-pressed', x===b?'true':'false'));
+  map.classList.remove('focus-notes','focus-fact','focus-trace');
+  if(b.dataset.focus!=='all') map.classList.add('focus-'+b.dataset.focus);
+}));
+wireNodes(map,$('#nd-map'),'verify');
+wireNodes($('#prod'),$('#nd-prod'),'p-workers');
+
+/* ---------- FIG 3: one claim through the loop ---------- */
+const lanes=[['Verifier',90],['Model',270],['Knowledge base',450],['Web search',630],['Report',810]];
+const X=Object.fromEntries(lanes.map(([n,x],i)=>[i,x]));
+const base=[
+ {f:0,t:1,l:'claim C3 · tools · today',h:'The verifier opens the loop',b:'verify_claim() sends the claim, the speaker’s quote, today’s date and the tools the planner allowed. The system prompt sets the verdict policy and a budget of 4 tool calls.'},
+ {f:1,t:0,l:'action: search_knowledge_base',r:1,h:'The model picks a tool',b:'Each turn is one JSON object: thought, action, input. The thought notes that the 2025 deadline has passed, so the prediction can now be checked.'},
+ {f:0,t:2,l:'query: Bitcoin $200K 2025',c:'fact',h:'Search the knowledge base',b:'BM25 over 18 dated facts. Every hit carries a source, an as-of date and a relevance score.'},
+ {f:2,t:0,l:'E1 KB-032 · as of 2026-10-06',r:1,c:'fact',h:'Evidence comes back',b:'Top hit: Bitcoin peaked near $126,000 in 2025 and did not reach $200,000. Results are numbered E1–E3 so the model can cite them.'},
+ {f:0,t:1,l:'observation E1–E3 · 3 calls left',h:'Feed the observation back',b:'The evidence, its dates and the remaining budget go back to the model as the next message.'},
+ {f:1,t:0,l:'action: web_search',r:1,h:'The model checks the web too',b:'The claim is time-sensitive, so the model looks for current reporting before deciding.'}];
+const happy=base.concat([
+ {f:0,t:3,l:'query: Bitcoin $200K 2025',c:'fact',h:'Search the web',b:'The mock engine ranks 17 dated pages, including stale ones. Live search is one setting away: SEARCH_PROVIDER=tavily.'},
+ {f:3,t:0,l:'E4 2024 forecast · E5 2025 record',r:1,c:'fact',h:'Mixed evidence',b:'One result is a December 2024 forecast of $200K; another reports the October 2025 record near $126,000. The publish dates let the model tell them apart.'},
+ {f:0,t:1,l:'observation E4–E6 · 2 calls left',h:'Feed the observation back',b:'Both searches are now in front of the model, each result with its id and date.'},
+ {f:1,t:0,l:'finish ⚠️ 0.82 · [E1, E5]',r:1,h:'The model finishes',b:'Verdict possibly_outdated_or_inaccurate, a one-to-three sentence rationale and the evidence ids it relied on. Ids it never saw would be rejected.'},
+ {f:0,t:4,l:'calibrate: KB + web → cap 0.95',h:'Cap the confidence',b:'Knowledge base and web together allow up to 0.95, so 0.82 stands. The model’s raw number is stored alongside.'},
+ {f:0,t:4,l:'row: ⚠️ … (contradicted by KB-032) · 0.82',h:'One row in the table',b:'The row lands in report.md and report.json in the brief’s format, with the evidence and reasoning in the details block below the table.'}]);
+const fail=base.concat([
+ {f:0,t:3,l:'timeout ×3 · 0.25 s, 0.5 s backoff',c:'warn',x:1,h:'Search fails',b:'The tool raises an error. with_retries() tries three times with exponential backoff, and each retry is logged.'},
+ {f:3,t:0,l:'ToolError: web_search unavailable',r:1,c:'warn',h:'The failure becomes an observation',b:'The run does not crash. The verifier tells the model the tool is unavailable and to use another tool or finish.'},
+ {f:0,t:1,l:'observation: ERROR · 2 calls left',c:'warn',h:'The model sees the outage',b:'It still has dated, curated evidence from the knowledge base.'},
+ {f:1,t:0,l:'finish ⚠️ 0.88 · [E1]',r:1,h:'The model finishes on the knowledge base',b:'KB-032 contradicts the claim directly, so the model finishes without the web.'},
+ {f:0,t:4,l:'calibrate: KB only → cap 0.90',h:'A lower ceiling',b:'With one source type the cap is 0.90, so 0.88 stands. The outage shows up as a lower ceiling, not a failed run.'},
+ {f:0,t:4,l:'row: ⚠️ … (contradicted by KB-032) · 0.88',h:'The row still ships',b:'Same verdict, same format. The search failure is visible in the log and in the tools used for this claim.'}]);
+let mode=happy, i=0;
+const svg=document.getElementById('seq');
+const NS='http://www.w3.org/2000/svg';
+function el(n,a,txt){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e;}
+function draw(){
+  const top=80, gap=42, H=top+mode.length*gap+20;
+  svg.setAttribute('viewBox',`0 0 900 ${H}`);
+  svg.innerHTML='';
+  const defs=el('defs');
+  [['s','mk'],['sf','mk-fact'],['sw','mk-warn']].forEach(([id,c])=>{const m=el('marker',{id:'q'+id,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto'});m.appendChild(el('path',{d:'M0,0 L10,5 L0,10 z',class:c}));defs.appendChild(m);});
+  svg.appendChild(defs);
+  lanes.forEach(([n,x])=>{
+    svg.appendChild(el('line',{x1:x,y1:56,x2:x,y2:H-6,class:'lifeline'}));
+    const cls = n==='Model'?'box-llm':(n==='Knowledge base'||n==='Web search')?'box-fact':n==='Report'?'box-notes':'box';
+    svg.appendChild(el('rect',{x:x-62,y:18,width:124,height:36,rx:8,class:cls}));
+    svg.appendChild(el('text',{x:x,y:41,'text-anchor':'middle',class:'t-chip'},n));
+  });
+  mode.forEach((m,k)=>{
+    const y=top+k*gap, x1=X[m.f], x2=X[m.t], dir=x2>x1?1:-1;
+    const g=el('g',{class:'msg','data-k':k});
+    const wc = m.c==='fact'?'wire-fact':m.c==='warn'?'wire-warn':'wire';
+    const mk = m.c==='fact'?'qsf':m.c==='warn'?'qsw':'qs';
+    const line=el('line',{x1:x1+dir*6,y1:y,x2:x2-dir*8,y2:y,class:wc,'marker-end':m.x?'':`url(#${mk})`});
+    if(m.r) line.setAttribute('stroke-dasharray','5 4');
+    g.appendChild(line);
+    if(m.x){ g.appendChild(el('path',{d:`M${x2-dir*16-6},${y-6} l12,12 m0,-12 l-12,12`,class:'wire-warn','stroke-dasharray':'0'})); }
+    g.appendChild(el('text',{x:(x1+x2)/2,y:y-8,'text-anchor':'middle',class:'t-small'},m.l));
+    const nx=Math.min(x1,x2)-20<10?Math.min(x1,x2)+14:Math.min(x1,x2)-20;
+    g.appendChild(el('circle',{cx:nx,cy:y,r:9,class:'stepnum'}));
+    g.appendChild(el('text',{x:nx,y:y+3.5,'text-anchor':'middle',class:'stepnum-t'},String(k+1)));
+    svg.appendChild(g);
+  });
+  svg.appendChild(el('circle',{id:'seqdot',r:6,cx:-20,cy:-20,class:'packet',style:'fill:var(--accent)'}));
+  show();
+}
+function show(){
+  const m=mode[i];
+  svg.querySelectorAll('.msg').forEach(g=>{const k=+g.dataset.k;g.classList.toggle('future',k>i);g.classList.toggle('now',k===i);});
+  $('#stepN').textContent=`Step ${i+1} of ${mode.length}`;
+  $('#stepT').textContent=m.h; $('#stepB').textContent=m.b;
+  $('#prev').disabled=i===0; $('#next').disabled=i===mode.length-1;
+  const dot=svg.querySelector('#seqdot'); const y=80+i*42, x1=X[m.f], x2=X[m.t];
+  dot.style.fill = m.c==='fact'?'var(--c-fact)':m.c==='warn'?'var(--bad)':'var(--accent)';
+  const tx=m.x?(x1+x2)/2+(x2-x1)*.35:x2;
+  if(anim){ gsap.killTweensOf(dot); gsap.fromTo(dot,{attr:{cx:x1,cy:y}},{attr:{cx:tx,cy:y},duration:.7,ease:'power2.inOut'}); }
+  else { dot.setAttribute('cx',tx); dot.setAttribute('cy',y); }
+}
+$('#next').onclick=()=>{if(i<mode.length-1){i++;show();}};
+$('#prev').onclick=()=>{if(i>0){i--;show();}};
+$('#reset').onclick=()=>{i=0;show();};
+function setMode(m,btn){mode=m;i=0;['modeHappy','modeFail'].forEach(id=>document.getElementById(id).setAttribute('aria-pressed',document.getElementById(id)===btn?'true':'false'));draw();}
+$('#modeHappy').onclick=e=>setMode(happy,e.currentTarget);
+$('#modeFail').onclick=e=>setMode(fail,e.currentTarget);
+draw();
+
+/* ---------- flip cards ---------- */
+let fcDeck='all';
+function renderCards(){
+  const v=$('#v-cards'); const kn=known.size;
+  const decks=DECKS.filter(d=>fcDeck==='all'||d.id===fcDeck).map(d=>`<section class="fc-deck" id="fc-${d.id}"><span class="kick">Podcast agent · ${d.cards.length} cards</span><h3>${esc(d.name)}</h3><p>${esc(d.sub)}</p>
+     <div class="fc-grid">${d.cards.map(no=>{const [q,a]=cards[no-1], id='c'+no;
+      return `<div class="fc-cell${known.has(id)?' known':''}" data-id="${id}"><button type="button" class="fc" aria-pressed="false" aria-label="Card ${no}: ${esc(q)} Tap to flip.">
+        <span class="fc-in"><span class="fc-face fc-front"><span class="kick">[ ${String(no).padStart(2,'0')} ] · tap to flip</span><span class="fc-q">${esc(q)}</span></span>
+        <span class="fc-face fc-back"><span class="kick">Answer</span><span class="fc-a">${esc(a)}</span></span></span></button>
+        <button type="button" class="fc-know" aria-pressed="${known.has(id)}">${known.has(id)?'✓ Known':'Mark known'}</button></div>`}).join('')}</div></section>`).join('');
+  v.innerHTML=`<header class="hero"><span class="kick">Flip cards</span><h2>Say it out loud, then flip.</h2>
+   <p>Fifteen cards on planning, validation, the fact-check loop and the production shape. Answer before you flip; the back gives the short version you would say in a design review.</p>
+   <div class="stats"><div><span>[ 01 ]</span><b>${DECKS.length}</b><small>decks</small></div>
+   <div><span>[ 02 ]</span><b>${cards.length}</b><small>cards</small></div>
+   <div><span>[ 03 ]</span><b data-fc="flipped">0<i>/${cards.length}</i></b><small>flipped this visit</small></div>
+   <div class="xp"><span>[ 04 ]</span><b data-fc="known">${kn}<i>/${cards.length}</i></b><small>marked known · saved in this browser</small></div></div></header>
+   <div class="fc-call"><b>The model proposes; the agent checks.</b><span>Most answers come back to the same idea: the model plans, writes and judges, and deterministic code validates, grounds and caps what it returns.</span></div>
+   <div class="fc-bar"><button type="button" class="chip" data-fcdeck="all" aria-expanded="${fcDeck==='all'}">All</button>${DECKS.map(d=>`<button type="button" class="chip" data-fcdeck="${d.id}" aria-expanded="${fcDeck===d.id}">${esc(d.name)}</button>`).join('')}<span class="sp"></span><button type="button" class="chip" id="fc-reset">Unflip all</button></div>
+   ${decks}`;
+  let flipped=new Set();
+  $$('.fc',v).forEach(b=>b.onclick=()=>{const on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on); if(on){flipped.add(b.closest('.fc-cell').dataset.id);} $('[data-fc="flipped"]',v).innerHTML=`${flipped.size}<i>/${cards.length}</i>`;});
+  $$('.fc-know',v).forEach(b=>b.onclick=()=>{const cell=b.closest('.fc-cell'), id=cell.dataset.id; known.has(id)?known.delete(id):known.add(id); store.set('pa-known',[...known]);
+    const on=known.has(id); b.setAttribute('aria-pressed',on); b.textContent=on?'✓ Known':'Mark known'; cell.classList.toggle('known',on); $('[data-fc="known"]',v).innerHTML=`${known.size}<i>/${cards.length}</i>`; pline();});
+  $$('[data-fcdeck]',v).forEach(b=>b.onclick=()=>{fcDeck=b.dataset.fcdeck; renderCards();});
+  $('#fc-reset',v).onclick=()=>$$('.fc',v).forEach(b=>b.setAttribute('aria-pressed','false'));
+  if(anim) gsap.from($$('.fc-cell',v),{y:12,opacity:.3,duration:.4,stagger:.03,ease:'power2.out',clearProps:'all'});
+}
+
+/* ---------- glossary ---------- */
+const GICON={Agent:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M3 12h6M15 12h6M12 3v6M12 15v6"/></svg>',
+ 'Model layer':'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/></svg>',
+ Tools:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="M15 15l5 5"/></svg>',
+ Outputs:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M9 11h6M9 15h6"/></svg>',
+ Deploy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="5" rx="1"/><rect x="4" y="10" width="16" height="5" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg>'};
+let glGroup='All';
+function renderGloss(){
+  const v=$('#v-gloss'); const groups=['Agent','Model layer','Tools','Outputs','Deploy'];
+  v.innerHTML=`<header class="hero"><span class="kick">Glossary · ${G.length} concepts</span><h2>Every term the guide uses.</h2><p style="margin:0">Say the definition out loud before you read it. The key ideas in each module open these same definitions.</p></header>
+   <div class="gl-tools"><div class="gl-filter">${['All',...groups].map(g=>`<button type="button" class="tab" aria-selected="${g===glGroup}" data-g="${g}">${g}</button>`).join('')}</div>
+   <input id="gq" type="search" placeholder="Filter: cache, quote, KEDA…" autocomplete="off" aria-label="Filter the glossary"><span class="gl-count" id="gcount"></span></div>
+   <div class="gl">${G.map(([t,d,g])=>`<article class="gc" id="g-${slug(t)}" data-group="${g}"><span class="gtag">${GICON[g]}${esc(g)}</span><h4>${esc(t)}</h4><p>${esc(d)}</p></article>`).join('')}</div>`;
+  const q=$('#gq',v), cnt=$('#gcount',v);
+  const filt=()=>{const s=q.value.trim().toLowerCase(); let n=0; $$('.gc',v).forEach(c=>{const on=(glGroup==='All'||c.dataset.group===glGroup)&&(!s||c.textContent.toLowerCase().includes(s)); c.hidden=!on; if(on) n++;}); cnt.textContent=`${n} of ${G.length}`;};
+  $$('.gl-filter .tab',v).forEach(b=>b.onclick=()=>{glGroup=b.dataset.g; $$('.gl-filter .tab',v).forEach(x=>x.setAttribute('aria-selected',x===b)); filt();});
+  q.addEventListener('input',filt); filt();
+}
+
+/* ---------- views ---------- */
+const VIEWS={path:'#v-path',cards:'#v-cards',gloss:'#v-gloss'};
+let cur=null, triggers=[];
+function wireMotion(){
+  triggers.forEach(t=>t.kill()); triggers=[];
+  if(!(anim&&ST)) return;
+  const root=$('#v-path');
+  const rail=$('.rail i',root);
+  triggers.push(ST.create({trigger:$('.main',root),start:'top 30%',end:'bottom 70%',scrub:.4,onUpdate:s=>gsap.set(rail,{scaleY:s.progress})}));
+  $$('.sec',root).forEach(sec=>triggers.push(ST.create({trigger:sec,start:'top 45%',end:'bottom 45%',onToggle:s=>{ if(!s.isActive) return;
+    $$('[data-toc]',root).forEach(a=>a.classList.toggle('on',a.dataset.toc===sec.dataset.sid));
+    const on=$(`[data-toc="${sec.dataset.sid}"]`,root); if(on&&matchMedia('(max-width: 900px)').matches) on.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); }})));
+}
+function showView(view,opts={}){
+  Object.entries(VIEWS).forEach(([k,sel])=>{$(sel).hidden=k!==view;});
+  $$('.nav .tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.view===view));
+  if(view==='cards') renderCards();
+  if(view==='gloss') renderGloss();
+  try{history.replaceState(null,'','#'+(view==='gloss'?'glossary':view))}catch(e){}
+  store.set('pa-view',view); pline();
+  if(opts.anchor){ requestAnimationFrame(()=>document.getElementById(opts.anchor)?.scrollIntoView({block:'start'})); } else if(cur) window.scrollTo(0,0);
+  if(view==='path'){ wireMotion(); if(ST) ST.refresh(); } else { triggers.forEach(t=>t.kill()); triggers=[]; }
+  cur=view;
+}
+$$('.nav .tab').forEach(t=>t.onclick=()=>showView(t.dataset.view));
+const setTop=()=>document.documentElement.style.setProperty('--toph',$('.top').offsetHeight+'px'); setTop(); addEventListener('resize',setTop);
+paintPath(); refresh();
+const h0=(location.hash||'').slice(1);
+if(/^m\d+$|^c\d$/.test(h0)) showView('path',{anchor:h0});
+else showView(h0==='cards'?'cards':(h0==='glossary'||h0==='gloss')?'gloss':h0==='path'?'path':store.get('pa-view','path'));
+})();
+</script>
+</body>
+</html>

@@ -7,7 +7,7 @@ An agentic AI system that takes raw podcast transcripts (`.json` or timestamped 
 3. **Fact-check.** Check-worthy claims are extracted and verified by a tool-using agent against a local knowledge base and a (mock or real) web search. Each claim is marked ✅ verified, ⚠️ possibly outdated/inaccurate or ❓ unverifiable, with a calibrated confidence score and cited evidence.
 4. **Reasoning log.** A readable trace of every plan, thought, tool call, observation, self-correction and verdict, plus a structured JSONL version.
 
-The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is in **[docs/guide/index.html](docs/guide/index.html)** (open it in a browser).
+The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is in **[docs/guide/public/index.html](docs/guide/public/index.html)**: open it in a browser, or deploy it as a Cloudflare Worker with `cd docs/guide && npx wrangler deploy`.
 
 ## Where each requirement lives
 
@@ -22,7 +22,7 @@ The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/
 | Readable logs of the agent's reasoning steps and plans | `output/logs/run.log` (readable) and `output/logs/trace.jsonl` (structured) |
 | An output JSON or Markdown file with summary, notes and fact-check table | `output/report.md` and `output/report.json` (plus one pair per episode) |
 | A deployment strategy with diagram and narrative | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/architecture.svg](docs/architecture.svg) |
-| A detailed README | This file, plus the interactive guide in `docs/guide/` |
+| A detailed README | This file, plus the interactive guide in `docs/guide/public/index.html` |
 
 Sample outputs from a complete run are committed in [`samples/offline-mode/`](samples/offline-mode).
 
