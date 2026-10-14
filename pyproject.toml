@@ -62,6 +62,7 @@ filterwarnings = ["error", "ignore::DeprecationWarning:httpx.*", "ignore::Resour
 [tool.coverage.run]
 source = ["podcast_agent"]
 branch = true
+patch = ["subprocess"]  # measure child processes too (the telemetry setup test runs in one)
 
 [tool.coverage.report]
 # A ratchet: raise it when coverage goes up, never lower it.

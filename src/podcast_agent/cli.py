@@ -9,7 +9,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from podcast_agent import __version__
+from podcast_agent import __version__, telemetry
 from podcast_agent.config import Settings
 from podcast_agent.models import Verdict
 
@@ -44,6 +44,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         (log_dir / name).unlink(missing_ok=True)
     run_id = new_run_id()
     tracer = Tracer(run_id, log_dir=log_dir, console=console, verbose=not args.quiet)
+    telemetry.setup()
     try:
         files = collect_inputs(args.inputs)
         if not files:
@@ -62,6 +63,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         return 2
     finally:
         tracer.close()
+        telemetry.shutdown()
 
     table = Table(title=f"Run {run_id}", show_lines=False)
     for col in ("Episode", "Summary", "Notes", "Claims ✅/⚠️/❓", "LLM calls", "Tokens in/out"):
@@ -132,7 +134,11 @@ def cmd_worker(args: argparse.Namespace) -> int:
                        max_attempts=int(os.environ.get("WORKER_MAX_ATTEMPTS", "3")))
     store = make_store(args.output or os.environ.get("OUTPUT_URI", "output/jobs"))
     tracer.info("worker", f"polling {args.queue or os.environ.get('QUEUE_URI', 'dir://queue')} · provider={ctx.llm.name}")
-    n = run_worker(ctx, queue, store, once=args.once)
+    telemetry.setup()
+    try:
+        n = run_worker(ctx, queue, store, once=args.once)
+    finally:
+        telemetry.shutdown()
     tracer.info("worker", f"stopped after {n} job(s)")
     tracer.close()
     return 0
@@ -141,7 +147,11 @@ def cmd_worker(args: argparse.Namespace) -> int:
 def cmd_serve(args: argparse.Namespace) -> int:
     import uvicorn
 
-    uvicorn.run("podcast_agent.server:app", host=args.host, port=args.port, log_level="info")
+    telemetry.setup()
+    try:
+        uvicorn.run("podcast_agent.server:app", host=args.host, port=args.port, log_level="info")
+    finally:
+        telemetry.shutdown()
     return 0
 
 

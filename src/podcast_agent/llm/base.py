@@ -14,6 +14,10 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Literal
 
+from opentelemetry.trace import SpanKind
+
+from podcast_agent import telemetry
+
 Tier = Literal["main", "fast"]
 
 
@@ -66,19 +70,30 @@ class LLMProvider(ABC):
         context: dict[str, Any] | None = None,
     ) -> LLMResponse:
         model = self.model_for(tier)
-        start = time.perf_counter()
-        resp = self._complete(
-            system=system,
-            messages=messages,
-            model=model,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            cache_prefix=cache_prefix,
-            task=task,
-            context=context or {},
-        )
-        if not resp.latency_ms:
-            resp.latency_ms = int((time.perf_counter() - start) * 1000)
+        attributes = telemetry.chat_attributes(provider=self.name, model=model, max_tokens=max_tokens,
+                                               temperature=temperature, task=task, tier=tier)
+        with telemetry.span(f"chat {model}", kind=SpanKind.CLIENT, attributes=attributes) as span:
+            start = time.perf_counter()
+            try:
+                resp = self._complete(
+                    system=system,
+                    messages=messages,
+                    model=model,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    cache_prefix=cache_prefix,
+                    task=task,
+                    context=context or {},
+                )
+            except Exception as exc:
+                telemetry.record_chat_error(self.name, model, time.perf_counter() - start, exc)
+                span.set_attribute("error.type", type(exc).__name__)
+                raise
+            duration = time.perf_counter() - start
+            if not resp.latency_ms:
+                resp.latency_ms = int(duration * 1000)
+            telemetry.record_chat(span, resp, provider=self.name, request_model=model, duration_s=duration,
+                                  messages=[{"role": "system", "content": system}, *messages])
         return resp
 
     @abstractmethod

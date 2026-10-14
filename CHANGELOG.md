@@ -11,6 +11,9 @@ Work toward v0.2.0, tracked in the [v0.2.0 milestone](https://github.com/Organiz
 
 - `docs/OPENSSF-BEST-PRACTICES.md` maps each of the 67 OpenSSF Best Practices passing criteria to its evidence; `SECURITY.md` adds secure-design principles and the common errors the code guards against; the README adds badges, who the project is for and a support section with response times.
 - Repository rulesets: `main` only accepts squash-merged pull requests whose required checks pass, and `v*` tags cannot be moved or deleted.
+- OpenTelemetry tracing with the GenAI semantic conventions: one trace per run (`run` → `invoke_agent` per episode → `step` → `verify_claim` → `chat` and `execute_tool`), with token usage, finish reasons and verdicts as attributes. Off unless `OTEL_EXPORTER_OTLP_ENDPOINT` or `OTEL_TRACES_EXPORTER` is set; transcript and model text stay out of spans unless content capture is turned on.
+- OpenTelemetry metrics: `gen_ai.client.token.usage`, `gen_ai.client.operation.duration`, and counters for episodes, verdicts, self-corrections and tool calls.
+- `logs/trace.jsonl` lines carry `trace_id` and `span_id`, and the run manifest (schema 1.2) records `otel_trace_id`, so the audit trail links to the trace.
 
 ### Changed
 - Repository layout follows vllm-project/semantic-router: the guide moved to `website/`, Compose to `deploy/compose/`, the embed script to `tools/guide/`, and the Makefile is split into `tools/make/*.mk`.
