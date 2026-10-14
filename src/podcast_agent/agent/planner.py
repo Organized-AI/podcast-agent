@@ -131,7 +131,7 @@ def repair_plan(plan: Plan, ctx: RunContext, ep: Episode, catalog: dict) -> Plan
 def default_plan(ctx: RunContext, ep: Episode, catalog: dict) -> Plan:
     plan = Plan(
         goal="Produce show notes and a fact-check report (deterministic fallback plan).",
-        steps=[PlanStep(step=n, reason="fallback plan") for n in CANONICAL_ORDER],
+        steps=[PlanStep.model_validate({"step": n, "reason": "fallback plan"}) for n in CANONICAL_ORDER],
     )
     return repair_plan(plan, ctx, ep, catalog)
 

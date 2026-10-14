@@ -18,6 +18,30 @@ from podcast_agent.trace import Tracer
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 
+SECRET_ENV = ("ANTHROPIC_API_KEY", "ANTHROPIC_WORKSPACE_ID", "OPENAI_API_KEY", "TAVILY_API_KEY",
+              "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "OTEL_EXPORTER_OTLP_ENDPOINT",
+              "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", "LLM_PROVIDER")
+
+
+@pytest.fixture(autouse=True)
+def hermetic(monkeypatch):
+    """Tests never reach the network or real credentials: a test that tries fails loudly."""
+    import socket
+
+    for name in SECRET_ENV:
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("OTEL_SDK_DISABLED", "true")
+
+    real_connect = socket.socket.connect
+
+    def guarded_connect(sock, address):
+        host = address[0] if isinstance(address, tuple) else address
+        if sock.family == socket.AF_UNIX or host in ("127.0.0.1", "::1", "localhost"):
+            return real_connect(sock, address)
+        raise RuntimeError(f"tests must not open network connections (tried {address!r})")
+
+    monkeypatch.setattr(socket.socket, "connect", guarded_connect)
+
 
 class ScriptedProvider(LLMProvider):
     """Returns queued responses per task; falls back to the offline heuristics when the queue is empty."""

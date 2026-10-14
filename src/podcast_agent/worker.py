@@ -17,6 +17,7 @@ not exercised in this repo's test suite (no AWS account in CI).
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import shutil
@@ -210,10 +211,8 @@ def run_worker(ctx: RunContext, queue: JobQueue, store: OutputStore, *, once: bo
         stop.requested = True
         ctx.trace.info("worker", "SIGTERM received — finishing the current job, then exiting")
 
-    try:
+    with contextlib.suppress(ValueError):  # not in the main thread (e.g. tests)
         signal.signal(signal.SIGTERM, handle_sigterm)
-    except ValueError:  # not in the main thread (e.g. tests)
-        pass
 
     processed = 0
     while not stop.requested:

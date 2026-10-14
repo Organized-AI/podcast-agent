@@ -135,7 +135,8 @@ def verify_claim(
     messages: list[dict[str, str]] = [{"role": "user", "content": verify_opening(claim, episode_title)}]
     evidence: dict[str, Evidence] = {}
     history: list[dict[str, Any]] = []
-    tool_calls, tools_used = 0, []
+    tool_calls = 0
+    tools_used: list[str] = []
     corrections = 0
     final: FinishInput | None = None
     max_turns = max_steps + 4

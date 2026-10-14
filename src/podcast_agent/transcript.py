@@ -124,7 +124,9 @@ def resolve_speaker(label: str, host: str | None, guests: list[str]) -> tuple[st
     if low == "guest":
         return (guests[0] if len(guests) == 1 else "Guest"), "guest"
     tokens = _name_tokens(label)
-    candidates: list[tuple[str, Role]] = ([(host, "host")] if host else []) + [(g, "guest") for g in guests]
+    host_role: Role = "host"
+    guest_role: Role = "guest"
+    candidates: list[tuple[str, Role]] = ([(host, host_role)] if host else []) + [(g, guest_role) for g in guests]
     for name, role in candidates:
         if tokens and tokens <= _name_tokens(name):
             return name, role

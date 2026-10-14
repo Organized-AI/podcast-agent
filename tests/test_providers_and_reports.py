@@ -71,7 +71,7 @@ def test_verification_text_matches_the_assignment_style():
 def test_reports_carry_the_three_column_table_and_a_combined_file(tmp_path, data_dir):
     ctx = make_ctx()
     files = [data_dir / "transcripts" / "ep004_pdf_example.txt", data_dir / "transcripts" / "ep002_ai_healthcare.json"]
-    reports, errors = run_batch(ctx, files, tmp_path, "test-run")
+    _reports, errors = run_batch(ctx, files, tmp_path, "test-run")
     assert not errors
     md = (tmp_path / "ep004.md").read_text()
     assert "| Claim | Verification | Confidence |" in md

@@ -17,6 +17,7 @@ audit.json and audit.md next to the run.
 
 from __future__ import annotations
 
+import itertools
 import json
 import re
 from dataclasses import asdict, dataclass, field
@@ -132,7 +133,7 @@ def audit_run(run_dir: str | Path, transcripts: list[str | Path] | None = None) 
                 except json.JSONDecodeError:
                     events.append({"_bad": line})
     foreign = [e for e in events if e.get("run_id") != res.run_id]
-    unordered = sum(1 for a, b in zip(events, events[1:], strict=False) if a.get("ts", "") > b.get("ts", ""))
+    unordered = sum(1 for a, b in itertools.pairwise(events) if a.get("ts", "") > b.get("ts", ""))
     expected = manifest.get("trace_events")
     complete = expected is None or expected == len(events)
     res.add("run", "run", "Trace belongs to this run, in order and complete",
@@ -170,7 +171,7 @@ def audit_run(run_dir: str | Path, transcripts: list[str | Path] | None = None) 
     for raw in combined.get("episodes", []):
         rep = EpisodeReport.model_validate(raw)
         eid = rep.episode.episode_id
-        src = sources.get(eid)
+        src_ep = sources.get(eid)
 
         names = [s.step for s in (rep.plan.steps if rep.plan else [])]
         missing_steps = [s for s in REQUIRED_STEPS if s not in names]
@@ -199,13 +200,13 @@ def audit_run(run_dir: str | Path, transcripts: list[str | Path] | None = None) 
         n = rep.notes
         if n:
             res.add(eid, "notes", "Exactly 5 takeaways", len(n.takeaways) == 5, f"{len(n.takeaways)} takeaways")
-            if src is None:
+            if src_ep is None:
                 res.add(eid, "notes", "Quotes verbatim at their timestamp and speaker", None,
                         "source transcript not available to re-check", warn=True)
             else:
                 problems = []
                 for q in n.quotes:
-                    u, score = locate_span(src, q.text, q.timestamp)
+                    u, score = locate_span(src_ep, q.text, q.timestamp)
                     if u is None or score < VERBATIM_THRESHOLD:
                         problems.append(f"[{q.timestamp}] not found (best {score:.2f})")
                     elif u.timestamp != q.timestamp or u.speaker_name != q.speaker:
@@ -222,10 +223,10 @@ def audit_run(run_dir: str | Path, transcripts: list[str | Path] | None = None) 
             res.add(eid, "claims", "Claims checked", None, "no fact-checks in this episode", warn=True)
             continue
 
-        if src is not None:
+        if src_ep is not None:
             ungrounded = []
             for fc in rep.fact_checks:
-                u, score = locate_span(src, fc.claim.quote or fc.claim.claim, fc.claim.timestamp)
+                u, score = locate_span(src_ep, fc.claim.quote or fc.claim.claim, fc.claim.timestamp)
                 if u is None or score < CLAIM_GROUNDING:
                     ungrounded.append(f"{fc.claim.id} ({score:.2f})")
             res.add(eid, "claims", "Every claim is grounded in its transcript line", not ungrounded,

@@ -131,15 +131,7 @@ def call_structured(
             + (f" (+{len(problems) - 1} more)" if len(problems) > 1 else ""),
             problems=problems,
         )
-        messages = messages + [
-            {"role": "assistant", "content": resp.text},
-            {
-                "role": "user",
-                "content": "Your previous response had these problems:\n- "
-                + "\n- ".join(problems)
-                + "\nFix every problem and return the complete corrected JSON only.",
-            },
-        ]
+        messages = [*messages, {"role": "assistant", "content": resp.text}, {"role": "user", "content": "Your previous response had these problems:\n- " + "\n- ".join(problems) + "\nFix every problem and return the complete corrected JSON only."}]
     if last_valid is not None:
         return StructuredResult(value=last_valid, attempts=max_attempts, unresolved=problems)
     raise StructuredOutputError(step, problems)
