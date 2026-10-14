@@ -1,7 +1,7 @@
 """Fact-checking agent: a ReAct-style tool loop per claim.
 
-For each claim the model alternates thought → action (search_knowledge_base | web_search) →
-observation until it calls `finish` with a verdict. The loop is bounded (tool budget per claim),
+For each claim the model alternates action (search_knowledge_base | web_search, with a one-line
+purpose for the log) → observation until it calls `finish` with a verdict. The loop is bounded (tool budget per claim),
 tool failures are retried and then surfaced to the model as observations, the final answer is
 validated (evidence ids must exist), and confidence is calibrated against the evidence actually
 gathered rather than taken on faith.
@@ -11,9 +11,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import AliasChoices, BaseModel, Field, ValidationError
 
 from podcast_agent.agent.pipeline import EpisodeState, register
+from podcast_agent.llm.base import LLMRefusal
 from podcast_agent.llm.structured import extract_json
 from podcast_agent.models import Claim, Evidence, FactCheck, Verdict
 from podcast_agent.prompts import verify_opening, verify_system
@@ -26,7 +27,8 @@ TOOLS = ("search_knowledge_base", "web_search")
 
 
 class VerifyTurn(BaseModel):
-    thought: str = ""
+    # A one-sentence explanation of the call for the log. Older transcripts used "thought".
+    purpose: str = Field(default="", validation_alias=AliasChoices("purpose", "thought"))
     action: Literal["search_knowledge_base", "web_search", "finish"]
     input: dict[str, Any] = Field(default_factory=dict)
 
@@ -109,12 +111,17 @@ def verify_claim(
 
     for _turn in range(max_turns):
         force = tool_calls >= max_steps
-        resp = ctx.llm.complete(
-            system=system, messages=messages, tier="main", max_tokens=800, temperature=s.temperature,
-            task="verify_step",
-            context={"claim": claim, "history": history, "tools": tools, "max_steps": max_steps,
-                     "today": s.today, "force_finish": force},
-        )
+        try:
+            resp = ctx.llm.complete(
+                system=system, messages=messages, tier="main", max_tokens=800, temperature=s.temperature,
+                task="verify_step",
+                context={"claim": claim, "history": history, "tools": tools, "max_steps": max_steps,
+                         "today": s.today, "force_finish": force},
+            )
+        except LLMRefusal as exc:
+            # A refusal is a policy decision, not a parse error: don't resend the same request.
+            ctx.trace.error(step, f"model declined: {exc}", indent=1, category=exc.category)
+            break
         ctx.record_usage(resp)
         ctx.trace.llm_call(step, resp)
         messages.append({"role": "assistant", "content": resp.text})
@@ -125,10 +132,10 @@ def verify_claim(
             ctx.trace.event("self_correct", step, f"unparseable turn ({str(exc)[:80]}); asking again", indent=1)
             if corrections > 2:
                 break
-            messages.append({"role": "user", "content": 'Respond with exactly one JSON object: {"thought": ..., "action": ..., "input": {...}}'})
+            messages.append({"role": "user", "content": 'Respond with exactly one JSON object: {"action": ..., "input": {...}, "purpose": ...}'})
             continue
-        if turn.thought:
-            ctx.trace.event("thought", step, turn.thought, indent=1)
+        if turn.purpose:
+            ctx.trace.event("purpose", step, turn.purpose, indent=1)
 
         if turn.action == "finish":
             try:

@@ -35,6 +35,8 @@ class ScriptedProvider(LLMProvider):
         queue = self.script.get(task)
         if queue:
             item = queue.pop(0)
+            if isinstance(item, Exception):
+                raise item
             text = item if isinstance(item, str) else json.dumps(item)
             return LLMResponse(text=text, model=model, input_tokens=10, output_tokens=10)
         return self._fallback._complete(

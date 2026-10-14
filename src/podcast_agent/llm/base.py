@@ -28,10 +28,19 @@ class LLMResponse:
     cached: bool = False  # served from the local response cache
     estimated: bool = False  # token counts are estimates, not provider-reported
     stop_reason: str | None = None
+    thinking: str = ""  # the provider's thinking summary, when it returns one (never raw reasoning)
 
 
 class LLMError(RuntimeError):
     pass
+
+
+class LLMRefusal(LLMError):
+    """The provider's safety classifier declined the request (stop_reason "refusal")."""
+
+    def __init__(self, message: str, category: str | None = None):
+        super().__init__(message)
+        self.category = category
 
 
 class LLMProvider(ABC):

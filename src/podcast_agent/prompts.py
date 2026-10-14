@@ -51,7 +51,7 @@ Rules
 - Respect "requires": a capability must come after the capabilities it requires.
 - Put normalize_transcript first when the profile shows filler or repeated words; otherwise you may leave it out.
 - summarize.strategy is "map_reduce" when word_count > {threshold}, otherwise "single_pass".
-- extract_claims.max_claims is between 3 and {max_claims_cap}; scale it with claim_signals (numbers, years, organisations, predictions).
+- extract_claims.max_claims is between {min(3, max_claims_cap)} and {max_claims_cap}; scale it with claim_signals (numbers, years, organisations, predictions).
 - verify_claims.max_steps_per_claim is between 2 and 6; verify_claims.tools is a subset of the available tools.
 
 Return JSON:
@@ -170,7 +170,8 @@ def verify_system(today: str, max_steps: int, tools: list[str]) -> str:
     tools_block = "\n".join(tool_lines)
     return f"""You are a meticulous fact-checker for an advertising agency's content team. Today's date is {today}.
 You verify ONE claim at a time by calling tools, and you answer every turn with exactly one JSON object:
-{{"thought": "<your reasoning about what you know and what to do next>", "action": "<tool name>", "input": {{...}}}}
+{{"action": "<tool name>", "input": {{...}}, "purpose": "<one short sentence for the audit log: what this call should establish>"}}
+Keep the purpose to one short sentence about the call itself.
 
 Tools
 {tools_block}

@@ -6,13 +6,18 @@ Claude 5.5 models reject non-default sampling parameters (temperature, top_p, to
 default, with thinking tokens counted against max_tokens. So this provider never sends temperature,
 sets an explicit effort level (ANTHROPIC_EFFORT, default "low": these are bounded extraction tasks),
 and adds headroom to max_tokens for thinking. Only tokens actually generated are billed.
+
+Prompts never ask the model to write out its reasoning (a "thought" or "reasoning" field): Claude 5.5
+declines those requests with stop_reason "refusal" (category reasoning_extraction). The readable
+reasoning in the log comes from the API's thinking summaries (thinking.display = "summarized").
+A refusal raises LLMRefusal with the category and explanation; it is never retried blindly.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from podcast_agent.llm.base import LLMError, LLMProvider, LLMResponse
+from podcast_agent.llm.base import LLMError, LLMProvider, LLMRefusal, LLMResponse
 
 THINKING_HEADROOM = 4096
 
@@ -31,6 +36,7 @@ class AnthropicProvider(LLMProvider):
         prompt_cache: bool = True,
         effort: str | None = "low",
         workspace_id: str | None = None,
+        thinking_summaries: bool = True,
     ):
         super().__init__(model, fast_model)
         try:
@@ -50,6 +56,7 @@ class AnthropicProvider(LLMProvider):
         self._client = client
         self.prompt_cache = prompt_cache
         self.effort = effort
+        self.thinking_summaries = thinking_summaries
 
     def _complete(
         self,
@@ -80,11 +87,21 @@ class AnthropicProvider(LLMProvider):
         }
         if self.effort:
             kwargs["output_config"] = {"effort": self.effort}
+        if self.thinking_summaries:
+            kwargs["thinking"] = {"type": "adaptive", "display": "summarized"}
         try:
             resp = self._client.messages.create(**kwargs)
         except self._anthropic.APIError as exc:
             raise LLMError(f"{self.name} API error: {exc}") from exc
+        if resp.stop_reason == "refusal":
+            details = getattr(resp, "stop_details", None)
+            category = getattr(details, "category", None)
+            explanation = getattr(details, "explanation", None) or "no explanation given"
+            raise LLMRefusal(f"{model} declined the request ({category or 'uncategorised'}): {explanation}", category)
         text = "".join(getattr(block, "text", "") for block in resp.content if block.type == "text")
+        thinking = "\n".join(
+            (getattr(block, "thinking", "") or "").strip() for block in resp.content if block.type == "thinking"
+        ).strip()
         usage = resp.usage
         return LLMResponse(
             text=text,
@@ -93,6 +110,7 @@ class AnthropicProvider(LLMProvider):
             output_tokens=usage.output_tokens or 0,
             cache_read_tokens=getattr(usage, "cache_read_input_tokens", 0) or 0,
             stop_reason=resp.stop_reason,
+            thinking=thinking,
         )
 
 
@@ -111,6 +129,7 @@ class BedrockProvider(AnthropicProvider):
         client: Any = None,
         prompt_cache: bool = True,
         effort: str | None = "low",
+        thinking_summaries: bool = True,
     ):
         if client is None:
             try:
@@ -119,4 +138,5 @@ class BedrockProvider(AnthropicProvider):
                 client = anthropic.AnthropicBedrock(aws_region=region, timeout=timeout_s, max_retries=4)
             except ImportError as exc:  # pragma: no cover
                 raise LLMError("Bedrock needs boto3: pip install 'podcast-agent[aws]'") from exc
-        super().__init__(model, fast_model, client=client, prompt_cache=prompt_cache, effort=effort)
+        super().__init__(model, fast_model, client=client, prompt_cache=prompt_cache, effort=effort,
+                         thinking_summaries=thinking_summaries)

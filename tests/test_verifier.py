@@ -11,11 +11,11 @@ CLAIM = Claim(id="C1", claim="Bitcoin will reach $200K by 2025.", speaker="Chris
 
 
 def kb(query):
-    return {"thought": "check the KB", "action": "search_knowledge_base", "input": {"query": query}}
+    return {"purpose": "check the KB", "action": "search_knowledge_base", "input": {"query": query}}
 
 
 def finish(verdict, conf, ids):
-    return {"thought": "done", "action": "finish",
+    return {"purpose": "done", "action": "finish",
             "input": {"verdict": verdict, "confidence": conf, "rationale": "See [E1].", "evidence_ids": ids}}
 
 
@@ -43,7 +43,7 @@ def test_finish_with_unknown_evidence_id_is_corrected():
 
 def test_search_outage_is_retried_then_surfaced_to_the_agent():
     provider = ScriptedProvider({"verify_step": [
-        {"thought": "web", "action": "web_search", "input": {"query": "bitcoin"}},
+        {"purpose": "web", "action": "web_search", "input": {"query": "bitcoin"}},
         kb("bitcoin"),
         finish("possibly_outdated_or_inaccurate", 0.7, ["E1"]),
     ]})
@@ -84,3 +84,22 @@ def test_offline_end_to_end_on_the_pdf_example(data_dir):
     assert find("before 2040") == Verdict.UNVERIFIABLE     # future prediction
     assert all(s.status == "ok" for s in report.steps)
     assert report.summary and report.notes and len(report.notes.takeaways) == 5
+
+
+def test_a_refusal_is_not_retried_and_the_claim_goes_to_human_review():
+    from podcast_agent.llm.base import LLMRefusal
+
+    provider = ScriptedProvider({"verify_step": [LLMRefusal("declined (reasoning_extraction): ...", "reasoning_extraction")]})
+    ctx = make_ctx(provider)
+    fc = verify_claim(ctx, CLAIM, "ep", max_steps=4, tools=["search_knowledge_base"])
+    assert fc.verdict == Verdict.UNVERIFIABLE and fc.tool_calls == 0
+    assert len(provider.calls) == 1  # declined once, never resent
+
+
+def test_the_turn_format_asks_for_a_purpose_not_private_reasoning():
+    from podcast_agent.prompts import verify_system
+
+    system = verify_system("2026-10-13", 4, ["search_knowledge_base", "web_search"]).lower()
+    assert '"purpose"' in system
+    for banned in ('"thought"', '"reasoning"', '"thinking"', "scratchpad", "your reasoning"):
+        assert banned not in system

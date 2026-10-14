@@ -115,7 +115,7 @@ def repair_plan(plan: Plan, ctx: RunContext, ep: Episode, catalog: dict) -> Plan
             if p.get("strategy") not in ("single_pass", "map_reduce"):
                 p["strategy"] = default
         elif step.step == "extract_claims":
-            p["max_claims"] = _clamp(p.get("max_claims"), 3, s.max_claims, s.max_claims)
+            p["max_claims"] = _clamp(p.get("max_claims"), min(3, s.max_claims), s.max_claims, s.max_claims)
         elif step.step == "verify_claims":
             p["max_steps_per_claim"] = _clamp(p.get("max_steps_per_claim"), 2, 6, s.max_steps_per_claim)
             tools = [t for t in (p.get("tools") or available_tools) if t in available_tools]

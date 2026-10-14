@@ -47,6 +47,8 @@ class Settings:
     prompt_cache: bool = field(default_factory=lambda: _env_bool("PROMPT_CACHE", True))
     # Claude effort level (low|medium|high|xhigh|max); "none" sends no effort, for older models.
     anthropic_effort: str | None = field(default_factory=lambda: _env_effort("ANTHROPIC_EFFORT", "low"))
+    # Log Claude's thinking summaries (the API's summarized reasoning) as "thinking" events in the trace.
+    thinking_summaries: bool = field(default_factory=lambda: _env_bool("ANTHROPIC_THINKING_SUMMARIES", True))
     openai_api_key: str | None = field(default_factory=lambda: _env("OPENAI_API_KEY"))
     openai_base_url: str = field(default_factory=lambda: _env("OPENAI_BASE_URL", "https://api.openai.com/v1"))
     openai_model: str | None = field(default_factory=lambda: _env("OPENAI_MODEL"))

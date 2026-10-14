@@ -5,7 +5,7 @@ An agentic AI system that takes raw podcast transcripts (`.json` or timestamped 
 1. **Summary.** 200–300 words covering core themes, key discussions and the opinions shared.
 2. **Key notes.** 🔹 top 5 takeaways, 💬 notable quotes with timestamps (each verified word-for-word against the transcript), 🧭 tag-style topics.
 3. **Fact-check.** Check-worthy claims are extracted and verified by a tool-using agent against a local knowledge base and a (mock or real) web search. Each claim is marked ✅ verified, ⚠️ possibly outdated/inaccurate or ❓ unverifiable, with a calibrated confidence score and cited evidence.
-4. **Reasoning log.** A readable trace of every plan, thought, tool call, observation, self-correction and verdict, plus a structured JSONL version.
+4. **Reasoning log.** A readable trace of every plan, tool call (with its stated purpose), observation, self-correction and verdict, plus Claude's own thinking summaries, plus a structured JSONL version.
 
 The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is in **[docs/guide/public/index.html](docs/guide/public/index.html)**: open it in a browser, or deploy it as a Cloudflare Worker with `cd docs/guide && npx wrangler deploy`. Its **Audit trail** tab is filled from a real run by `make guide` (`scripts/embed_audit.py`).
 
@@ -94,7 +94,7 @@ export ANTHROPIC_API_KEY=...            # or LLM_PROVIDER=offline
 .venv/bin/podcast-agent audit output             # re-verify a run: hashes, quotes, caps, trace coverage
 .venv/bin/podcast-agent kb "FDA autonomous AI"    # query the knowledge base directly
 .venv/bin/podcast-agent serve --port 8080         # HTTP API: POST /v1/process, GET /healthz
-.venv/bin/pytest -q                               # 35 tests, no network or API key needed
+.venv/bin/pytest -q                               # 39 tests, no network or API key needed
 ```
 
 ---
@@ -121,7 +121,7 @@ export ANTHROPIC_API_KEY=...            # or LLM_PROVIDER=offline
                                   └──── specific problems fed back ◄────────┘  (≤ 3 attempts)
 
  verify_claims, per claim (ReAct):
-   thought ─► action: search_knowledge_base | web_search ─► observation (dated evidence E1..En)
+   purpose ─► action: search_knowledge_base | web_search ─► observation (dated evidence E1..En)
       ▲                                                            │
       └────────────────────── repeat (≤ tool budget) ◄─────────────┘
    finish(verdict, confidence, rationale, evidence_ids) ─► validate ids ─► calibrate confidence
@@ -215,7 +215,7 @@ data/transcripts/                               ep001–ep003 (provided) + ep004
 data/knowledge_base.json · mock_web_index.json  local KB (18 dated facts) · mock search corpus
 docs/DEPLOYMENT.md                              deployment strategy: diagram + narrative
 deploy/helm/podcast-agent/                      Helm chart: API + KEDA-scaled workers
-tests/                                          35 tests, including scripted-model tests of every correction path
+tests/                                          39 tests, including scripted-model tests of every correction path
 ```
 
 ## Making changes quickly

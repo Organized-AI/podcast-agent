@@ -347,14 +347,14 @@ def verify_step(context: dict[str, Any]) -> dict:
                        "unverifiable", 0.35, "Forward-looking prediction; it cannot be verified yet.", [])
     if not force and "search_knowledge_base" in tools and "search_knowledge_base" not in done:
         hint = " The deadline has passed, so the prediction is checkable." if claim.type == "prediction" else ""
-        return {"thought": f"Start with the curated knowledge base.{hint}",
+        return {"purpose": f"Start with the curated knowledge base.{hint}",
                 "action": "search_knowledge_base", "input": {"query": focus_query(claim.claim)}}
     best = max(evidence, key=lambda e: e["relevance"], default=None)
     if not force and "web_search" in tools and "web_search" not in done and (
         best is None or best["relevance"] < 0.6 or claim.time_sensitive
     ):
         why = "weak" if best is None or best["relevance"] < 0.6 else "possibly stale for a time-sensitive claim"
-        return {"thought": f"Knowledge-base evidence is {why}; check the web for current information.",
+        return {"purpose": f"Knowledge-base evidence is {why}; check the web for current information.",
                 "action": "web_search", "input": {"query": focus_query(claim.claim)}}
     if best is None or best["relevance"] < 0.5:
         return _finish("No source covers this claim closely enough.", "unverifiable", 0.3,
@@ -377,8 +377,8 @@ def verify_step(context: dict[str, Any]) -> dict:
                    f"Sources {refs} support the claim as stated.", ids)
 
 
-def _finish(thought: str, verdict: str, confidence: float, rationale: str, ids: list[str]) -> dict:
-    return {"thought": thought, "action": "finish",
+def _finish(purpose: str, verdict: str, confidence: float, rationale: str, ids: list[str]) -> dict:
+    return {"purpose": purpose, "action": "finish",
             "input": {"verdict": verdict, "confidence": confidence, "rationale": rationale, "evidence_ids": ids}}
 
 

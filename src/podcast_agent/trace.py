@@ -1,6 +1,6 @@
 """Reasoning trace: human-readable console log + machine-readable JSONL.
 
-Every plan, thought, tool call, observation, self-correction and verdict goes through
+Every plan, purpose, thinking summary, tool call, observation, self-correction and verdict goes through
 `Tracer.event`. The console view is what you watch live; `trace.jsonl` is what you would
 ship to an observability stack (each record carries run_id / episode_id / step).
 """
@@ -21,7 +21,8 @@ KIND_STYLE: dict[str, tuple[str, str]] = {
     "plan": ("◆", "bold magenta"),
     "step": ("▶", "bold cyan"),
     "llm": ("⇄", "dim"),
-    "thought": ("💭", "italic yellow"),
+    "purpose": ("💭", "italic yellow"),
+    "thinking": ("🧠", "dim italic"),
     "action": ("🔧", "bold blue"),
     "observation": ("👁 ", "green"),
     "verdict": ("⚖️ ", "bold"),
@@ -131,6 +132,10 @@ class Tracer:
         self.event("llm", step, msg, model=resp.model, input_tokens=resp.input_tokens,
                    output_tokens=resp.output_tokens, cache_read_tokens=resp.cache_read_tokens,
                    latency_ms=resp.latency_ms, cached=resp.cached, attempt=attempt)
+        summary = getattr(resp, "thinking", "")
+        if summary:  # the provider's own summary of its reasoning; the full text goes to the JSONL
+            short = " ".join(summary.split())
+            self.event("thinking", step, short if len(short) <= 220 else short[:217] + "…", indent=1, summary=summary)
 
     def close(self) -> None:
         for fh in (self._jsonl, self._plain):

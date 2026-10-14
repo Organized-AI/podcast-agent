@@ -46,6 +46,7 @@ class CachedProvider(LLMProvider):
                 "max_tokens": max_tokens,
                 "temperature": temperature,
                 "effort": getattr(self.inner, "effort", None),
+                "thinking_summaries": getattr(self.inner, "thinking_summaries", None),
             },
             sort_keys=True,
         )

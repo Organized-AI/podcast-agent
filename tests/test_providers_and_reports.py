@@ -118,3 +118,46 @@ def test_workspace_id_is_sent_for_keys_not_scoped_to_a_workspace():
     p = AnthropicProvider("m", None, api_key="sk-ant-test", workspace_id="wrkspc_test")
     assert p._client.default_headers["anthropic-workspace-id"] == "wrkspc_test"
     assert "anthropic-workspace-id" not in AnthropicProvider("m", None, api_key="sk-ant-test")._client.default_headers
+
+
+class RefusingMessages:
+    def create(self, **kwargs):
+        details = SimpleNamespace(type="refusal", category="reasoning_extraction", explanation="blocked")
+        usage = SimpleNamespace(input_tokens=5, output_tokens=0, cache_creation_input_tokens=0, cache_read_input_tokens=0)
+        return SimpleNamespace(content=[], usage=usage, stop_reason="refusal", stop_details=details)
+
+
+class ThinkingMessages(FakeMessages):
+    def create(self, **kwargs):
+        self.kwargs = kwargs
+        usage = SimpleNamespace(input_tokens=9, output_tokens=30, cache_creation_input_tokens=0, cache_read_input_tokens=0)
+        content = [SimpleNamespace(type="thinking", thinking="Checked the dates first.", signature="sig"),
+                   SimpleNamespace(type="text", text='{"ok": true}')]
+        return SimpleNamespace(content=content, usage=usage, stop_reason="end_turn")
+
+
+def test_refusal_raises_with_its_category():
+    from podcast_agent.llm.anthropic_provider import AnthropicProvider
+    from podcast_agent.llm.base import LLMRefusal
+
+    p = AnthropicProvider("m", None, client=SimpleNamespace(messages=RefusingMessages()))
+    with pytest.raises(LLMRefusal, match="reasoning_extraction") as err:
+        p.complete(system="s", messages=[{"role": "user", "content": "x"}])
+    assert err.value.category == "reasoning_extraction"
+
+
+def test_thinking_summaries_are_requested_parsed_and_logged():
+    from rich.console import Console
+
+    from podcast_agent.llm.anthropic_provider import AnthropicProvider
+    from podcast_agent.trace import Tracer
+
+    fake = SimpleNamespace(messages=ThinkingMessages())
+    resp = AnthropicProvider("m", None, client=fake).complete(system="s", messages=[{"role": "user", "content": "x"}])
+    assert fake.messages.kwargs["thinking"] == {"type": "adaptive", "display": "summarized"}
+    assert resp.text == '{"ok": true}' and resp.thinking == "Checked the dates first."
+    events = []
+    tracer = Tracer("t", console=Console(quiet=True))
+    tracer.event = lambda kind, step, message, **kw: events.append((kind, message))
+    tracer.llm_call("verify C1", resp)
+    assert ("thinking", "Checked the dates first.") in events
