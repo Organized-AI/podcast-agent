@@ -13,6 +13,7 @@ from collections import Counter
 from itertools import pairwise
 from typing import Any
 
+from podcast_agent.agent.policy import deadline_status
 from podcast_agent.models import Episode, Utterance
 from podcast_agent.text import STOPWORDS, kebab, split_sentences, word_count
 
@@ -317,13 +318,7 @@ def extract_claims(context: dict[str, Any]) -> dict:
 
 
 def _past_deadline(text: str, today: str) -> bool:
-    year_now, month_now = int(today[:4]), int(today[5:7])
-    for m in re.finditer(r"(?i)\b(early|mid|late|end of)?\s*(20\d{2})\b", text):
-        qualifier, year = (m.group(1) or "").lower(), int(m.group(2))
-        end_month = {"early": 6, "mid": 9}.get(qualifier, 12)
-        if (year, end_month) < (year_now, month_now):
-            return True
-    return False
+    return deadline_status(text, today) == "passed"
 
 
 def focus_query(text: str) -> str:

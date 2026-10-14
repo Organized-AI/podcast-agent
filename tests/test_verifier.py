@@ -117,3 +117,36 @@ def test_near_miss_turns_are_accepted_and_real_errors_are_named():
     assert fc.tool_calls == 1 and fc.verdict == Verdict.OUTDATED and fc.evidence[0].id == "E1"
     correction = provider.calls[2]["messages"][-1]["content"]
     assert correction.startswith("That reply could not be used (action:")
+
+
+MARS = Claim(id="C5", claim="Humans will walk on Mars before 2040.", speaker="Nina Alvarez", timestamp="00:04:06",
+             quote="I think humans will walk on Mars before 2040.", type="prediction", time_sensitive=True)
+
+
+def test_an_unexpired_prediction_is_unverifiable_whatever_the_model_says():
+    """#13: samples/claude-run has this claim as ⚠️ 0.60; the deadline is 2040, so it cannot be checked yet."""
+    provider = ScriptedProvider({"verify_step": [kb("crewed Mars landing"), finish("possibly_outdated_or_inaccurate", 0.6, ["E1"])]})
+    ctx = make_ctx(provider)
+    fc = verify_claim(ctx, MARS, "ep", max_steps=4, tools=["search_knowledge_base"])
+    assert fc.verdict == Verdict.UNVERIFIABLE
+    assert fc.confidence <= 0.5 and fc.raw_confidence == 0.6
+    assert "deadline has not passed" in fc.rationale
+
+
+def test_a_prediction_whose_deadline_passed_keeps_the_models_verdict():
+    provider = ScriptedProvider({"verify_step": [kb("bitcoin 2025 high"), finish("possibly_outdated_or_inaccurate", 0.8, ["E1"])]})
+    fc = verify_claim(make_ctx(provider), CLAIM, "ep", max_steps=4, tools=["search_knowledge_base"])
+    assert fc.verdict == Verdict.OUTDATED
+
+
+def test_deadline_status():
+    from podcast_agent.agent.policy import deadline_status, prediction_is_checkable
+
+    today = "2026-10-13"
+    assert deadline_status("Bitcoin will reach $200K by 2025.", today) == "passed"
+    assert deadline_status("NASA launches in early 2026.", today) == "passed"
+    assert deadline_status("A launch in late 2026.", today) == "pending"
+    assert deadline_status("Humans will walk on Mars before 2040.", today) == "pending"
+    assert deadline_status("Async culture will become standard.", today) == "none"
+    assert prediction_is_checkable("factual", "Something in 2040.", today)
+    assert not prediction_is_checkable("prediction", "Async culture will become standard.", today)
