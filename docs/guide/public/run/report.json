@@ -1,0 +1,1386 @@
+{
+  "schema_version": "1.0",
+  "run_id": "20261014-120705-1c61da",
+  "prompt_version": "2026-10-13.1",
+  "provider": {
+    "provider": "offline",
+    "main": "offline-heuristic",
+    "fast": "offline-heuristic"
+  },
+  "today": "2026-10-13",
+  "episodes": [
+    {
+      "schema_version": "1.0",
+      "run_id": "20261014-120705-1c61da",
+      "generated_at": "2026-10-14T17:07:05+00:00",
+      "episode": {
+        "episode_id": "ep001",
+        "title": "The Future of Remote Work",
+        "host": "Sarah Johnson",
+        "guests": [
+          "Mark Rivera"
+        ],
+        "duration": "06:00",
+        "word_count": 325,
+        "utterances": 19,
+        "source": "data/transcripts/ep001_remote_work.json",
+        "cleaning": {}
+      },
+      "provider": "offline",
+      "models": {
+        "provider": "offline",
+        "main": "offline-heuristic",
+        "fast": "offline-heuristic"
+      },
+      "plan": {
+        "goal": "Publish-ready show notes and a fact-check table for 'The Future of Remote Work'.",
+        "steps": [
+          {
+            "step": "summarize",
+            "reason": "325 words fits within the single-pass budget.",
+            "params": {
+              "strategy": "single_pass"
+            }
+          },
+          {
+            "step": "extract_notes",
+            "reason": "Required show-notes deliverable.",
+            "params": {}
+          },
+          {
+            "step": "extract_claims",
+            "reason": "Claim signals (entities=7, years=2, predictions=3) suggest about 8 check-worthy claims.",
+            "params": {
+              "max_claims": 8
+            }
+          },
+          {
+            "step": "verify_claims",
+            "reason": "Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.",
+            "params": {
+              "max_steps_per_claim": 4,
+              "tools": [
+                "search_knowledge_base",
+                "web_search"
+              ]
+            }
+          }
+        ],
+        "repaired": false,
+        "repair_notes": []
+      },
+      "summary": {
+        "text": "In \"The Future of Remote Work\", Sarah Johnson talks with Mark Rivera about work, remote, culture and teams. Mark Rivera opens by noting: “Excited to be here. Remote work has evolved a lot in just a few years.” Rivera argues: “Not quite. It’s more about async-first culture, documentation, and autonomy. Being remote doesn’t just mean a location; it means structured processes and trust.” Rivera argues: “Look at GitLab, Automattic, and Doist. They’ve literally written handbooks for everything. Employees can figure things out without asking for constant guidance.” Rivera points to: “Even small teams benefit from clear documentation. It reduces context-switching and keeps knowledge from being siloed.” Rivera observes: “They help, but tools aren’t the solution. Culture is. Slack is great, but if you rely on it for everything, people will burn out.” Rivera observes: “Outcomes over hours. Set goals, track progress on deliverables, and trust the team. Transparency matters more than check-ins.” Rivera acknowledges: “Regular virtual coffee chats, occasional in-person retreats, and team rituals help. Remote doesn’t mean isolated; it just needs intention.” Rivera predicts: “Remote-first companies will dominate talent acquisition. Local offices might become optional hubs, and async culture will become standard practice.” Rivera concludes: “Focus on documentation, set clear goals, invest in culture, and trust your team. That’s the foundation.”",
+        "word_count": 212,
+        "strategy": "single_pass"
+      },
+      "notes": {
+        "takeaways": [
+          {
+            "text": "Rivera: Remote work has evolved a lot in just a few years.",
+            "timestamp": "00:15"
+          },
+          {
+            "text": "Rivera: Focus on documentation, set clear goals, invest in culture, and trust your team. That’s the foundation.",
+            "timestamp": "05:35"
+          },
+          {
+            "text": "Rivera: Being remote doesn’t just mean a location; it means structured processes and trust.",
+            "timestamp": "00:45"
+          },
+          {
+            "text": "Rivera: Local offices might become optional hubs, and async culture will become standard practice.",
+            "timestamp": "05:00"
+          },
+          {
+            "text": "Rivera: Remote doesn’t mean isolated; it just needs intention.",
+            "timestamp": "04:10"
+          }
+        ],
+        "quotes": [
+          {
+            "text": "Remote work has evolved a lot in just a few years.",
+            "speaker": "Mark Rivera",
+            "timestamp": "00:15",
+            "match_score": 1.0
+          },
+          {
+            "text": "What about loneliness or lack of connection? It’s often cited as a remote work downside.",
+            "speaker": "Sarah Johnson",
+            "timestamp": "03:55",
+            "match_score": 1.0
+          },
+          {
+            "text": "So Mark, a lot of people equate remote work with working from anywhere.",
+            "speaker": "Sarah Johnson",
+            "timestamp": "00:30",
+            "match_score": 1.0
+          },
+          {
+            "text": "Focus on documentation, set clear goals, invest in culture, and trust your team. That’s the foundation.",
+            "speaker": "Mark Rivera",
+            "timestamp": "05:35",
+            "match_score": 1.0
+          }
+        ],
+        "topics": [
+          "remote-work",
+          "work-reimagined",
+          "work",
+          "reimagined",
+          "culture",
+          "teams",
+          "documentation"
+        ]
+      },
+      "fact_checks": [
+        {
+          "claim": {
+            "id": "C1",
+            "claim": "Look at GitLab, Automattic, and Doist. They’ve literally written handbooks for everything.",
+            "speaker": "Mark Rivera",
+            "timestamp": "01:20",
+            "quote": "Look at GitLab, Automattic, and Doist. They’ve literally written handbooks for everything.",
+            "type": "factual",
+            "time_sensitive": false
+          },
+          "verdict": "verified",
+          "confidence": 0.72,
+          "raw_confidence": 0.72,
+          "rationale": "Sources [E4] support the claim as stated.",
+          "evidence": [
+            {
+              "id": "E4",
+              "source": "web_search",
+              "title": "How GitLab runs an all-remote company with a public handbook",
+              "snippet": "GitLab's public handbook runs to thousands of pages and documents nearly every process, a model other remote companies such as Automattic and Doist cite for async, documentation-first work.",
+              "url": "https://example-work.test/gitlab-handbook-remote",
+              "date": "2024-05-02",
+              "relevance": 0.63
+            }
+          ],
+          "tool_calls": 2,
+          "tools_used": [
+            "search_knowledge_base",
+            "web_search"
+          ],
+          "method": "web search",
+          "verification": "✅ Verified true (confirmed by web search: How GitLab runs an all-remote company with a public handbook)"
+        },
+        {
+          "claim": {
+            "id": "C2",
+            "claim": "Slack is great, but if you rely on it for everything, people will burn out.",
+            "speaker": "Mark Rivera",
+            "timestamp": "02:45",
+            "quote": "Slack is great, but if you rely on it for everything, people will burn out.",
+            "type": "prediction",
+            "time_sensitive": true
+          },
+          "verdict": "unverifiable",
+          "confidence": 0.35,
+          "raw_confidence": 0.35,
+          "rationale": "Forward-looking prediction; it cannot be verified yet.",
+          "evidence": [],
+          "tool_calls": 0,
+          "tools_used": [],
+          "method": "reasoning step",
+          "verification": "❓ Unverifiable (future prediction)"
+        },
+        {
+          "claim": {
+            "id": "C3",
+            "claim": "Local offices might become optional hubs, and async culture will become standard practice.",
+            "speaker": "Mark Rivera",
+            "timestamp": "05:00",
+            "quote": "Local offices might become optional hubs, and async culture will become standard practice.",
+            "type": "prediction",
+            "time_sensitive": true
+          },
+          "verdict": "unverifiable",
+          "confidence": 0.35,
+          "raw_confidence": 0.35,
+          "rationale": "Forward-looking prediction; it cannot be verified yet.",
+          "evidence": [],
+          "tool_calls": 0,
+          "tools_used": [],
+          "method": "reasoning step",
+          "verification": "❓ Unverifiable (future prediction)"
+        },
+        {
+          "claim": {
+            "id": "C4",
+            "claim": "Remote-first companies will dominate talent acquisition.",
+            "speaker": "Mark Rivera",
+            "timestamp": "05:00",
+            "quote": "Remote-first companies will dominate talent acquisition.",
+            "type": "prediction",
+            "time_sensitive": true
+          },
+          "verdict": "unverifiable",
+          "confidence": 0.35,
+          "raw_confidence": 0.35,
+          "rationale": "Forward-looking prediction; it cannot be verified yet.",
+          "evidence": [],
+          "tool_calls": 0,
+          "tools_used": [],
+          "method": "reasoning step",
+          "verification": "❓ Unverifiable (future prediction)"
+        }
+      ],
+      "steps": [
+        {
+          "step": "plan",
+          "status": "ok",
+          "duration_ms": 6,
+          "attempts": 0,
+          "detail": "4 steps"
+        },
+        {
+          "step": "summarize",
+          "status": "ok",
+          "duration_ms": 2,
+          "attempts": 1,
+          "detail": "212 words (single_pass, target 200–300)"
+        },
+        {
+          "step": "extract_notes",
+          "status": "ok",
+          "duration_ms": 9,
+          "attempts": 1,
+          "detail": "5 takeaways · 4 verbatim quotes · 7 topics"
+        },
+        {
+          "step": "extract_claims",
+          "status": "ok",
+          "duration_ms": 5,
+          "attempts": 1,
+          "detail": "4 check-worthy claims (1 factual, 3 prediction)"
+        },
+        {
+          "step": "verify_claims",
+          "status": "ok",
+          "duration_ms": 13,
+          "attempts": 4,
+          "detail": "1 ✅ · 0 ⚠️ · 3 ❓ across 4 claims · 2 tool calls"
+        }
+      ],
+      "usage": {
+        "llm_calls": 10,
+        "cached_calls": 0,
+        "input_tokens": 7890,
+        "output_tokens": 1478,
+        "cache_read_tokens": 0,
+        "estimated": true
+      },
+      "warnings": [],
+      "fact_check_table": [
+        {
+          "claim": "Look at GitLab, Automattic, and Doist. They’ve literally written handbooks for everything.",
+          "verification": "✅ Verified true (confirmed by web search: How GitLab runs an all-remote company with a public handbook)",
+          "confidence": 0.72
+        },
+        {
+          "claim": "Slack is great, but if you rely on it for everything, people will burn out.",
+          "verification": "❓ Unverifiable (future prediction)",
+          "confidence": 0.35
+        },
+        {
+          "claim": "Local offices might become optional hubs, and async culture will become standard practice.",
+          "verification": "❓ Unverifiable (future prediction)",
+          "confidence": 0.35
+        },
+        {
+          "claim": "Remote-first companies will dominate talent acquisition.",
+          "verification": "❓ Unverifiable (future prediction)",
+          "confidence": 0.35
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "run_id": "20261014-120705-1c61da",
+      "generated_at": "2026-10-14T17:07:05+00:00",
+      "episode": {
+        "episode_id": "ep002",
+        "title": "AI in Healthcare: Hype or Reality?",
+        "host": "David Chen",
+        "guests": [
+          "Dr. Priya Patel",
+          "Alex Moore"
+        ],
+        "duration": "05:10",
+        "word_count": 233,
+        "utterances": 16,
+        "source": "data/transcripts/ep002_ai_healthcare.json",
+        "cleaning": {}
+      },
+      "provider": "offline",
+      "models": {
+        "provider": "offline",
+        "main": "offline-heuristic",
+        "fast": "offline-heuristic"
+      },
+      "plan": {
+        "goal": "Publish-ready show notes and a fact-check table for 'AI in Healthcare: Hype or Reality?'.",
+        "steps": [
+          {
+            "step": "summarize",
+            "reason": "233 words fits within the single-pass budget.",
+            "params": {
+              "strategy": "single_pass"
+            }
+          },
+          {
+            "step": "extract_notes",
+            "reason": "Required show-notes deliverable.",
+            "params": {}
+          },
+          {
+            "step": "extract_claims",
+            "reason": "Claim signals (entities=5, years=0, predictions=4) suggest about 7 check-worthy claims.",
+            "params": {
+              "max_claims": 7
+            }
+          },
+          {
+            "step": "verify_claims",
+            "reason": "Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.",
+            "params": {
+              "max_steps_per_claim": 4,
+              "tools": [
+                "search_knowledge_base",
+                "web_search"
+              ]
+            }
+          }
+        ],
+        "repaired": false,
+        "repair_notes": []
+      },
+      "summary": {
+        "text": "In \"AI in Healthcare: Hype or Reality?\", David Chen talks with Dr. Priya Patel, Alex Moore about healthcare, hype, reality and health. Dr. Priya Patel opens by noting: “Excited to discuss the real applications and limitations.” Alex Moore opens by noting: “Let’s be practical and look at use cases that are live today.” Dr. Patel argues: “Some hospitals use AI for reading X-rays or flagging urgent cases. But it’s assistive, not replacing clinicians.” Moore argues: “The regulatory barriers are huge. The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.” Dr. Patel points to: “Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.” Moore acknowledges: “Data privacy and bias are major hurdles. AI learns from existing clinical data, which may be skewed.” Dr. Patel observes: “Efficiency and clinician support. Hospitals want faster reads and fewer errors.” Moore observes: “The pandemic accelerated digital health adoption, including AI tools.” Dr. Patel looks ahead: “AI copilots that suggest treatment plans, but a human will always make the final call.” Moore looks ahead: “Interoperability is key. AI will work best when systems talk to each other securely.” David Chen concludes: “AI is powerful, but cautious optimism is the way forward.”",
+        "word_count": 208,
+        "strategy": "single_pass"
+      },
+      "notes": {
+        "takeaways": [
+          {
+            "text": "Dr. Patel: Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.",
+            "timestamp": "01:50"
+          },
+          {
+            "text": "Moore: Plus, the pandemic accelerated digital health adoption, including AI tools.",
+            "timestamp": "03:30"
+          },
+          {
+            "text": "Dr. Patel: Hospitals want faster reads and fewer errors.",
+            "timestamp": "03:05"
+          },
+          {
+            "text": "Moore: The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.",
+            "timestamp": "01:15"
+          },
+          {
+            "text": "Dr. Patel: Some hospitals use AI for reading X-rays or flagging urgent cases.",
+            "timestamp": "00:55"
+          }
+        ],
+        "quotes": [
+          {
+            "text": "Yes, AI copilots that suggest treatment plans, but a human will always make the final call.",
+            "speaker": "Dr. Priya Patel",
+            "timestamp": "04:15",
+            "match_score": 1.0
+          },
+          {
+            "text": "Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.",
+            "speaker": "Dr. Priya Patel",
+            "timestamp": "01:50",
+            "match_score": 1.0
+          },
+          {
+            "text": "Plus, the pandemic accelerated digital health adoption, including AI tools.",
+            "speaker": "Alex Moore",
+            "timestamp": "03:30",
+            "match_score": 1.0
+          },
+          {
+            "text": "AI is everywhere, but in healthcare it’s complicated.",
+            "speaker": "David Chen",
+            "timestamp": "00:00",
+            "match_score": 1.0
+          }
+        ],
+        "topics": [
+          "tech",
+          "health",
+          "healthcare",
+          "hype",
+          "reality",
+          "cases",
+          "diagnostics"
+        ]
+      },
+      "fact_checks": [
+        {
+          "claim": {
+            "id": "C1",
+            "claim": "Some hospitals use AI for reading X-rays or flagging urgent cases.",
+            "speaker": "Dr. Priya Patel",
+            "timestamp": "00:55",
+            "quote": "Some hospitals use AI for reading X-rays or flagging urgent cases.",
+            "type": "factual",
+            "time_sensitive": false
+          },
+          "verdict": "verified",
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "rationale": "Sources [E1] support the claim as stated.",
+          "evidence": [
+            {
+              "id": "E1",
+              "source": "knowledge_base",
+              "title": "KB-011: Hospitals use AI to read X-rays and flag urgent cases for clinicians",
+              "snippet": "AI tools are used in hospitals for reading medical images such as X-rays and CT scans and for flagging urgent cases so clinicians review them first (computer-aided triage). In February 2018 the FDA authorized Viz.ai's ContaCT, which analyzes CT images for suspected large-vessel-occlusion strokes and alerts specialists. Most such tools assist clinicians rather than replace their reads.",
+              "url": "https://www.fiercehealthcare.com/regulatory/fda-approval-clinical-decision-support-ai-triage-app",
+              "date": "2025-06-01",
+              "relevance": 1.0
+            }
+          ],
+          "tool_calls": 1,
+          "tools_used": [
+            "search_knowledge_base"
+          ],
+          "method": "knowledge base",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-011)"
+        },
+        {
+          "claim": {
+            "id": "C2",
+            "claim": "The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.",
+            "speaker": "Alex Moore",
+            "timestamp": "01:15",
+            "quote": "The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.",
+            "type": "prediction",
+            "time_sensitive": true
+          },
+          "verdict": "unverifiable",
+          "confidence": 0.35,
+          "raw_confidence": 0.35,
+          "rationale": "Forward-looking prediction; it cannot be verified yet.",
+          "evidence": [],
+          "tool_calls": 0,
+          "tools_used": [],
+          "method": "reasoning step",
+          "verification": "❓ Unverifiable (future prediction)"
+        },
+        {
+          "claim": {
+            "id": "C3",
+            "claim": "Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.",
+            "speaker": "Dr. Priya Patel",
+            "timestamp": "01:50",
+            "quote": "Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.",
+            "type": "factual",
+            "time_sensitive": false
+          },
+          "verdict": "verified",
+          "confidence": 0.75,
+          "raw_confidence": 0.75,
+          "rationale": "Sources [E1] support the claim as stated.",
+          "evidence": [
+            {
+              "id": "E1",
+              "source": "knowledge_base",
+              "title": "KB-013: Symptom-checker and triage chatbots are offered to patients online",
+              "snippet": "Symptom-checker and triage chatbots are offered by digital-health companies (for example Ada Health and Buoy Health) and by some health systems on their websites and apps, guiding patients toward next steps and an appropriate level of care before they see a doctor.",
+              "url": "https://ada.com/",
+              "date": "2025-06-01",
+              "relevance": 0.705
+            }
+          ],
+          "tool_calls": 1,
+          "tools_used": [
+            "search_knowledge_base"
+          ],
+          "method": "knowledge base",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-013)"
+        },
+        {
+          "claim": {
+            "id": "C4",
+            "claim": "AI learns from existing clinical data, which may be skewed.",
+            "speaker": "Alex Moore",
+            "timestamp": "02:20",
+            "quote": "AI learns from existing clinical data, which may be skewed.",
+            "type": "factual",
+            "time_sensitive": false
+          },
+          "verdict": "verified",
+          "confidence": 0.71,
+          "raw_confidence": 0.71,
+          "rationale": "Sources [E1] support the claim as stated.",
+          "evidence": [
+            {
+              "id": "E1",
+              "source": "knowledge_base",
+              "title": "KB-014: Clinical algorithms can inherit bias from historical data (Science, 2019)",
+              "snippet": "A 2019 study in Science by Obermeyer et al. found that a widely used commercial algorithm for allocating extra care underestimated the needs of Black patients because it used past healthcare costs as a proxy for need. It is a well-documented example of AI trained on existing clinical data reproducing skew in that data. Patient data used by such systems is also subject to privacy rules such as HIPAA.",
+              "url": "https://www.science.org/doi/10.1126/science.aax2342",
+              "date": "2019-10-25",
+              "relevance": 0.61
+            }
+          ],
+          "tool_calls": 1,
+          "tools_used": [
+            "search_knowledge_base"
+          ],
+          "method": "knowledge base",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-014)"
+        },
+        {
+          "claim": {
+            "id": "C5",
+            "claim": "Hospitals want faster reads and fewer errors.",
+            "speaker": "Dr. Priya Patel",
+            "timestamp": "03:05",
+            "quote": "Hospitals want faster reads and fewer errors.",
+            "type": "factual",
+            "time_sensitive": false
+          },
+          "verdict": "unverifiable",
+          "confidence": 0.3,
+          "raw_confidence": 0.3,
+          "rationale": "No knowledge-base entry or search result addresses this claim directly.",
+          "evidence": [],
+          "tool_calls": 2,
+          "tools_used": [
+            "search_knowledge_base",
+            "web_search"
+          ],
+          "method": "reasoning step",
+          "verification": "❓ Unverifiable (no supporting source found)"
+        },
+        {
+          "claim": {
+            "id": "C6",
+            "claim": "The pandemic accelerated digital health adoption, including AI tools.",
+            "speaker": "Alex Moore",
+            "timestamp": "03:30",
+            "quote": "The pandemic accelerated digital health adoption, including AI tools.",
+            "type": "factual",
+            "time_sensitive": false
+          },
+          "verdict": "verified",
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "rationale": "Sources [E1] support the claim as stated.",
+          "evidence": [
+            {
+              "id": "E1",
+              "source": "knowledge_base",
+              "title": "KB-015: The COVID-19 pandemic accelerated digital health and telehealth adoption",
+              "snippet": "McKinsey estimated in 2021 that telehealth use had stabilized at levels 38 times higher than before the COVID-19 pandemic, and investment in digital health, including AI tools, rose sharply during the pandemic.",
+              "url": "https://www.mckinsey.com/industries/healthcare/our-insights/telehealth-a-quarter-trillion-dollar-post-covid-19-reality",
+              "date": "2021-07-09",
+              "relevance": 1.0
+            }
+          ],
+          "tool_calls": 1,
+          "tools_used": [
+            "search_knowledge_base"
+          ],
+          "method": "knowledge base",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-015)"
+        },
+        {
+          "claim": {
+            "id": "C7",
+            "claim": "AI copilots that suggest treatment plans, but a human will always make the final call.",
+            "speaker": "Dr. Priya Patel",
+            "timestamp": "04:15",
+            "quote": "AI copilots that suggest treatment plans, but a human will always make the final call.",
+            "type": "prediction",
+            "time_sensitive": true
+          },
+          "verdict": "unverifiable",
+          "confidence": 0.35,
+          "raw_confidence": 0.35,
+          "rationale": "Forward-looking prediction; it cannot be verified yet.",
+          "evidence": [],
+          "tool_calls": 0,
+          "tools_used": [],
+          "method": "reasoning step",
+          "verification": "❓ Unverifiable (future prediction)"
+        }
+      ],
+      "steps": [
+        {
+          "step": "plan",
+          "status": "ok",
+          "duration_ms": 4,
+          "attempts": 0,
+          "detail": "4 steps"
+        },
+        {
+          "step": "summarize",
+          "status": "ok",
+          "duration_ms": 1,
+          "attempts": 1,
+          "detail": "208 words (single_pass, target 200–300)"
+        },
+        {
+          "step": "extract_notes",
+          "status": "ok",
+          "duration_ms": 8,
+          "attempts": 1,
+          "detail": "5 takeaways · 4 verbatim quotes · 7 topics"
+        },
+        {
+          "step": "extract_claims",
+          "status": "ok",
+          "duration_ms": 5,
+          "attempts": 1,
+          "detail": "7 check-worthy claims (5 factual, 2 prediction)"
+        },
+        {
+          "step": "verify_claims",
+          "status": "ok",
+          "duration_ms": 23,
+          "attempts": 7,
+          "detail": "4 ✅ · 0 ⚠️ · 3 ❓ across 7 claims · 6 tool calls"
+        }
+      ],
+      "usage": {
+        "llm_calls": 17,
+        "cached_calls": 0,
+        "input_tokens": 12465,
+        "output_tokens": 1999,
+        "cache_read_tokens": 0,
+        "estimated": true
+      },
+      "warnings": [],
+      "fact_check_table": [
+        {
+          "claim": "Some hospitals use AI for reading X-rays or flagging urgent cases.",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-011)",
+          "confidence": 0.9
+        },
+        {
+          "claim": "The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.",
+          "verification": "❓ Unverifiable (future prediction)",
+          "confidence": 0.35
+        },
+        {
+          "claim": "Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-013)",
+          "confidence": 0.75
+        },
+        {
+          "claim": "AI learns from existing clinical data, which may be skewed.",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-014)",
+          "confidence": 0.71
+        },
+        {
+          "claim": "Hospitals want faster reads and fewer errors.",
+          "verification": "❓ Unverifiable (no supporting source found)",
+          "confidence": 0.3
+        },
+        {
+          "claim": "The pandemic accelerated digital health adoption, including AI tools.",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-015)",
+          "confidence": 0.9
+        },
+        {
+          "claim": "AI copilots that suggest treatment plans, but a human will always make the final call.",
+          "verification": "❓ Unverifiable (future prediction)",
+          "confidence": 0.35
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "run_id": "20261014-120705-1c61da",
+      "generated_at": "2026-10-14T17:07:05+00:00",
+      "episode": {
+        "episode_id": "ep003",
+        "title": "Bootstrapping vs Fundraising — Which Path Wins?",
+        "host": "Lena Torres",
+        "guests": [
+          "Samir Gupta",
+          "Emily Rogers"
+        ],
+        "duration": "05:10",
+        "word_count": 192,
+        "utterances": 16,
+        "source": "data/transcripts/ep003_bootstrapping.json",
+        "cleaning": {}
+      },
+      "provider": "offline",
+      "models": {
+        "provider": "offline",
+        "main": "offline-heuristic",
+        "fast": "offline-heuristic"
+      },
+      "plan": {
+        "goal": "Publish-ready show notes and a fact-check table for 'Bootstrapping vs Fundraising — Which Path Wins?'.",
+        "steps": [
+          {
+            "step": "summarize",
+            "reason": "192 words fits within the single-pass budget.",
+            "params": {
+              "strategy": "single_pass"
+            }
+          },
+          {
+            "step": "extract_notes",
+            "reason": "Required show-notes deliverable.",
+            "params": {}
+          },
+          {
+            "step": "extract_claims",
+            "reason": "Claim signals (entities=4, years=0, predictions=0) suggest about 5 check-worthy claims.",
+            "params": {
+              "max_claims": 5
+            }
+          },
+          {
+            "step": "verify_claims",
+            "reason": "Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.",
+            "params": {
+              "max_steps_per_claim": 3,
+              "tools": [
+                "search_knowledge_base",
+                "web_search"
+              ]
+            }
+          }
+        ],
+        "repaired": false,
+        "repair_notes": []
+      },
+      "summary": {
+        "text": "In \"Bootstrapping vs Fundraising — Which Path Wins?\", Lena Torres talks with Samir Gupta, Emily Rogers about bootstrapping, path, market and control. Samir Gupta opens by noting: “Excited to share my experiences bootstrapping companies from scratch.” Emily Rogers opens by noting: “I’ve raised multiple funding rounds, so we’ll debate both perspectives.” Gupta argues: “Bootstrapping forces discipline. You focus on revenue and profitability early. No distractions from chasing VC metrics.” Rogers argues: “If your market is time-sensitive, VC money helps capture it before competitors.” Gupta points to: “I built a SaaS with no outside capital; we reached break-even in 18 months. We had total control.” Rogers points to: “Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.” Gupta suggests: “If your market is niche, defensible, and revenue-generating early, bootstrap.” Rogers suggests: “If it’s a fast-moving, competitive space and you need talent or product scale fast, raise.” Gupta weighs the trade-offs: “Bootstrapping: slower growth, full control, less risk from investors.” Rogers weighs the trade-offs: “VC: faster growth, resources, but you dilute control and may face pressure for quick exits.” Lena Torres concludes: “It seems the best path depends heavily on market type and founder priorities.”",
+        "word_count": 201,
+        "strategy": "single_pass"
+      },
+      "notes": {
+        "takeaways": [
+          {
+            "text": "Gupta: Bootstrapping: slower growth, full control, less risk from investors.",
+            "timestamp": "04:25"
+          },
+          {
+            "text": "Rogers: Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.",
+            "timestamp": "02:35"
+          },
+          {
+            "text": "Gupta: Excited to share my experiences bootstrapping companies from scratch.",
+            "timestamp": "00:20"
+          },
+          {
+            "text": "Gupta: If your market is niche, defensible, and revenue-generating early, bootstrap.",
+            "timestamp": "03:15"
+          },
+          {
+            "text": "Rogers: VC: faster growth, resources, but you dilute control and may face pressure for quick exits.",
+            "timestamp": "04:40"
+          }
+        ],
+        "quotes": [
+          {
+            "text": "Bootstrapping: slower growth, full control, less risk from investors.",
+            "speaker": "Samir Gupta",
+            "timestamp": "04:25",
+            "match_score": 1.0
+          },
+          {
+            "text": "VC: faster growth, resources, but you dilute control and may face pressure for quick exits.",
+            "speaker": "Emily Rogers",
+            "timestamp": "04:40",
+            "match_score": 1.0
+          },
+          {
+            "text": "Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.",
+            "speaker": "Emily Rogers",
+            "timestamp": "02:35",
+            "match_score": 1.0
+          },
+          {
+            "text": "True, but if your market is time-sensitive, VC money helps capture it before competitors.",
+            "speaker": "Emily Rogers",
+            "timestamp": "01:30",
+            "match_score": 1.0
+          }
+        ],
+        "topics": [
+          "founder",
+          "debates",
+          "bootstrapping",
+          "path",
+          "market",
+          "control",
+          "capital"
+        ]
+      },
+      "fact_checks": [
+        {
+          "claim": {
+            "id": "C1",
+            "claim": "No distractions from chasing VC metrics.",
+            "speaker": "Samir Gupta",
+            "timestamp": "01:05",
+            "quote": "No distractions from chasing VC metrics.",
+            "type": "factual",
+            "time_sensitive": false
+          },
+          "verdict": "unverifiable",
+          "confidence": 0.3,
+          "raw_confidence": 0.3,
+          "rationale": "No knowledge-base entry or search result addresses this claim directly.",
+          "evidence": [],
+          "tool_calls": 2,
+          "tools_used": [
+            "search_knowledge_base",
+            "web_search"
+          ],
+          "method": "reasoning step",
+          "verification": "❓ Unverifiable (no supporting source found)"
+        },
+        {
+          "claim": {
+            "id": "C2",
+            "claim": "If your market is time-sensitive, VC money helps capture it before competitors.",
+            "speaker": "Emily Rogers",
+            "timestamp": "01:30",
+            "quote": "If your market is time-sensitive, VC money helps capture it before competitors.",
+            "type": "factual",
+            "time_sensitive": false
+          },
+          "verdict": "unverifiable",
+          "confidence": 0.3,
+          "raw_confidence": 0.3,
+          "rationale": "No knowledge-base entry or search result addresses this claim directly.",
+          "evidence": [],
+          "tool_calls": 2,
+          "tools_used": [
+            "search_knowledge_base",
+            "web_search"
+          ],
+          "method": "reasoning step",
+          "verification": "❓ Unverifiable (no supporting source found)"
+        },
+        {
+          "claim": {
+            "id": "C3",
+            "claim": "Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.",
+            "speaker": "Emily Rogers",
+            "timestamp": "02:35",
+            "quote": "Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.",
+            "type": "anecdotal",
+            "time_sensitive": false
+          },
+          "verdict": "unverifiable",
+          "confidence": 0.3,
+          "raw_confidence": 0.3,
+          "rationale": "Personal anecdote from the speaker; no independent source can confirm it.",
+          "evidence": [],
+          "tool_calls": 0,
+          "tools_used": [],
+          "method": "reasoning step",
+          "verification": "❓ Unverifiable (personal anecdote)"
+        },
+        {
+          "claim": {
+            "id": "C4",
+            "claim": "Bootstrapping: slower growth, full control, less risk from investors.",
+            "speaker": "Samir Gupta",
+            "timestamp": "04:25",
+            "quote": "Bootstrapping: slower growth, full control, less risk from investors.",
+            "type": "factual",
+            "time_sensitive": false
+          },
+          "verdict": "verified",
+          "confidence": 0.69,
+          "raw_confidence": 0.69,
+          "rationale": "Sources [E1] support the claim as stated.",
+          "evidence": [
+            {
+              "id": "E1",
+              "source": "knowledge_base",
+              "title": "KB-022: Bootstrapping trades growth speed for ownership and control",
+              "snippet": "Bootstrapping means funding a company from founders' savings and customer revenue instead of outside investment. Founders keep full ownership and control and must focus on revenue and profitability early, but growth is usually slower because it is limited by cash flow.",
+              "url": null,
+              "date": "2025-01-01",
+              "relevance": 0.576
+            }
+          ],
+          "tool_calls": 2,
+          "tools_used": [
+            "search_knowledge_base",
+            "web_search"
+          ],
+          "method": "knowledge base",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-022)"
+        },
+        {
+          "claim": {
+            "id": "C5",
+            "claim": "VC: faster growth, resources, but you dilute control and may face pressure for quick exits.",
+            "speaker": "Emily Rogers",
+            "timestamp": "04:40",
+            "quote": "VC: faster growth, resources, but you dilute control and may face pressure for quick exits.",
+            "type": "factual",
+            "time_sensitive": false
+          },
+          "verdict": "unverifiable",
+          "confidence": 0.3,
+          "raw_confidence": 0.3,
+          "rationale": "No knowledge-base entry or search result addresses this claim directly.",
+          "evidence": [],
+          "tool_calls": 2,
+          "tools_used": [
+            "search_knowledge_base",
+            "web_search"
+          ],
+          "method": "reasoning step",
+          "verification": "❓ Unverifiable (no supporting source found)"
+        }
+      ],
+      "steps": [
+        {
+          "step": "plan",
+          "status": "ok",
+          "duration_ms": 3,
+          "attempts": 0,
+          "detail": "4 steps"
+        },
+        {
+          "step": "summarize",
+          "status": "ok",
+          "duration_ms": 0,
+          "attempts": 1,
+          "detail": "201 words (single_pass, target 200–300)"
+        },
+        {
+          "step": "extract_notes",
+          "status": "ok",
+          "duration_ms": 5,
+          "attempts": 1,
+          "detail": "5 takeaways · 4 verbatim quotes · 7 topics"
+        },
+        {
+          "step": "extract_claims",
+          "status": "ok",
+          "duration_ms": 3,
+          "attempts": 1,
+          "detail": "5 check-worthy claims (1 anecdotal, 4 factual)"
+        },
+        {
+          "step": "verify_claims",
+          "status": "ok",
+          "duration_ms": 20,
+          "attempts": 5,
+          "detail": "1 ✅ · 0 ⚠️ · 4 ❓ across 5 claims · 8 tool calls"
+        }
+      ],
+      "usage": {
+        "llm_calls": 17,
+        "cached_calls": 0,
+        "input_tokens": 12542,
+        "output_tokens": 1878,
+        "cache_read_tokens": 0,
+        "estimated": true
+      },
+      "warnings": [],
+      "fact_check_table": [
+        {
+          "claim": "No distractions from chasing VC metrics.",
+          "verification": "❓ Unverifiable (no supporting source found)",
+          "confidence": 0.3
+        },
+        {
+          "claim": "If your market is time-sensitive, VC money helps capture it before competitors.",
+          "verification": "❓ Unverifiable (no supporting source found)",
+          "confidence": 0.3
+        },
+        {
+          "claim": "Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.",
+          "verification": "❓ Unverifiable (personal anecdote)",
+          "confidence": 0.3
+        },
+        {
+          "claim": "Bootstrapping: slower growth, full control, less risk from investors.",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-022)",
+          "confidence": 0.69
+        },
+        {
+          "claim": "VC: faster growth, resources, but you dilute control and may face pressure for quick exits.",
+          "verification": "❓ Unverifiable (no supporting source found)",
+          "confidence": 0.3
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0",
+      "run_id": "20261014-120705-1c61da",
+      "generated_at": "2026-10-14T17:07:05+00:00",
+      "episode": {
+        "episode_id": "ep004",
+        "title": "Space & Markets Roundup (synthetic test transcript built from the assignment's example)",
+        "host": "Chris Bell",
+        "guests": [
+          "Nina Alvarez"
+        ],
+        "duration": "04:15",
+        "word_count": 122,
+        "utterances": 11,
+        "source": "data/transcripts/ep004_pdf_example.txt",
+        "cleaning": {
+          "fillers": 7,
+          "filler_phrases": 3,
+          "repeated_words": 1,
+          "utterances_changed": 7
+        }
+      },
+      "provider": "offline",
+      "models": {
+        "provider": "offline",
+        "main": "offline-heuristic",
+        "fast": "offline-heuristic"
+      },
+      "plan": {
+        "goal": "Publish-ready show notes and a fact-check table for 'Space & Markets Roundup (synthetic test transcript built from the assignment's example)'.",
+        "steps": [
+          {
+            "step": "normalize_transcript",
+            "reason": "11 filler/repeated tokens detected; clean before quoting.",
+            "params": {}
+          },
+          {
+            "step": "summarize",
+            "reason": "122 words fits within the single-pass budget.",
+            "params": {
+              "strategy": "single_pass"
+            }
+          },
+          {
+            "step": "extract_notes",
+            "reason": "Required show-notes deliverable.",
+            "params": {}
+          },
+          {
+            "step": "extract_claims",
+            "reason": "Claim signals (entities=8, years=4, predictions=3) suggest about 8 check-worthy claims.",
+            "params": {
+              "max_claims": 8
+            }
+          },
+          {
+            "step": "verify_claims",
+            "reason": "Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.",
+            "params": {
+              "max_steps_per_claim": 4,
+              "tools": [
+                "search_knowledge_base",
+                "web_search"
+              ]
+            }
+          }
+        ],
+        "repaired": false,
+        "repair_notes": []
+      },
+      "summary": {
+        "text": "In \"Space & Markets Roundup (synthetic test transcript built from the assignment's example)\", Chris Bell talks with Nina Alvarez about markets, mars, samples and space. Nina Alvarez adds: “It’s launching in early 2026 — they’re planning to bring back samples.” Alvarez adds: “The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.” Alvarez adds: “I heard that a lot. Honestly I think crypto is just too volatile to call.” Alvarez adds: “Nvidia became the first company to hit a five trillion dollar market cap last year.” Alvarez adds: “I think humans will walk on Mars before 2040.” Bell asks: “NASA recently announced something about a new Mars mission.” Bell asks: “That’s exciting.” Bell asks: “On the markets side, people keep saying Bitcoin will reach $200K by 2025.” Bell asks: “What about AI stocks?” Bell asks: “Wild. Any predictions?” Bell asks: “We'll see. Thanks for joining us.”",
+        "word_count": 150,
+        "strategy": "single_pass"
+      },
+      "notes": {
+        "takeaways": [
+          {
+            "text": "Alvarez: Nvidia became the first company to hit a five trillion dollar market cap last year.",
+            "timestamp": "00:03:44"
+          },
+          {
+            "text": "Alvarez: The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.",
+            "timestamp": "00:03:05"
+          },
+          {
+            "text": "Alvarez: Yes, it’s launching in early 2026 — they’re planning to bring back samples.",
+            "timestamp": "00:02:18"
+          },
+          {
+            "text": "Alvarez: I think humans will walk on Mars before 2040.",
+            "timestamp": "00:04:06"
+          },
+          {
+            "text": "Alvarez: Honestly I think crypto is just too volatile to call.",
+            "timestamp": "00:03:27"
+          }
+        ],
+        "quotes": [
+          {
+            "text": "Nvidia became the first company to hit a five trillion dollar market cap last year.",
+            "speaker": "Nina Alvarez",
+            "timestamp": "00:03:44",
+            "match_score": 1.0
+          },
+          {
+            "text": "The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.",
+            "speaker": "Nina Alvarez",
+            "timestamp": "00:03:05",
+            "match_score": 1.0
+          },
+          {
+            "text": "Yes, it’s launching in early 2026 — they’re planning to bring back samples.",
+            "speaker": "Nina Alvarez",
+            "timestamp": "00:02:18",
+            "match_score": 1.0
+          },
+          {
+            "text": "I think humans will walk on Mars before 2040.",
+            "speaker": "Nina Alvarez",
+            "timestamp": "00:04:06",
+            "match_score": 1.0
+          }
+        ],
+        "topics": [
+          "mars",
+          "nasa",
+          "markets",
+          "samples",
+          "space",
+          "roundup",
+          "synthetic"
+        ]
+      },
+      "fact_checks": [
+        {
+          "claim": {
+            "id": "C1",
+            "claim": "NASA recently announced something about a new Mars mission: It’s launching in early 2026 — they’re planning to bring back samples.",
+            "speaker": "Nina Alvarez",
+            "timestamp": "00:02:18",
+            "quote": "It’s launching in early 2026 — they’re planning to bring back samples.",
+            "type": "statistical",
+            "time_sensitive": true
+          },
+          "verdict": "possibly_outdated_or_inaccurate",
+          "confidence": 0.7,
+          "raw_confidence": 0.7,
+          "rationale": "Sources [E4], [E1] cover the claim but indicate it is outdated or overstated.",
+          "evidence": [
+            {
+              "id": "E4",
+              "source": "web_search",
+              "title": "NASA and ESA outline Mars Sample Return campaign with launches in 2026",
+              "snippet": "NASA and ESA plan to launch the Mars Sample Return lander and Earth Return Orbiter in 2026, bringing Perseverance's samples back to Earth in the early 2030s.",
+              "url": "https://example-news.test/2020/mars-sample-return-plan",
+              "date": "2020-11-10",
+              "relevance": 0.673
+            },
+            {
+              "id": "E1",
+              "source": "knowledge_base",
+              "title": "KB-030: NASA's Mars Sample Return has been delayed and restructured; no 2026 launch",
+              "snippet": "NASA's Mars Sample Return (MSR) has not launched. The original plan targeted launches around 2026 with samples back in the early 2030s, but after an independent review warned costs could reach $11 billion, NASA in January 2025 outlined two cheaper architectures with launches around 2030-2031 and Earth return between 2035 and 2039. A decision between them was deferred to mid-2026, and the President's FY2026 budget request proposed cancelling the program.",
+              "url": "https://www.scientificamerican.com/article/the-fate-of-nasas-mars-sample-return-program-may-be-decided-in-2026/",
+              "date": "2025-07-01",
+              "relevance": 0.657
+            }
+          ],
+          "tool_calls": 2,
+          "tools_used": [
+            "search_knowledge_base",
+            "web_search"
+          ],
+          "method": "knowledge base + web search",
+          "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-030)"
+        },
+        {
+          "claim": {
+            "id": "C2",
+            "claim": "The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.",
+            "speaker": "Nina Alvarez",
+            "timestamp": "00:03:05",
+            "quote": "The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.",
+            "type": "statistical",
+            "time_sensitive": true
+          },
+          "verdict": "verified",
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "rationale": "Sources [E1], [E4] support the claim as stated.",
+          "evidence": [
+            {
+              "id": "E1",
+              "source": "knowledge_base",
+              "title": "KB-031: Perseverance landed in Jezero Crater in February 2021 and is caching samples",
+              "snippet": "NASA's Perseverance rover landed in Jezero Crater on Mars on February 18, 2021, and has been collecting and caching rock and regolith samples intended for eventual return to Earth.",
+              "url": "https://science.nasa.gov/mission/mars-2020-perseverance/",
+              "date": "2025-01-01",
+              "relevance": 1.0
+            },
+            {
+              "id": "E4",
+              "source": "web_search",
+              "title": "Perseverance rover lands safely in Jezero Crater",
+              "snippet": "NASA's Perseverance rover touched down in Jezero Crater on February 18, 2021, beginning its mission to search for signs of ancient life and collect samples.",
+              "url": "https://example-news.test/2021/perseverance-landing",
+              "date": "2021-02-18",
+              "relevance": 1.0
+            }
+          ],
+          "tool_calls": 2,
+          "tools_used": [
+            "search_knowledge_base",
+            "web_search"
+          ],
+          "method": "knowledge base + web search",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-031 and web search)"
+        },
+        {
+          "claim": {
+            "id": "C3",
+            "claim": "On the markets side, people keep saying Bitcoin will reach $200K by 2025.",
+            "speaker": "Chris Bell",
+            "timestamp": "00:03:20",
+            "quote": "On the markets side, people keep saying Bitcoin will reach $200K by 2025.",
+            "type": "prediction",
+            "time_sensitive": true
+          },
+          "verdict": "possibly_outdated_or_inaccurate",
+          "confidence": 0.75,
+          "raw_confidence": 0.75,
+          "rationale": "Sources [E4], [E1] cover the claim but indicate it is outdated or overstated.",
+          "evidence": [
+            {
+              "id": "E4",
+              "source": "web_search",
+              "title": "Analysts: Bitcoin could hit $200,000 by the end of 2025",
+              "snippet": "Several analysts forecast that Bitcoin could reach $200,000 by the end of 2025, citing ETF inflows and the halving cycle.",
+              "url": "https://example-markets.test/2024/bitcoin-200k-forecast",
+              "date": "2024-12-18",
+              "relevance": 0.787
+            },
+            {
+              "id": "E1",
+              "source": "knowledge_base",
+              "title": "KB-032: Bitcoin peaked near $126,000 in 2025 and did not reach $200,000",
+              "snippet": "Bitcoin's highest price in 2025 was about $126,210, set on October 6, 2025. It did not reach $200,000 in 2025, and that record still stood a year later.",
+              "url": "https://www.kucoin.com/news/flash/bitcoin-s-126-210-all-time-high-turns-one-year-old",
+              "date": "2026-10-06",
+              "relevance": 0.753
+            }
+          ],
+          "tool_calls": 2,
+          "tools_used": [
+            "search_knowledge_base",
+            "web_search"
+          ],
+          "method": "knowledge base + web search",
+          "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-032)"
+        },
+        {
+          "claim": {
+            "id": "C4",
+            "claim": "I think humans will walk on Mars before 2040.",
+            "speaker": "Nina Alvarez",
+            "timestamp": "00:04:06",
+            "quote": "I think humans will walk on Mars before 2040.",
+            "type": "prediction",
+            "time_sensitive": true
+          },
+          "verdict": "unverifiable",
+          "confidence": 0.35,
+          "raw_confidence": 0.35,
+          "rationale": "Forward-looking prediction; it cannot be verified yet.",
+          "evidence": [],
+          "tool_calls": 0,
+          "tools_used": [],
+          "method": "reasoning step",
+          "verification": "❓ Unverifiable (future prediction)"
+        }
+      ],
+      "steps": [
+        {
+          "step": "plan",
+          "status": "ok",
+          "duration_ms": 3,
+          "attempts": 0,
+          "detail": "5 steps"
+        },
+        {
+          "step": "normalize_transcript",
+          "status": "ok",
+          "duration_ms": 3,
+          "attempts": 0,
+          "detail": "removed 7 filler words, 3 filler phrases, 1 repeated words across 7 lines"
+        },
+        {
+          "step": "summarize",
+          "status": "ok",
+          "duration_ms": 4,
+          "attempts": 3,
+          "detail": "150 words (single_pass, target 200–300)"
+        },
+        {
+          "step": "extract_notes",
+          "status": "ok",
+          "duration_ms": 5,
+          "attempts": 1,
+          "detail": "5 takeaways · 4 verbatim quotes · 7 topics"
+        },
+        {
+          "step": "extract_claims",
+          "status": "ok",
+          "duration_ms": 3,
+          "attempts": 1,
+          "detail": "4 check-worthy claims (2 prediction, 2 statistical)"
+        },
+        {
+          "step": "verify_claims",
+          "status": "ok",
+          "duration_ms": 15,
+          "attempts": 4,
+          "detail": "1 ✅ · 2 ⚠️ · 1 ❓ across 4 claims · 6 tool calls"
+        }
+      ],
+      "usage": {
+        "llm_calls": 16,
+        "cached_calls": 0,
+        "input_tokens": 12877,
+        "output_tokens": 2128,
+        "cache_read_tokens": 0,
+        "estimated": true
+      },
+      "warnings": [
+        "summary: the summary is 150 words; it must be 200–300 words — expand it using only the transcript"
+      ],
+      "fact_check_table": [
+        {
+          "claim": "NASA recently announced something about a new Mars mission: It’s launching in early 2026 — they’re planning to bring back samples.",
+          "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-030)",
+          "confidence": 0.7
+        },
+        {
+          "claim": "The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.",
+          "verification": "✅ Verified true (confirmed by knowledge base KB-031 and web search)",
+          "confidence": 0.9
+        },
+        {
+          "claim": "On the markets side, people keep saying Bitcoin will reach $200K by 2025.",
+          "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-032)",
+          "confidence": 0.75
+        },
+        {
+          "claim": "I think humans will walk on Mars before 2040.",
+          "verification": "❓ Unverifiable (future prediction)",
+          "confidence": 0.35
+        }
+      ]
+    }
+  ]
+}

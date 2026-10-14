@@ -1,4 +1,4 @@
-.PHONY: install test lint run offline audit docker-build docker-run docker-offline serve worker-demo helm-lint
+.PHONY: install test lint run offline audit guide docker-build docker-run docker-offline serve worker-demo helm-lint
 
 install:            ## local virtualenv + dev tools
 	python3 -m venv .venv && .venv/bin/pip install -e ".[dev,aws]"
@@ -7,7 +7,7 @@ test:
 	.venv/bin/pytest -q
 
 lint:
-	.venv/bin/ruff check src tests
+	.venv/bin/ruff check src tests scripts
 
 run:                ## real model (needs ANTHROPIC_API_KEY or another provider in .env)
 	set -a; [ -f .env ] && . ./.env; set +a; .venv/bin/podcast-agent run data/transcripts --out output
@@ -17,6 +17,10 @@ offline:            ## no key needed: deterministic heuristics, exercises the fu
 
 audit:              ## re-verify the last run from its files
 	.venv/bin/podcast-agent audit output
+
+RUN ?= samples/offline-mode
+guide:              ## refill the guide's Audit trail tab from a run folder: make guide RUN=output
+	.venv/bin/podcast-agent audit $(RUN) && .venv/bin/python scripts/embed_audit.py $(RUN) samples/proof docs/guide/public/index.html
 
 docker-build:
 	docker build --build-arg GIT_COMMIT=$$(git rev-parse --short HEAD) -t podcast-agent:local .

@@ -1,0 +1,28 @@
+# command: docker run --rm -e LLM_PROVIDER=offline -v "$PWD/output:/app/output" podcast-agent:local run data/transcripts --out output --today 2026-10-13
+# machine: MacBook Pro · Apple M1 Pro · 16 GB · macOS 26.2 · Colima · Docker 29.2.1
+# commit: 07366cb
+# captured: 2026-10-14T17:09:48Z
+
+17:09:49 verify C3         🔧 web_search("markets Bitcoin reach $200K 2025")
+17:09:49 verify C3         👁  3 result(s); top [E4] Analysts: Bitcoin could hit $200,000 by the end of 2025 (relevance 
+0.79, 2024-12-18)
+17:09:49 verify C3         💭 The best evidence covers the claim but signals a change or contradiction.
+17:09:49 verify C3         ⚖️  ⚠️ Possibly outdated/inaccurate · confidence 0.75
+17:09:49 verify C3            · Sources [E4], [E1] cover the claim but indicate it is outdated or overstated.
+17:09:49 verify C4      ▶ “I think humans will walk on Mars before 2040.” (prediction, Nina Alvarez @ 00:04:06)
+17:09:49 verify C4         💭 This is a forward-looking prediction whose deadline has not passed.
+17:09:49 verify C4         ⚖️  ❓ Unverifiable · confidence 0.35
+17:09:49 verify C4            · Forward-looking prediction; it cannot be verified yet.
+17:09:49 verify         ✔ done in 0.0s — 1 ✅ · 2 ⚠️ · 1 ❓ across 4 claims · 6 tool calls
+17:09:49 done           ✔ ep004 finished in 0.1s · 16 LLM calls (0 cached) · ~12,877 in / 2,128 out tokens
+                          Run 20261014-170949-543536                           
+┏━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┓
+┃ Episode ┃ Summary ┃ Notes    ┃ Claims ✅/⚠️/❓ ┃ LLM calls ┃ Tokens in/out  ┃
+┡━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩
+│ ep001   │ 212w    │ 5T 4Q 7# │ 1/0/3           │ 10        │ ~7,890/~1,478  │
+│ ep002   │ 208w    │ 5T 4Q 7# │ 4/0/3           │ 17        │ ~12,465/~1,999 │
+│ ep003   │ 201w    │ 5T 4Q 7# │ 1/0/4           │ 17        │ ~12,542/~1,878 │
+│ ep004   │ 150w    │ 5T 4Q 7# │ 1/2/1           │ 16        │ ~12,877/~2,128 │
+└─────────┴─────────┴──────────┴─────────────────┴───────────┴────────────────┘
+Outputs: output/ (report.md, report.json, <episode>.md/.json, index.md, logs/run.log, logs/trace.jsonl)
+exit: 0

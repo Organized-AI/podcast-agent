@@ -1,0 +1,6 @@
+# command: ruff check src tests
+# machine: Linux workspace · x86_64 · Python 3.13.16
+# commit: 07366cb
+# captured: 2026-10-14T17:07:19Z
+
+All checks passed!

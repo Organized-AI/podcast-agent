@@ -1,0 +1,16 @@
+Title: Space & Markets Roundup (synthetic test transcript built from the assignment's example)
+Episode: ep004
+Host: Chris Bell
+Guests: Nina Alvarez
+
+[00:02:14] Host: So NASA recently announced something about a new Mars mission.
+[00:02:18] Guest: Yes, it’s launching in early 2026 — they’re planning to bring back samples.
+[00:03:01] Host: Wow, that’s exciting.
+[00:03:05] Guest: Um, yeah. The the samples were collected by the Perseverance rover, which, uh, landed in Jezero Crater in February 2021.
+[00:03:20] Host: And on the markets side, people keep saying, like, Bitcoin will reach $200K by 2025.
+[00:03:27] Guest: I mean, I heard that a lot. Honestly I think, you know, crypto is just, uh, too volatile to call.
+[00:03:40] Host: Fair. What about AI stocks?
+[00:03:44] Guest: Nvidia became the first company to hit a five trillion dollar market cap, uh, last year.
+[00:04:02] Host: Hmm, wild. Any predictions?
+[00:04:06] Guest: Er, I think humans will walk on Mars before 2040.
+[00:04:15] Host: We'll see. Thanks for, um, joining us.

@@ -1,0 +1,42 @@
+# command: pytest -v
+# machine: Linux workspace · x86_64 · Python 3.13.16
+# commit: 07366cb
+# captured: 2026-10-14T17:07:19Z
+
+============================= test session starts ==============================
+collecting ... collected 32 items
+
+tests/test_audit.py::test_manifest_records_versions_settings_and_hashes PASSED [  3%]
+tests/test_audit.py::test_audit_passes_on_a_fresh_run PASSED             [  6%]
+tests/test_audit.py::test_audit_catches_tampering PASSED                 [  9%]
+tests/test_notes.py::test_locate_span_finds_line_even_with_wrong_timestamp PASSED [ 12%]
+tests/test_notes.py::test_paraphrased_quote_is_rejected_then_fixed PASSED [ 15%]
+tests/test_notes.py::test_offline_notes_meet_the_contract PASSED         [ 18%]
+tests/test_providers_and_reports.py::test_bedrock_provider_uses_the_messages_api_with_prompt_caching PASSED [ 21%]
+tests/test_providers_and_reports.py::test_prompt_cache_can_be_disabled PASSED [ 25%]
+tests/test_providers_and_reports.py::test_bedrock_requires_a_model_id_and_is_never_auto_selected PASSED [ 28%]
+tests/test_providers_and_reports.py::test_verification_text_matches_the_assignment_style PASSED [ 31%]
+tests/test_providers_and_reports.py::test_reports_carry_the_three_column_table_and_a_combined_file PASSED [ 34%]
+tests/test_providers_and_reports.py::test_episode_json_round_trips_with_computed_fields PASSED [ 37%]
+tests/test_server.py::test_process_endpoint_offline PASSED               [ 40%]
+tests/test_structured_and_summary.py::test_extract_json_tolerates_fences_and_prose PASSED [ 43%]
+tests/test_structured_and_summary.py::test_summary_self_corrects_when_too_short PASSED [ 46%]
+tests/test_structured_and_summary.py::test_summary_accepts_with_warning_after_max_attempts PASSED [ 50%]
+tests/test_structured_and_summary.py::test_planner_repairs_a_plan_missing_required_steps PASSED [ 53%]
+tests/test_structured_and_summary.py::test_planner_falls_back_when_model_returns_garbage PASSED [ 56%]
+tests/test_transcript.py::test_load_json_resolves_speakers PASSED        [ 59%]
+tests/test_transcript.py::test_load_txt_with_header_and_fillers PASSED   [ 62%]
+tests/test_transcript.py::test_txt_continuation_lines_and_unknown_speaker PASSED [ 65%]
+tests/test_transcript.py::test_timestamps PASSED                         [ 68%]
+tests/test_transcript.py::test_clean_text_removes_disfluencies_but_keeps_meaning PASSED [ 71%]
+tests/test_transcript.py::test_normalize_keeps_raw_text PASSED           [ 75%]
+tests/test_transcript.py::test_resolve_speaker_generic_labels PASSED     [ 78%]
+tests/test_verifier.py::test_react_loop_kb_then_finish_with_calibrated_confidence PASSED [ 81%]
+tests/test_verifier.py::test_finish_with_unknown_evidence_id_is_corrected PASSED [ 84%]
+tests/test_verifier.py::test_search_outage_is_retried_then_surfaced_to_the_agent PASSED [ 87%]
+tests/test_verifier.py::test_budget_exhaustion_defaults_to_unverifiable_for_review PASSED [ 90%]
+tests/test_verifier.py::test_calibration_caps PASSED                     [ 93%]
+tests/test_verifier.py::test_offline_end_to_end_on_the_pdf_example PASSED [ 96%]
+tests/test_worker.py::test_dir_queue_worker_is_idempotent_and_dead_letters_bad_input PASSED [100%]
+
+============================== 32 passed in 3.21s ==============================

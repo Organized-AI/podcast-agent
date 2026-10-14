@@ -1,6 +1,6 @@
 # Podcast show notes and fact-checks
 
-Run `20261014-113451-ed70d4` · provider **offline** (offline-heuristic / offline-heuristic) · 4 episode(s)
+Run `20261014-120705-1c61da` · provider **offline** (offline-heuristic / offline-heuristic) · 4 episode(s)
 
 ## Episodes
 
@@ -106,7 +106,7 @@ Forward-looking prediction; it cannot be verified yet.
 | extract_claims | ok | 0.0s | 1 | 4 check-worthy claims (1 factual, 3 prediction) |
 | verify_claims | ok | 0.0s | 4 | 1 ✅ · 0 ⚠️ · 3 ❓ across 4 claims · 2 tool calls |
 
-Provider **offline** · models offline-heuristic / offline-heuristic · 10 LLM calls (0 from cache) · ~7,890 input / ~1,478 output tokens · run `20261014-113451-ed70d4`
+Provider **offline** · models offline-heuristic / offline-heuristic · 10 LLM calls (0 from cache) · ~7,890 input / ~1,478 output tokens · run `20261014-120705-1c61da`
 ---
 
 ## AI in Healthcare: Hype or Reality?
@@ -228,7 +228,7 @@ Forward-looking prediction; it cannot be verified yet.
 | extract_claims | ok | 0.0s | 1 | 7 check-worthy claims (5 factual, 2 prediction) |
 | verify_claims | ok | 0.0s | 7 | 4 ✅ · 0 ⚠️ · 3 ❓ across 7 claims · 6 tool calls |
 
-Provider **offline** · models offline-heuristic / offline-heuristic · 17 LLM calls (0 from cache) · ~12,465 input / ~1,999 output tokens · run `20261014-113451-ed70d4`
+Provider **offline** · models offline-heuristic / offline-heuristic · 17 LLM calls (0 from cache) · ~12,465 input / ~1,999 output tokens · run `20261014-120705-1c61da`
 ---
 
 ## Bootstrapping vs Fundraising — Which Path Wins?
@@ -333,7 +333,7 @@ No knowledge-base entry or search result addresses this claim directly.
 | extract_claims | ok | 0.0s | 1 | 5 check-worthy claims (1 anecdotal, 4 factual) |
 | verify_claims | ok | 0.0s | 5 | 1 ✅ · 0 ⚠️ · 4 ❓ across 5 claims · 8 tool calls |
 
-Provider **offline** · models offline-heuristic / offline-heuristic · 17 LLM calls (0 from cache) · ~12,542 input / ~1,878 output tokens · run `20261014-113451-ed70d4`
+Provider **offline** · models offline-heuristic / offline-heuristic · 17 LLM calls (0 from cache) · ~12,542 input / ~1,878 output tokens · run `20261014-120705-1c61da`
 ---
 
 ## Space & Markets Roundup (synthetic test transcript built from the assignment's example)
@@ -438,7 +438,7 @@ Forward-looking prediction; it cannot be verified yet.
 | extract_claims | ok | 0.0s | 1 | 4 check-worthy claims (2 prediction, 2 statistical) |
 | verify_claims | ok | 0.0s | 4 | 1 ✅ · 2 ⚠️ · 1 ❓ across 4 claims · 6 tool calls |
 
-Provider **offline** · models offline-heuristic / offline-heuristic · 16 LLM calls (0 from cache) · ~12,877 input / ~2,128 output tokens · run `20261014-113451-ed70d4`
+Provider **offline** · models offline-heuristic / offline-heuristic · 16 LLM calls (0 from cache) · ~12,877 input / ~2,128 output tokens · run `20261014-120705-1c61da`
 
 **Warnings**
 

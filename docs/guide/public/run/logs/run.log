@@ -1,0 +1,294 @@
+12:07:05 run            ⚠ OFFLINE MODE: no model API key found, using deterministic heuristics. Output tests the pipeline but is not model quality. Set ANTHROPIC_API_KEY (or LLM_PROVIDER=ollama) for real results.
+12:07:05 run            · run 20261014-120705-1c61da · provider=offline (offline-heuristic) · kb=18 entries · search=mock · 4 transcript(s)
+
+━━━━━━━━ ep001 · The Future of Remote Work ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12:07:05 ingest         ▸ JSON · 19 lines · 325 words · ~06:00 · speakers: Sarah Johnson, Mark Rivera
+12:07:05 plan           ▸ profile: 325 words · 19 lines · 2 speakers · 0 filler/repeat tokens · 7 named entities · 2 years · 3 prediction cues
+12:07:05 plan           ◆ goal: Publish-ready show notes and a fact-check table for 'The Future of Remote Work'.
+12:07:05 plan              ◆ 1. summarize {'strategy': 'single_pass'} — 325 words fits within the single-pass budget.
+12:07:05 plan              ◆ 2. extract_notes — Required show-notes deliverable.
+12:07:05 plan              ◆ 3. extract_claims {'max_claims': 8} — Claim signals (entities=7, years=2, predictions=3) suggest about 8 check-worthy claims.
+12:07:05 plan              ◆ 4. verify_claims {'max_steps_per_claim': 4, 'tools': ['search_knowledge_base', 'web_search']} — Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.
+12:07:05 summarize      ▶ start — 325 words fits within the single-pass budget.
+12:07:05 summarize      ✔ done in 0.0s — 212 words (single_pass, target 200–300)
+12:07:05 notes          ▶ start — Required show-notes deliverable.
+12:07:05 notes             👁  takeaway 1: Rivera: Remote work has evolved a lot in just a few years.
+12:07:05 notes             👁  takeaway 2: Rivera: Focus on documentation, set clear goals, invest in culture, and trust your team. That’s the foundation.
+12:07:05 notes             👁  takeaway 3: Rivera: Being remote doesn’t just mean a location; it means structured processes and trust.
+12:07:05 notes             👁  takeaway 4: Rivera: Local offices might become optional hubs, and async culture will become standard practice.
+12:07:05 notes             👁  takeaway 5: Rivera: Remote doesn’t mean isolated; it just needs intention.
+12:07:05 notes             👁  quote [00:15] Mark Rivera: “Remote work has evolved a lot in just a few years.” (match 1.00)
+12:07:05 notes             👁  quote [03:55] Sarah Johnson: “What about loneliness or lack of connection? It’s often cited as a remote work downside.” (match 1.00)
+12:07:05 notes             👁  quote [00:30] Sarah Johnson: “So Mark, a lot of people equate remote work with working from anywhere.” (match 1.00)
+12:07:05 notes             👁  quote [05:35] Mark Rivera: “Focus on documentation, set clear goals, invest in culture, and trust your team. That’s the foundation.” (match 1.00)
+12:07:05 notes             👁  topics: #remote-work #work-reimagined #work #reimagined #culture #teams #documentation
+12:07:05 notes          ✔ done in 0.0s — 5 takeaways · 4 verbatim quotes · 7 topics
+12:07:05 claims         ▶ start — Claim signals (entities=7, years=2, predictions=3) suggest about 8 check-worthy claims.
+12:07:05 claims            👁  C1 [01:20] (factual) Look at GitLab, Automattic, and Doist. They’ve literally written handbooks for everything.
+12:07:05 claims            👁  C2 [02:45] (prediction · time-sensitive) Slack is great, but if you rely on it for everything, people will burn out.
+12:07:05 claims            👁  C3 [05:00] (prediction · time-sensitive) Local offices might become optional hubs, and async culture will become standard practice.
+12:07:05 claims            👁  C4 [05:00] (prediction · time-sensitive) Remote-first companies will dominate talent acquisition.
+12:07:05 claims         ✔ done in 0.0s — 4 check-worthy claims (1 factual, 3 prediction)
+12:07:05 verify         ▶ start — Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.
+12:07:05 verify C1      ▶ “Look at GitLab, Automattic, and Doist. They’ve literally written handbooks for everything.” (factual, Mark Rivera @ 01:20)
+12:07:05 verify C1         💭 Start with the curated knowledge base.
+12:07:05 verify C1         🔧 search_knowledge_base("GitLab Automattic Doist written handbooks everything")
+12:07:05 verify C1         👁  3 result(s); top [E1] KB-001: GitLab is all-remote and publishes its company handbook public (relevance 0.32, 2025-12-01)
+12:07:05 verify C1         💭 Knowledge-base evidence is weak; check the web for current information.
+12:07:05 verify C1         🔧 web_search("GitLab Automattic Doist written handbooks everything")
+12:07:05 verify C1         👁  1 result(s); top [E4] How GitLab runs an all-remote company with a public handbook (relevance 0.63, 2024-05-02)
+12:07:05 verify C1         💭 The best evidence covers the claim and shows no sign of being outdated.
+12:07:05 verify C1         ⚖️  ✅ Verified true · confidence 0.72
+12:07:05 verify C1            · Sources [E4] support the claim as stated.
+12:07:05 verify C2      ▶ “Slack is great, but if you rely on it for everything, people will burn out.” (prediction, Mark Rivera @ 02:45)
+12:07:05 verify C2         💭 This is a forward-looking prediction whose deadline has not passed.
+12:07:05 verify C2         ⚖️  ❓ Unverifiable · confidence 0.35
+12:07:05 verify C2            · Forward-looking prediction; it cannot be verified yet.
+12:07:05 verify C3      ▶ “Local offices might become optional hubs, and async culture will become standard practice.” (prediction, Mark Rivera @ 05:00)
+12:07:05 verify C3         💭 This is a forward-looking prediction whose deadline has not passed.
+12:07:05 verify C3         ⚖️  ❓ Unverifiable · confidence 0.35
+12:07:05 verify C3            · Forward-looking prediction; it cannot be verified yet.
+12:07:05 verify C4      ▶ “Remote-first companies will dominate talent acquisition.” (prediction, Mark Rivera @ 05:00)
+12:07:05 verify C4         💭 This is a forward-looking prediction whose deadline has not passed.
+12:07:05 verify C4         ⚖️  ❓ Unverifiable · confidence 0.35
+12:07:05 verify C4            · Forward-looking prediction; it cannot be verified yet.
+12:07:05 verify         ✔ done in 0.0s — 1 ✅ · 0 ⚠️ · 3 ❓ across 4 claims · 2 tool calls
+12:07:05 done           ✔ ep001 finished in 0.0s · 10 LLM calls (0 cached) · ~7,890 in / 1,478 out tokens
+
+━━━━━━━━ ep002 · AI in Healthcare: Hype or Reality? ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12:07:05 ingest         ▸ JSON · 16 lines · 233 words · ~05:10 · speakers: David Chen, Dr. Priya Patel, Alex Moore
+12:07:05 plan           ▸ profile: 233 words · 16 lines · 3 speakers · 0 filler/repeat tokens · 5 named entities · 0 years · 4 prediction cues
+12:07:05 plan           ◆ goal: Publish-ready show notes and a fact-check table for 'AI in Healthcare: Hype or Reality?'.
+12:07:05 plan              ◆ 1. summarize {'strategy': 'single_pass'} — 233 words fits within the single-pass budget.
+12:07:05 plan              ◆ 2. extract_notes — Required show-notes deliverable.
+12:07:05 plan              ◆ 3. extract_claims {'max_claims': 7} — Claim signals (entities=5, years=0, predictions=4) suggest about 7 check-worthy claims.
+12:07:05 plan              ◆ 4. verify_claims {'max_steps_per_claim': 4, 'tools': ['search_knowledge_base', 'web_search']} — Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.
+12:07:05 summarize      ▶ start — 233 words fits within the single-pass budget.
+12:07:05 summarize      ✔ done in 0.0s — 208 words (single_pass, target 200–300)
+12:07:05 notes          ▶ start — Required show-notes deliverable.
+12:07:05 notes             👁  takeaway 1: Dr. Patel: Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.
+12:07:05 notes             👁  takeaway 2: Moore: Plus, the pandemic accelerated digital health adoption, including AI tools.
+12:07:05 notes             👁  takeaway 3: Dr. Patel: Hospitals want faster reads and fewer errors.
+12:07:05 notes             👁  takeaway 4: Moore: The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.
+12:07:05 notes             👁  takeaway 5: Dr. Patel: Some hospitals use AI for reading X-rays or flagging urgent cases.
+12:07:05 notes             👁  quote [04:15] Dr. Priya Patel: “Yes, AI copilots that suggest treatment plans, but a human will always make the final call.” (match 1.00)
+12:07:05 notes             👁  quote [01:50] Dr. Priya Patel: “Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.” (match 1.00)
+12:07:05 notes             👁  quote [03:30] Alex Moore: “Plus, the pandemic accelerated digital health adoption, including AI tools.” (match 1.00)
+12:07:05 notes             👁  quote [00:00] David Chen: “AI is everywhere, but in healthcare it’s complicated.” (match 1.00)
+12:07:05 notes             👁  topics: #tech #health #healthcare #hype #reality #cases #diagnostics
+12:07:05 notes          ✔ done in 0.0s — 5 takeaways · 4 verbatim quotes · 7 topics
+12:07:05 claims         ▶ start — Claim signals (entities=5, years=0, predictions=4) suggest about 7 check-worthy claims.
+12:07:05 claims            👁  C1 [00:55] (factual) Some hospitals use AI for reading X-rays or flagging urgent cases.
+12:07:05 claims            👁  C2 [01:15] (prediction · time-sensitive) The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.
+12:07:05 claims            👁  C3 [01:50] (factual) Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.
+12:07:05 claims            👁  C4 [02:20] (factual) AI learns from existing clinical data, which may be skewed.
+12:07:05 claims            👁  C5 [03:05] (factual) Hospitals want faster reads and fewer errors.
+12:07:05 claims            👁  C6 [03:30] (factual) The pandemic accelerated digital health adoption, including AI tools.
+12:07:05 claims            👁  C7 [04:15] (prediction · time-sensitive) AI copilots that suggest treatment plans, but a human will always make the final call.
+12:07:05 claims         ✔ done in 0.0s — 7 check-worthy claims (5 factual, 2 prediction)
+12:07:05 verify         ▶ start — Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.
+12:07:05 verify C1      ▶ “Some hospitals use AI for reading X-rays or flagging urgent cases.” (factual, Dr. Priya Patel @ 00:55)
+12:07:05 verify C1         💭 Start with the curated knowledge base.
+12:07:05 verify C1         🔧 search_knowledge_base("hospitals use reading X-rays flagging urgent cases")
+12:07:05 verify C1         👁  3 result(s); top [E1] KB-011: Hospitals use AI to read X-rays and flag urgent cases for clin (relevance 1.00, 2025-06-01)
+12:07:05 verify C1         💭 The best evidence covers the claim and shows no sign of being outdated.
+12:07:05 verify C1         ⚖️  ✅ Verified true · confidence 0.90
+12:07:05 verify C1            · Sources [E1] support the claim as stated.
+12:07:05 verify C2      ▶ “The FDA reviews these systems carefully, so full autonomy isn’t happening anytime soon.” (prediction, Alex Moore @ 01:15)
+12:07:05 verify C2         💭 This is a forward-looking prediction whose deadline has not passed.
+12:07:05 verify C2         ⚖️  ❓ Unverifiable · confidence 0.35
+12:07:05 verify C2            · Forward-looking prediction; it cannot be verified yet.
+12:07:05 verify C3      ▶ “Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.” (factual, Dr. Priya Patel @ 01:50)
+12:07:05 verify C3         💭 Start with the curated knowledge base.
+12:07:05 verify C3         🔧 search_knowledge_base("Smart triage chatbots hospital websites apps helping patients figure steps seeing doctor")
+12:07:05 verify C3         👁  3 result(s); top [E1] KB-013: Symptom-checker and triage chatbots are offered to patients on (relevance 0.70, 2025-06-01)
+12:07:05 verify C3         💭 The best evidence covers the claim and shows no sign of being outdated.
+12:07:05 verify C3         ⚖️  ✅ Verified true · confidence 0.75
+12:07:05 verify C3            · Sources [E1] support the claim as stated.
+12:07:05 verify C4      ▶ “AI learns from existing clinical data, which may be skewed.” (factual, Alex Moore @ 02:20)
+12:07:05 verify C4         💭 Start with the curated knowledge base.
+12:07:05 verify C4         🔧 search_knowledge_base("learns existing clinical data may skewed")
+12:07:05 verify C4         👁  3 result(s); top [E1] KB-014: Clinical algorithms can inherit bias from historical data (Sci (relevance 0.61, 2019-10-25)
+12:07:05 verify C4         💭 The best evidence covers the claim and shows no sign of being outdated.
+12:07:05 verify C4         ⚖️  ✅ Verified true · confidence 0.71
+12:07:05 verify C4            · Sources [E1] support the claim as stated.
+12:07:05 verify C5      ▶ “Hospitals want faster reads and fewer errors.” (factual, Dr. Priya Patel @ 03:05)
+12:07:05 verify C5         💭 Start with the curated knowledge base.
+12:07:05 verify C5         🔧 search_knowledge_base("Hospitals want faster reads fewer errors")
+12:07:05 verify C5         👁  3 result(s); top [E1] KB-011: Hospitals use AI to read X-rays and flag urgent cases for clin (relevance 0.28, 2025-06-01)
+12:07:05 verify C5         💭 Knowledge-base evidence is weak; check the web for current information.
+12:07:05 verify C5         🔧 web_search("Hospitals want faster reads fewer errors")
+12:07:05 verify C5         👁  1 result(s); top [E4] Hospitals deploy AI triage to flag urgent scans (relevance 0.15, 2024-03-04)
+12:07:05 verify C5         💭 No source covers this claim closely enough.
+12:07:05 verify C5         ⚖️  ❓ Unverifiable · confidence 0.30
+12:07:05 verify C5            · No knowledge-base entry or search result addresses this claim directly.
+12:07:05 verify C6      ▶ “The pandemic accelerated digital health adoption, including AI tools.” (factual, Alex Moore @ 03:30)
+12:07:05 verify C6         💭 Start with the curated knowledge base.
+12:07:05 verify C6         🔧 search_knowledge_base("pandemic accelerated digital health adoption including tools")
+12:07:05 verify C6         👁  3 result(s); top [E1] KB-015: The COVID-19 pandemic accelerated digital health and telehealt (relevance 1.00, 2021-07-09)
+12:07:05 verify C6         💭 The best evidence covers the claim and shows no sign of being outdated.
+12:07:05 verify C6         ⚖️  ✅ Verified true · confidence 0.90
+12:07:05 verify C6            · Sources [E1] support the claim as stated.
+12:07:05 verify C7      ▶ “AI copilots that suggest treatment plans, but a human will always make the final call.” (prediction, Dr. Priya Patel @ 04:15)
+12:07:05 verify C7         💭 This is a forward-looking prediction whose deadline has not passed.
+12:07:05 verify C7         ⚖️  ❓ Unverifiable · confidence 0.35
+12:07:05 verify C7            · Forward-looking prediction; it cannot be verified yet.
+12:07:05 verify         ✔ done in 0.0s — 4 ✅ · 0 ⚠️ · 3 ❓ across 7 claims · 6 tool calls
+12:07:05 done           ✔ ep002 finished in 0.0s · 17 LLM calls (0 cached) · ~12,465 in / 1,999 out tokens
+
+━━━━━━━━ ep003 · Bootstrapping vs Fundraising — Which Path Wins? ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12:07:05 ingest         ▸ JSON · 16 lines · 192 words · ~05:10 · speakers: Lena Torres, Samir Gupta, Emily Rogers
+12:07:05 plan           ▸ profile: 192 words · 16 lines · 3 speakers · 0 filler/repeat tokens · 4 named entities · 0 years · 0 prediction cues
+12:07:05 plan           ◆ goal: Publish-ready show notes and a fact-check table for 'Bootstrapping vs Fundraising — Which Path Wins?'.
+12:07:05 plan              ◆ 1. summarize {'strategy': 'single_pass'} — 192 words fits within the single-pass budget.
+12:07:05 plan              ◆ 2. extract_notes — Required show-notes deliverable.
+12:07:05 plan              ◆ 3. extract_claims {'max_claims': 5} — Claim signals (entities=4, years=0, predictions=0) suggest about 5 check-worthy claims.
+12:07:05 plan              ◆ 4. verify_claims {'max_steps_per_claim': 3, 'tools': ['search_knowledge_base', 'web_search']} — Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.
+12:07:05 summarize      ▶ start — 192 words fits within the single-pass budget.
+12:07:05 summarize      ✔ done in 0.0s — 201 words (single_pass, target 200–300)
+12:07:05 notes          ▶ start — Required show-notes deliverable.
+12:07:05 notes             👁  takeaway 1: Gupta: Bootstrapping: slower growth, full control, less risk from investors.
+12:07:05 notes             👁  takeaway 2: Rogers: Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.
+12:07:05 notes             👁  takeaway 3: Gupta: Excited to share my experiences bootstrapping companies from scratch.
+12:07:05 notes             👁  takeaway 4: Gupta: If your market is niche, defensible, and revenue-generating early, bootstrap.
+12:07:05 notes             👁  takeaway 5: Rogers: VC: faster growth, resources, but you dilute control and may face pressure for quick exits.
+12:07:05 notes             👁  quote [04:25] Samir Gupta: “Bootstrapping: slower growth, full control, less risk from investors.” (match 1.00)
+12:07:05 notes             👁  quote [04:40] Emily Rogers: “VC: faster growth, resources, but you dilute control and may face pressure for quick exits.” (match 1.00)
+12:07:05 notes             👁  quote [02:35] Emily Rogers: “Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.” (match 1.00)
+12:07:05 notes             👁  quote [01:30] Emily Rogers: “True, but if your market is time-sensitive, VC money helps capture it before competitors.” (match 1.00)
+12:07:05 notes             👁  topics: #founder #debates #bootstrapping #path #market #control #capital
+12:07:05 notes          ✔ done in 0.0s — 5 takeaways · 4 verbatim quotes · 7 topics
+12:07:05 claims         ▶ start — Claim signals (entities=4, years=0, predictions=0) suggest about 5 check-worthy claims.
+12:07:05 claims            👁  C1 [01:05] (factual) No distractions from chasing VC metrics.
+12:07:05 claims            👁  C2 [01:30] (factual) If your market is time-sensitive, VC money helps capture it before competitors.
+12:07:05 claims            👁  C3 [02:35] (anecdotal) Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.
+12:07:05 claims            👁  C4 [04:25] (factual) Bootstrapping: slower growth, full control, less risk from investors.
+12:07:05 claims            👁  C5 [04:40] (factual) VC: faster growth, resources, but you dilute control and may face pressure for quick exits.
+12:07:05 claims         ✔ done in 0.0s — 5 check-worthy claims (1 anecdotal, 4 factual)
+12:07:05 verify         ▶ start — Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.
+12:07:05 verify C1      ▶ “No distractions from chasing VC metrics.” (factual, Samir Gupta @ 01:05)
+12:07:05 verify C1         💭 Start with the curated knowledge base.
+12:07:05 verify C1         🔧 search_knowledge_base("distractions chasing metrics")
+12:07:05 verify C1         👁  no results
+12:07:05 verify C1         💭 Knowledge-base evidence is weak; check the web for current information.
+12:07:05 verify C1         🔧 web_search("distractions chasing metrics")
+12:07:05 verify C1         👁  no results
+12:07:05 verify C1         💭 No source covers this claim closely enough.
+12:07:05 verify C1         ⚖️  ❓ Unverifiable · confidence 0.30
+12:07:05 verify C1            · No knowledge-base entry or search result addresses this claim directly.
+12:07:05 verify C2      ▶ “If your market is time-sensitive, VC money helps capture it before competitors.” (factual, Emily Rogers @ 01:30)
+12:07:05 verify C2         💭 Start with the curated knowledge base.
+12:07:05 verify C2         🔧 search_knowledge_base("market time-sensitive money helps capture competitors")
+12:07:05 verify C2         👁  3 result(s); top [E1] KB-033: Nvidia became the first company to reach a $5 trillion market  (relevance 0.13, 2025-10-29)
+12:07:05 verify C2         💭 Knowledge-base evidence is weak; check the web for current information.
+12:07:05 verify C2         🔧 web_search("market time-sensitive money helps capture competitors")
+12:07:05 verify C2         👁  3 result(s); top [E4] Telehealth use stabilizes at 38 times pre-pandemic levels (relevance 0.13, 2021-07-09)
+12:07:05 verify C2         💭 No source covers this claim closely enough.
+12:07:05 verify C2         ⚖️  ❓ Unverifiable · confidence 0.30
+12:07:05 verify C2            · No knowledge-base entry or search result addresses this claim directly.
+12:07:05 verify C3      ▶ “Meanwhile, a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.” (anecdotal, Emily Rogers @ 02:35)
+12:07:05 verify C3         💭 The claim is a personal anecdote; there is no public record to check it against.
+12:07:05 verify C3         ⚖️  ❓ Unverifiable · confidence 0.30
+12:07:05 verify C3            · Personal anecdote from the speaker; no independent source can confirm it.
+12:07:05 verify C4      ▶ “Bootstrapping: slower growth, full control, less risk from investors.” (factual, Samir Gupta @ 04:25)
+12:07:05 verify C4         💭 Start with the curated knowledge base.
+12:07:05 verify C4         🔧 search_knowledge_base("Bootstrapping slower growth full control less risk investors")
+12:07:05 verify C4         👁  3 result(s); top [E1] KB-022: Bootstrapping trades growth speed for ownership and control (relevance 0.58, 2025-01-01)
+12:07:05 verify C4         💭 Knowledge-base evidence is weak; check the web for current information.
+12:07:05 verify C4         🔧 web_search("Bootstrapping slower growth full control less risk investors")
+12:07:05 verify C4         👁  1 result(s); top [E4] Why most startups should bootstrap first (relevance 0.34, 2023-08-30)
+12:07:05 verify C4         💭 The best evidence covers the claim and shows no sign of being outdated.
+12:07:05 verify C4         ⚖️  ✅ Verified true · confidence 0.69
+12:07:05 verify C4            · Sources [E1] support the claim as stated.
+12:07:05 verify C5      ▶ “VC: faster growth, resources, but you dilute control and may face pressure for quick exits.” (factual, Emily Rogers @ 04:40)
+12:07:05 verify C5         💭 Start with the curated knowledge base.
+12:07:05 verify C5         🔧 search_knowledge_base("faster growth resources dilute control may face pressure quick exits")
+12:07:05 verify C5         👁  3 result(s); top [E1] KB-020: Venture funding dilutes founder ownership and can reduce contr (relevance 0.34, 2025-01-01)
+12:07:05 verify C5         💭 Knowledge-base evidence is weak; check the web for current information.
+12:07:05 verify C5         🔧 web_search("faster growth resources dilute control may face pressure quick exits")
+12:07:05 verify C5         👁  1 result(s); top [E4] Why most startups should bootstrap first (relevance 0.36, 2023-08-30)
+12:07:05 verify C5         💭 No source covers this claim closely enough.
+12:07:05 verify C5         ⚖️  ❓ Unverifiable · confidence 0.30
+12:07:05 verify C5            · No knowledge-base entry or search result addresses this claim directly.
+12:07:05 verify         ✔ done in 0.0s — 1 ✅ · 0 ⚠️ · 4 ❓ across 5 claims · 8 tool calls
+12:07:05 done           ✔ ep003 finished in 0.0s · 17 LLM calls (0 cached) · ~12,542 in / 1,878 out tokens
+
+━━━━━━━━ ep004 · Space & Markets Roundup (synthetic test transcript built from the assignment's example) ━━━━
+12:07:05 ingest         ▸ TXT · 11 lines · 122 words · ~04:15 · speakers: Chris Bell, Nina Alvarez
+12:07:05 plan           ▸ profile: 122 words · 11 lines · 2 speakers · 11 filler/repeat tokens · 8 named entities · 4 years · 3 prediction cues
+12:07:05 plan           ◆ goal: Publish-ready show notes and a fact-check table for 'Space & Markets Roundup (synthetic test transcript built from the assignment's example)'.
+12:07:05 plan              ◆ 1. normalize_transcript — 11 filler/repeated tokens detected; clean before quoting.
+12:07:05 plan              ◆ 2. summarize {'strategy': 'single_pass'} — 122 words fits within the single-pass budget.
+12:07:05 plan              ◆ 3. extract_notes — Required show-notes deliverable.
+12:07:05 plan              ◆ 4. extract_claims {'max_claims': 8} — Claim signals (entities=8, years=4, predictions=3) suggest about 8 check-worthy claims.
+12:07:05 plan              ◆ 5. verify_claims {'max_steps_per_claim': 4, 'tools': ['search_knowledge_base', 'web_search']} — Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.
+12:07:05 normalize      ▶ start — 11 filler/repeated tokens detected; clean before quoting.
+12:07:05 normalize         👁  [00:03:05] 'Um, yeah. The the samples were collected by the Perseverance rover, which, uh, landed in Jezero Crater in February 2021.' → 'Yeah. The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.'
+12:07:05 normalize         👁  [00:03:20] 'And on the markets side, people keep saying, like, Bitcoin will reach $200K by 2025.' → 'And on the markets side, people keep saying Bitcoin will reach $200K by 2025.'
+12:07:05 normalize         👁  [00:03:27] 'I mean, I heard that a lot. Honestly I think, you know, crypto is just, uh, too volatile to call.' → 'I heard that a lot. Honestly I think crypto is just too volatile to call.'
+12:07:05 normalize         👁  [00:03:44] 'Nvidia became the first company to hit a five trillion dollar market cap, uh, last year.' → 'Nvidia became the first company to hit a five trillion dollar market cap last year.'
+12:07:05 normalize         👁  [00:04:02] 'Hmm, wild. Any predictions?' → 'Wild. Any predictions?'
+12:07:05 normalize         👁  [00:04:06] 'Er, I think humans will walk on Mars before 2040.' → 'I think humans will walk on Mars before 2040.'
+12:07:05 normalize         👁  [00:04:15] "We'll see. Thanks for, um, joining us." → "We'll see. Thanks for joining us."
+12:07:05 normalize      ✔ done in 0.0s — removed 7 filler words, 3 filler phrases, 1 repeated words across 7 lines
+12:07:05 summarize      ▶ start — 122 words fits within the single-pass budget.
+12:07:05 summarize      ↻ attempt 1/3 rejected — the summary is 150 words; it must be 200–300 words — expand it using only the transcript
+12:07:05 summarize      ↻ attempt 2/3 rejected — the summary is 150 words; it must be 200–300 words — expand it using only the transcript
+12:07:05 summarize      ↻ attempt 3/3 rejected — the summary is 150 words; it must be 200–300 words — expand it using only the transcript
+12:07:05 summarize      ⚠ accepted with unresolved issues: the summary is 150 words; it must be 200–300 words — expand it using only the transcript
+12:07:05 summarize      ✔ done in 0.0s — 150 words (single_pass, target 200–300)
+12:07:05 notes          ▶ start — Required show-notes deliverable.
+12:07:05 notes             👁  takeaway 1: Alvarez: Nvidia became the first company to hit a five trillion dollar market cap last year.
+12:07:05 notes             👁  takeaway 2: Alvarez: The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.
+12:07:05 notes             👁  takeaway 3: Alvarez: Yes, it’s launching in early 2026 — they’re planning to bring back samples.
+12:07:05 notes             👁  takeaway 4: Alvarez: I think humans will walk on Mars before 2040.
+12:07:05 notes             👁  takeaway 5: Alvarez: Honestly I think crypto is just too volatile to call.
+12:07:05 notes             👁  quote [00:03:44] Nina Alvarez: “Nvidia became the first company to hit a five trillion dollar market cap last year.” (match 1.00)
+12:07:05 notes             👁  quote [00:03:05] Nina Alvarez: “The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.” (match 1.00)
+12:07:05 notes             👁  quote [00:02:18] Nina Alvarez: “Yes, it’s launching in early 2026 — they’re planning to bring back samples.” (match 1.00)
+12:07:05 notes             👁  quote [00:04:06] Nina Alvarez: “I think humans will walk on Mars before 2040.” (match 1.00)
+12:07:05 notes             👁  topics: #mars #nasa #markets #samples #space #roundup #synthetic
+12:07:05 notes          ✔ done in 0.0s — 5 takeaways · 4 verbatim quotes · 7 topics
+12:07:05 claims         ▶ start — Claim signals (entities=8, years=4, predictions=3) suggest about 8 check-worthy claims.
+12:07:05 claims            👁  C1 [00:02:18] (statistical · time-sensitive) NASA recently announced something about a new Mars mission: It’s launching in early 2026 — they’re planning to bring back samples.
+12:07:05 claims            👁  C2 [00:03:05] (statistical · time-sensitive) The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.
+12:07:05 claims            👁  C3 [00:03:20] (prediction · time-sensitive) On the markets side, people keep saying Bitcoin will reach $200K by 2025.
+12:07:05 claims            👁  C4 [00:04:06] (prediction · time-sensitive) I think humans will walk on Mars before 2040.
+12:07:05 claims         ✔ done in 0.0s — 4 check-worthy claims (2 prediction, 2 statistical)
+12:07:05 verify         ▶ start — Ground each claim in the knowledge base first, then the web when evidence is thin or time-sensitive.
+12:07:05 verify C1      ▶ “NASA recently announced something about a new Mars mission: It’s launching in early 2026 — they’re planning to bring back samples.” (statistical, Nina Alvarez @ 00:02:18)
+12:07:05 verify C1         💭 Start with the curated knowledge base.
+12:07:05 verify C1         🔧 search_knowledge_base("NASA announced new Mars mission launching early 2026 bring back samples")
+12:07:05 verify C1         👁  3 result(s); top [E1] KB-030: NASA's Mars Sample Return has been delayed and restructured; n (relevance 0.66, 2025-07-01)
+12:07:05 verify C1         💭 Knowledge-base evidence is possibly stale for a time-sensitive claim; check the web for current information.
+12:07:05 verify C1         🔧 web_search("NASA announced new Mars mission launching early 2026 bring back samples")
+12:07:05 verify C1         👁  3 result(s); top [E4] NASA and ESA outline Mars Sample Return campaign with launches in 2026 (relevance 0.67, 2020-11-10)
+12:07:05 verify C1         💭 The best evidence covers the claim but signals a change or contradiction.
+12:07:05 verify C1         ⚖️  ⚠️ Possibly outdated/inaccurate · confidence 0.70
+12:07:05 verify C1            · Sources [E4], [E1] cover the claim but indicate it is outdated or overstated.
+12:07:05 verify C2      ▶ “The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.” (statistical, Nina Alvarez @ 00:03:05)
+12:07:05 verify C2         💭 Start with the curated knowledge base.
+12:07:05 verify C2         🔧 search_knowledge_base("samples collected Perseverance rover landed Jezero Crater February 2021")
+12:07:05 verify C2         👁  3 result(s); top [E1] KB-031: Perseverance landed in Jezero Crater in February 2021 and is c (relevance 1.00, 2025-01-01)
+12:07:05 verify C2         💭 Knowledge-base evidence is possibly stale for a time-sensitive claim; check the web for current information.
+12:07:05 verify C2         🔧 web_search("samples collected Perseverance rover landed Jezero Crater February 2021")
+12:07:05 verify C2         👁  3 result(s); top [E4] Perseverance rover lands safely in Jezero Crater (relevance 1.00, 2021-02-18)
+12:07:05 verify C2         💭 The best evidence covers the claim and shows no sign of being outdated.
+12:07:05 verify C2         ⚖️  ✅ Verified true · confidence 0.90
+12:07:05 verify C2            · Sources [E1], [E4] support the claim as stated.
+12:07:05 verify C3      ▶ “On the markets side, people keep saying Bitcoin will reach $200K by 2025.” (prediction, Chris Bell @ 00:03:20)
+12:07:05 verify C3         💭 Start with the curated knowledge base. The deadline has passed, so the prediction is checkable.
+12:07:05 verify C3         🔧 search_knowledge_base("markets Bitcoin reach $200K 2025")
+12:07:05 verify C3         👁  3 result(s); top [E1] KB-032: Bitcoin peaked near $126,000 in 2025 and did not reach $200,00 (relevance 0.75, 2026-10-06)
+12:07:05 verify C3         💭 Knowledge-base evidence is possibly stale for a time-sensitive claim; check the web for current information.
+12:07:05 verify C3         🔧 web_search("markets Bitcoin reach $200K 2025")
+12:07:05 verify C3         👁  3 result(s); top [E4] Analysts: Bitcoin could hit $200,000 by the end of 2025 (relevance 0.79, 2024-12-18)
+12:07:05 verify C3         💭 The best evidence covers the claim but signals a change or contradiction.
+12:07:05 verify C3         ⚖️  ⚠️ Possibly outdated/inaccurate · confidence 0.75
+12:07:05 verify C3            · Sources [E4], [E1] cover the claim but indicate it is outdated or overstated.
+12:07:05 verify C4      ▶ “I think humans will walk on Mars before 2040.” (prediction, Nina Alvarez @ 00:04:06)
+12:07:05 verify C4         💭 This is a forward-looking prediction whose deadline has not passed.
+12:07:05 verify C4         ⚖️  ❓ Unverifiable · confidence 0.35
+12:07:05 verify C4            · Forward-looking prediction; it cannot be verified yet.
+12:07:05 verify         ✔ done in 0.0s — 1 ✅ · 2 ⚠️ · 1 ❓ across 4 claims · 6 tool calls
+12:07:05 done           ✔ ep004 finished in 0.0s · 16 LLM calls (0 cached) · ~12,877 in / 2,128 out tokens

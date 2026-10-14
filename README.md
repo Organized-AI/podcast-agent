@@ -7,7 +7,7 @@ An agentic AI system that takes raw podcast transcripts (`.json` or timestamped 
 3. **Fact-check.** Check-worthy claims are extracted and verified by a tool-using agent against a local knowledge base and a (mock or real) web search. Each claim is marked ✅ verified, ⚠️ possibly outdated/inaccurate or ❓ unverifiable, with a calibrated confidence score and cited evidence.
 4. **Reasoning log.** A readable trace of every plan, thought, tool call, observation, self-correction and verdict, plus a structured JSONL version.
 
-The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is in **[docs/guide/public/index.html](docs/guide/public/index.html)**: open it in a browser, or deploy it as a Cloudflare Worker with `cd docs/guide && npx wrangler deploy`.
+The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is in **[docs/guide/public/index.html](docs/guide/public/index.html)**: open it in a browser, or deploy it as a Cloudflare Worker with `cd docs/guide && npx wrangler deploy`. Its **Audit trail** tab is filled from a real run by `make guide` (`scripts/embed_audit.py`).
 
 ## Where each requirement lives
 
@@ -19,12 +19,12 @@ The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/
 | A multi-step agent that plans and executes on its own | `agent/planner.py` (model-written plan, validated and repaired), `agent/pipeline.py` (executor) |
 | Containerized, runs locally via Docker | `Dockerfile`, `docker-compose.yml`; see [Quickstart](#quickstart-docker) |
 | A model running locally or on a cloud provider (Bedrock, OpenAI, Anthropic) | `src/podcast_agent/llm/`: `LLM_PROVIDER=anthropic`, `bedrock`, `openai`, `ollama` or `offline` |
-| Readable logs of the agent's reasoning steps and plans | `output/logs/run.log` (readable) and `output/logs/trace.jsonl` (structured) |
+| Readable logs of the agent's reasoning steps and plans | `output/logs/run.log` (readable) and `output/logs/trace.jsonl` (structured); browse a full run in the guide's **Audit trail** tab |
 | An output JSON or Markdown file with summary, notes and fact-check table | `output/report.md` and `output/report.json` (plus one pair per episode) |
 | A deployment strategy with diagram and narrative | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/architecture.svg](docs/architecture.svg) |
 | A detailed README | This file, plus the interactive guide in `docs/guide/public/index.html` |
 
-Sample outputs from a complete run are committed in [`samples/offline-mode/`](samples/offline-mode).
+Sample outputs from a complete run are committed in [`samples/offline-mode/`](samples/offline-mode), with its audit (`audit.md`). Captured test, lint, Helm and Docker output from the same commit, including a tamper test the audit catches, is in [`samples/proof/`](samples/proof). The guide's **Audit trail** tab renders all of it and re-hashes the run's files in the browser.
 
 ---
 

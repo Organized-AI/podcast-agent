@@ -1,0 +1,308 @@
+{
+  "schema_version": "1.1",
+  "run_id": "20261014-170949-543536",
+  "started_at": "2026-10-14T17:09:49+00:00",
+  "finished_at": "2026-10-14T17:09:49+00:00",
+  "agent_version": "0.1.0",
+  "git_commit": "07366cb",
+  "prompt_version": "2026-10-13.1",
+  "provider": {
+    "provider": "offline",
+    "main": "offline-heuristic",
+    "fast": "offline-heuristic"
+  },
+  "search": "mock",
+  "knowledge_base_entries": 18,
+  "knowledge_base": {
+    "path": "data/knowledge_base.json",
+    "entries": 18,
+    "sha256": "348dbf15ccd570dc4aae3d20e6ae5a87b71cf1be4332f3fa16d311735c090c39"
+  },
+  "today": "2026-10-13",
+  "settings": {
+    "provider": "offline",
+    "models": {
+      "provider": "offline",
+      "main": "offline-heuristic",
+      "fast": "offline-heuristic"
+    },
+    "search": "mock",
+    "today": "2026-10-13",
+    "temperature": 0.2,
+    "max_claims": 8,
+    "max_steps_per_claim": 4,
+    "max_attempts": 3,
+    "summary_length_mode": "spec",
+    "map_reduce_threshold_words": 15000,
+    "prompt_cache": true,
+    "response_cache": true,
+    "mock_search_failure_rate": 0.0
+  },
+  "trace_events": 350,
+  "outputs_sha256": {
+    "report.md": "cdbd845a6e2c47d389f123fff4d37a0e9da9e8891d60d3b40034d94387c83250",
+    "report.json": "4e2fdb311714294cd3dea86c97aa5c07352f5486ca8852f2a8d3070299013e81",
+    "index.md": "99a2192b91f69c4d54553a494a6bc215750990aa9170141d02f2fbb36885048d",
+    "ep001.json": "2518590d53b2e70eadb7f6884a95a46a5351fe0ae9668286796276d4f6353128",
+    "ep001.md": "5319f8a8ab371c55498e11391446a06cc3843a2c20441c0c931f3f5a32057cff",
+    "ep002.json": "b4493345b3c2127484d27c41d3c2387c5f2905bba84918e6d1fcbb82220d67b7",
+    "ep002.md": "b295588591c8b16518b8017c332a9b800a0e341f925dfe18cc3133ece17945dc",
+    "ep003.json": "8fd646e507fcdfaf336a16cbd986dfe5cc6fb6141f69fcd87162fe17791d34d1",
+    "ep003.md": "e2b973d77f3322cb440241c8d40d961db69c56ede9119e555ff6b51eaf6f03fc",
+    "ep004.json": "0b5fb2cdc06cc76cf38aec60a8d0004cf0dcfdb23730590495333beab9d0d8a8",
+    "ep004.md": "6a83670640db2a20ff6f8e27c47e11c3c987a9ce41ef6a6c01b7fdc80fdabe76",
+    "logs/trace.jsonl": "21d29a1e52a2657bf581f2d42fe9cb8f5048233c54aa7adbcc579d0a509023e1"
+  },
+  "episodes": [
+    {
+      "episode_id": "ep001",
+      "title": "The Future of Remote Work",
+      "input": {
+        "path": "data/transcripts/ep001_remote_work.json",
+        "sha256": "4896a2df7ee1b1c4c1cb8e445ca21f956bf1616c498f35c433d7de6fc80b3ada"
+      },
+      "outputs": [
+        "ep001.json",
+        "ep001.md",
+        "report.md",
+        "report.json"
+      ],
+      "usage": {
+        "llm_calls": 10,
+        "cached_calls": 0,
+        "input_tokens": 7890,
+        "output_tokens": 1478,
+        "cache_read_tokens": 0,
+        "estimated": true
+      },
+      "steps": [
+        {
+          "step": "plan",
+          "status": "ok",
+          "duration_ms": 6,
+          "attempts": 0,
+          "detail": "4 steps"
+        },
+        {
+          "step": "summarize",
+          "status": "ok",
+          "duration_ms": 1,
+          "attempts": 1,
+          "detail": "212 words (single_pass, target 200\u2013300)"
+        },
+        {
+          "step": "extract_notes",
+          "status": "ok",
+          "duration_ms": 9,
+          "attempts": 1,
+          "detail": "5 takeaways \u00b7 4 verbatim quotes \u00b7 7 topics"
+        },
+        {
+          "step": "extract_claims",
+          "status": "ok",
+          "duration_ms": 4,
+          "attempts": 1,
+          "detail": "4 check-worthy claims (1 factual, 3 prediction)"
+        },
+        {
+          "step": "verify_claims",
+          "status": "ok",
+          "duration_ms": 16,
+          "attempts": 4,
+          "detail": "1 \u2705 \u00b7 0 \u26a0\ufe0f \u00b7 3 \u2753 across 4 claims \u00b7 2 tool calls"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "episode_id": "ep002",
+      "title": "AI in Healthcare: Hype or Reality?",
+      "input": {
+        "path": "data/transcripts/ep002_ai_healthcare.json",
+        "sha256": "e898ab4ef781a918444d2d25817a9c32aa5c9202d0b1b526fede9574fd448695"
+      },
+      "outputs": [
+        "ep002.json",
+        "ep002.md",
+        "report.md",
+        "report.json"
+      ],
+      "usage": {
+        "llm_calls": 17,
+        "cached_calls": 0,
+        "input_tokens": 12465,
+        "output_tokens": 1999,
+        "cache_read_tokens": 0,
+        "estimated": true
+      },
+      "steps": [
+        {
+          "step": "plan",
+          "status": "ok",
+          "duration_ms": 4,
+          "attempts": 0,
+          "detail": "4 steps"
+        },
+        {
+          "step": "summarize",
+          "status": "ok",
+          "duration_ms": 0,
+          "attempts": 1,
+          "detail": "208 words (single_pass, target 200\u2013300)"
+        },
+        {
+          "step": "extract_notes",
+          "status": "ok",
+          "duration_ms": 8,
+          "attempts": 1,
+          "detail": "5 takeaways \u00b7 4 verbatim quotes \u00b7 7 topics"
+        },
+        {
+          "step": "extract_claims",
+          "status": "ok",
+          "duration_ms": 5,
+          "attempts": 1,
+          "detail": "7 check-worthy claims (5 factual, 2 prediction)"
+        },
+        {
+          "step": "verify_claims",
+          "status": "ok",
+          "duration_ms": 33,
+          "attempts": 7,
+          "detail": "4 \u2705 \u00b7 0 \u26a0\ufe0f \u00b7 3 \u2753 across 7 claims \u00b7 6 tool calls"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "episode_id": "ep003",
+      "title": "Bootstrapping vs Fundraising \u2014 Which Path Wins?",
+      "input": {
+        "path": "data/transcripts/ep003_bootstrapping.json",
+        "sha256": "103538cb1fe60c349a1a9fb7f56efc2a86955006fa8314df3f6a6d23dd3d5199"
+      },
+      "outputs": [
+        "ep003.json",
+        "ep003.md",
+        "report.md",
+        "report.json"
+      ],
+      "usage": {
+        "llm_calls": 17,
+        "cached_calls": 0,
+        "input_tokens": 12542,
+        "output_tokens": 1878,
+        "cache_read_tokens": 0,
+        "estimated": true
+      },
+      "steps": [
+        {
+          "step": "plan",
+          "status": "ok",
+          "duration_ms": 5,
+          "attempts": 0,
+          "detail": "4 steps"
+        },
+        {
+          "step": "summarize",
+          "status": "ok",
+          "duration_ms": 0,
+          "attempts": 1,
+          "detail": "201 words (single_pass, target 200\u2013300)"
+        },
+        {
+          "step": "extract_notes",
+          "status": "ok",
+          "duration_ms": 8,
+          "attempts": 1,
+          "detail": "5 takeaways \u00b7 4 verbatim quotes \u00b7 7 topics"
+        },
+        {
+          "step": "extract_claims",
+          "status": "ok",
+          "duration_ms": 4,
+          "attempts": 1,
+          "detail": "5 check-worthy claims (1 anecdotal, 4 factual)"
+        },
+        {
+          "step": "verify_claims",
+          "status": "ok",
+          "duration_ms": 31,
+          "attempts": 5,
+          "detail": "1 \u2705 \u00b7 0 \u26a0\ufe0f \u00b7 4 \u2753 across 5 claims \u00b7 8 tool calls"
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "episode_id": "ep004",
+      "title": "Space & Markets Roundup (synthetic test transcript built from the assignment's example)",
+      "input": {
+        "path": "data/transcripts/ep004_pdf_example.txt",
+        "sha256": "65ab6a2b1cc0a3c5614b0b402d81be9556516010b5407f4e38542c14bbe2d88e"
+      },
+      "outputs": [
+        "ep004.json",
+        "ep004.md",
+        "report.md",
+        "report.json"
+      ],
+      "usage": {
+        "llm_calls": 16,
+        "cached_calls": 0,
+        "input_tokens": 12877,
+        "output_tokens": 2128,
+        "cache_read_tokens": 0,
+        "estimated": true
+      },
+      "steps": [
+        {
+          "step": "plan",
+          "status": "ok",
+          "duration_ms": 4,
+          "attempts": 0,
+          "detail": "5 steps"
+        },
+        {
+          "step": "normalize_transcript",
+          "status": "ok",
+          "duration_ms": 5,
+          "attempts": 0,
+          "detail": "removed 7 filler words, 3 filler phrases, 1 repeated words across 7 lines"
+        },
+        {
+          "step": "summarize",
+          "status": "ok",
+          "duration_ms": 4,
+          "attempts": 3,
+          "detail": "150 words (single_pass, target 200\u2013300)"
+        },
+        {
+          "step": "extract_notes",
+          "status": "ok",
+          "duration_ms": 8,
+          "attempts": 1,
+          "detail": "5 takeaways \u00b7 4 verbatim quotes \u00b7 7 topics"
+        },
+        {
+          "step": "extract_claims",
+          "status": "ok",
+          "duration_ms": 3,
+          "attempts": 1,
+          "detail": "4 check-worthy claims (2 prediction, 2 statistical)"
+        },
+        {
+          "step": "verify_claims",
+          "status": "ok",
+          "duration_ms": 25,
+          "attempts": 4,
+          "detail": "1 \u2705 \u00b7 2 \u26a0\ufe0f \u00b7 1 \u2753 across 4 claims \u00b7 6 tool calls"
+        }
+      ],
+      "warnings": [
+        "summary: the summary is 150 words; it must be 200\u2013300 words \u2014 expand it using only the transcript"
+      ]
+    }
+  ],
+  "errors": []
+}

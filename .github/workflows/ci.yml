@@ -12,7 +12,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e ".[dev,aws]"
-      - run: ruff check src tests
+      - run: ruff check src tests scripts
       - run: pytest -q
       - name: End-to-end run (offline provider, no secrets needed)
         run: podcast-agent run data/transcripts --out output --provider offline --quiet --today 2026-10-13

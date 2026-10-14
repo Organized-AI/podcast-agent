@@ -1,0 +1,21 @@
+# command: helm lint deploy/helm/podcast-agent && helm template … | kubeconform -strict -kubernetes-version 1.30.0
+# machine: Linux workspace · x86_64 · Python 3.13.16
+# commit: 07366cb
+# captured: 2026-10-14T17:07:19Z
+
+==> Linting deploy/helm/podcast-agent
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+
+      1 kind: ConfigMap
+      2 kind: Deployment
+      1 kind: HorizontalPodAutoscaler
+      1 kind: NetworkPolicy
+      1 kind: PodDisruptionBudget
+      1 kind: ScaledObject
+      1 kind: Service
+      1 kind: ServiceAccount
+      1 kind: TriggerAuthentication
+
+Summary: 10 resources found in 1 file - Valid: 8, Invalid: 0, Errors: 0, Skipped: 2
