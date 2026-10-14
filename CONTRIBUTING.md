@@ -39,7 +39,7 @@ Every behavior change ships with a test that fails before the change and passes 
 3. Add a line under `[Unreleased]` in `CHANGELOG.md` for anything a user would notice.
 4. PRs are squash-merged once the required checks are green. Commit and PR titles are short and imperative ("Add trace context to the worker").
 
-`main` is protected by a repository ruleset: no direct pushes, force pushes or deletion; changes land only through squash-merged pull requests whose required checks pass (PR Gate, gitleaks, zizmor, Trivy, CodeQL for Python and Actions, dependency review), with review threads resolved and no new high-severity CodeQL alert.
+`main` is protected by a repository ruleset: no direct pushes, force pushes or deletion; changes land only through squash-merged pull requests whose required checks pass (PR Gate, gitleaks, zizmor, Trivy, CodeQL for Python and Actions, dependency review) and that add no high-severity CodeQL alert.
 
 ## Response times
 
