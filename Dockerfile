@@ -17,7 +17,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN useradd --create-home --uid 10001 agent
 WORKDIR /app
 COPY --from=build /opt/venv /opt/venv
-COPY data ./data
+COPY --chown=agent:agent data ./data
 RUN mkdir -p /app/output /app/queue /cache && chown -R agent:agent /app/output /app/queue /cache
 USER agent
 EXPOSE 8080
