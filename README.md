@@ -1,5 +1,7 @@
 # Podcast Agent — show notes and fact-checking for podcast transcripts
 
+**Interactive guide:** [podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev) · **Proof it runs:** [Audit trail tab](https://podcast-agent-guide.jordan-691.workers.dev/#audit) (a real Claude run, re-checkable in the browser) · **Source:** [github.com/organized-ai/podcast-agent](https://github.com/organized-ai/podcast-agent)
+
 An agentic AI system that takes raw podcast transcripts (`.json` or timestamped `.txt`) and produces publish-ready show notes for an ad agency:
 
 1. **Summary.** 200–300 words covering core themes, key discussions and the opinions shared.
@@ -7,7 +9,7 @@ An agentic AI system that takes raw podcast transcripts (`.json` or timestamped 
 3. **Fact-check.** Check-worthy claims are extracted and verified by a tool-using agent against a local knowledge base and a (mock or real) web search. Each claim is marked ✅ verified, ⚠️ possibly outdated/inaccurate or ❓ unverifiable, with a calibrated confidence score and cited evidence.
 4. **Reasoning log.** A readable trace of every plan, tool call (with its stated purpose), observation, self-correction and verdict, plus Claude's own thinking summaries, plus a structured JSONL version.
 
-The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is in **[docs/guide/public/index.html](docs/guide/public/index.html)**: open it in a browser, or deploy it as a Cloudflare Worker with `cd docs/guide && npx wrangler deploy`. Its **Audit trail** tab is filled from a real run by `make guide` (`scripts/embed_audit.py`).
+The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is live at **[podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev)** (source: [docs/guide/public/index.html](docs/guide/public/index.html); deploy your own copy as a Cloudflare Worker with `cd docs/guide && npx wrangler deploy`). Its **Audit trail** tab is filled from a real run by `make guide` (`scripts/embed_audit.py`).
 
 ## Where each requirement lives
 
@@ -22,7 +24,7 @@ The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/
 | Readable logs of the agent's reasoning steps and plans | `output/logs/run.log` (readable) and `output/logs/trace.jsonl` (structured); browse a full run in the guide's **Audit trail** tab |
 | An output JSON or Markdown file with summary, notes and fact-check table | `output/report.md` and `output/report.json` (plus one pair per episode) |
 | A deployment strategy with diagram and narrative | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/architecture.svg](docs/architecture.svg) |
-| A detailed README | This file, plus the interactive guide in `docs/guide/public/index.html` |
+| A detailed README | This file, plus the [interactive guide](https://podcast-agent-guide.jordan-691.workers.dev) (`docs/guide/public/index.html`) |
 
 Sample outputs are committed for two complete runs, each with its audit (`audit.md`): [`samples/claude-run/`](samples/claude-run) (Claude Sonnet 5.5 and Haiku 5.5, run in Docker on an M1 MacBook: 36 of 36 audit checks pass) and [`samples/offline-mode/`](samples/offline-mode) (no API key, deterministic heuristics). Captured test, lint, Helm and Docker output from the same commit, including a tamper test the audit catches, is in [`samples/proof/`](samples/proof). The guide's **Audit trail** tab renders all of it and re-hashes the run's files in the browser.
 
