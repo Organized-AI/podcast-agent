@@ -1,0 +1,19 @@
+# make observe on an M1 MacBook Pro (Docker via Colima), 2026-10-14
+# Stack: otel-collector-contrib 0.161.0 · jaeger 2.21.0 · prometheus v3.14.0 · grafana 13.2.3 (pinned by digest)
+# Run: LLM_PROVIDER=offline podcast-agent run data/transcripts with OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+$ python e2e/check_telemetry.py output/observe
+run 20261014-233940-b83bf7 · trace b52c0eafb3ac0720d9226025d5b6fb8f · 4 episodes · 20 fact-checks
+PASS one root span 'run podcast-agent' (found 1)
+PASS an invoke_agent span per episode (4/4)
+PASS a verify_claim span per fact-check (20/20)
+PASS model and tool spans present (60 chat, 22 execute_tool)
+PASS GenAI attributes on model spans
+PASS no prompt, completion or query text in spans
+PASS podcast_agent_episodes_total ≥ 4 (got 8)
+PASS podcast_agent_verdicts_total ≥ 20 (got 40)
+PASS gen_ai_client_token_usage recorded (240 model calls)
+PASS alert rules loaded (6)
+PASS Grafana dashboard 'Podcast Agent' provisioned
+PASS Grafana data sources provisioned (jaeger, prometheus)
+Jaeger: /trace/b52c0eafb3ac0720d9226025d5b6fb8f
+# Counters show two runs: Prometheus kept the series from an earlier run in the same session.

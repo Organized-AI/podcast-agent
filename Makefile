@@ -2,4 +2,4 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-include tools/make/help.mk tools/make/dev.mk tools/make/quality.mk tools/make/docker.mk tools/make/helm.mk tools/make/guide.mk
+include tools/make/help.mk tools/make/dev.mk tools/make/quality.mk tools/make/docker.mk tools/make/observability.mk tools/make/helm.mk tools/make/guide.mk

@@ -8,13 +8,13 @@ Work toward v0.2.0, tracked in the [v0.2.0 milestone](https://github.com/Organiz
 
 ### Added
 - Phase 0, foundation: `uv.lock` with strict gates (ruff with bandit rules, mypy, warnings as errors, a coverage floor), hermetic tests that block the network, `config/settings.yaml` generated from the code with a drift check, a version agreement check, `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue forms, a PR template, CODEOWNERS and pre-commit hooks.
-
 - `docs/OPENSSF-BEST-PRACTICES.md` maps each of the 67 OpenSSF Best Practices passing criteria to its evidence; `SECURITY.md` adds secure-design principles and the common errors the code guards against; the README adds badges, who the project is for and a support section with response times.
 - Repository rulesets: `main` only accepts squash-merged pull requests whose required checks pass, and `v*` tags cannot be moved or deleted.
 - OpenTelemetry tracing with the GenAI semantic conventions: one trace per run (`run` → `invoke_agent` per episode → `step` → `verify_claim` → `chat` and `execute_tool`), with token usage, finish reasons and verdicts as attributes. Off unless `OTEL_EXPORTER_OTLP_ENDPOINT` or `OTEL_TRACES_EXPORTER` is set; transcript and model text stay out of spans unless content capture is turned on.
 - OpenTelemetry metrics: `gen_ai.client.token.usage`, `gen_ai.client.operation.duration`, and counters for episodes, verdicts, self-corrections and tool calls.
 - Trace context crosses the API and the queue: `POST /v1/jobs` queues a transcript with the request's W3C trace context, and the worker's `process <queue>` CONSUMER span joins that trace, retries included. FastAPI's native OpenTelemetry provides the SERVER spans and HTTP metrics; `/healthz` is excluded.
 - `logs/trace.jsonl` lines carry `trace_id` and `span_id`, and the run manifest (schema 1.2) records `otel_trace_id`, so the audit trail links to the trace.
+- Local observability stack (Compose profile `observability`): OpenTelemetry Collector, Jaeger, Prometheus with six alert rules and promtool unit tests, and a provisioned Grafana dashboard. `make observe` runs every transcript with telemetry on and `e2e/check_telemetry.py` confirms the trace and metrics arrived; CI runs it on every pull request. The Helm chart gets `otel.*` values.
 
 ### Changed
 - Repository layout follows vllm-project/semantic-router: the guide moved to `website/`, Compose to `deploy/compose/`, the embed script to `tools/guide/`, and the Makefile is split into `tools/make/*.mk`.

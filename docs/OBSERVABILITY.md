@@ -21,6 +21,37 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 podcast-agent run data/transcr
 OTEL_TRACES_EXPORTER=console podcast-agent run data/transcripts/ep004_pdf_example.txt --provider offline --quiet
 ```
 
+## Local stack
+
+```bash
+make observe        # Collector, Jaeger, Prometheus and Grafana; runs every transcript with telemetry; checks it arrived
+make observe-down   # stop it and drop its data
+```
+
+| Component | Where | Config |
+|---|---|---|
+| OpenTelemetry Collector | OTLP on 127.0.0.1:4317 (gRPC) and :4318 (HTTP) | [deploy/observability/otel-collector.yaml](../deploy/observability/otel-collector.yaml) |
+| Jaeger (traces) | [127.0.0.1:16686](http://127.0.0.1:16686/search?service=podcast-agent) | in-memory storage |
+| Prometheus (metrics, alerts) | [127.0.0.1:9090](http://127.0.0.1:9090) | [prometheus.yml](../deploy/observability/prometheus/prometheus.yml), [alerts.yml](../deploy/observability/prometheus/alerts.yml) |
+| Grafana (dashboard) | [127.0.0.1:3000](http://127.0.0.1:3000) | provisioned data sources and the [Podcast Agent dashboard](../deploy/observability/grafana/dashboards/podcast-agent.json) |
+
+The Compose profile `observability` binds every port to 127.0.0.1 and pins each image by digest. `make observe` runs the offline provider by default; `make observe OBSERVE_PROVIDER=anthropic` uses the key in `.env`. [e2e/check_telemetry.py](../e2e/check_telemetry.py) then confirms that the run's trace is in Jaeger (one root span, an `invoke_agent` span per episode, a `verify_claim` span per fact-check, no content attributes) and its metrics and alert rules are in Prometheus. CI runs the same target on every pull request.
+
+In Kubernetes, set `otel.enabled=true` and `otel.endpoint` in the Helm values to point pods at a Collector; sampling and `deployment.environment.name` come from the same values. Where transcripts must never reach the tracing backend, add the Collector's `attributes/drop-content` processor to the traces pipeline as a second guard behind the client default.
+
+## Alerts
+
+| Alert | Fires when | Severity |
+|---|---|---|
+| `PodcastAgentEpisodesFailing` | any episode finished `failed` or `partial` in 15 minutes | page |
+| `PodcastAgentModelErrors` | more than 3 failed model calls in 10 minutes | page |
+| `PodcastAgentModelLatencyHigh` | p95 model latency above 30 s for 10 minutes | ticket |
+| `PodcastAgentUnverifiableShareHigh` | over 60% of at least 10 verdicts in an hour were ❓, for 30 minutes | ticket |
+| `PodcastAgentToolErrors` | more than 5 tool errors in 15 minutes | ticket |
+| `PodcastAgentSelfCorrectionsHigh` | over 25% of at least 20 model outputs in an hour were rejected and retried, for 30 minutes | ticket |
+
+`make observability-check` validates the Collector and Prometheus configs and runs the alert unit tests in [alerts_test.yml](../deploy/observability/prometheus/alerts_test.yml) with promtool.
+
 ## Traces
 
 One trace per run. Span names and `gen_ai.*` attributes follow the [OpenTelemetry GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/).

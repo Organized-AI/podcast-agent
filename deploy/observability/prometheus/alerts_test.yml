@@ -1,0 +1,81 @@
+# promtool unit tests for alerts.yml: `make observability-check` (runs promtool from the pinned Prometheus image).
+rule_files:
+  - alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a partial episode pages
+    interval: 1m
+    input_series:
+      - series: 'podcast_agent_episodes_total{service_name="podcast-agent",podcast_agent_episode_status="ok"}'
+        values: "0+1x20"
+      - series: 'podcast_agent_episodes_total{service_name="podcast-agent",podcast_agent_episode_status="partial"}'
+        values: "0x10 1x10"
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: PodcastAgentEpisodesFailing
+        exp_alerts: []
+      - eval_time: 15m
+        alertname: PodcastAgentEpisodesFailing
+        exp_alerts:
+          - exp_labels: { severity: page, service_name: podcast-agent }
+            exp_annotations:
+              summary: Episodes are finishing with failed steps
+              description: >-
+                1 episode(s) finished failed or partial in the last 15 minutes.
+                Open the episode's invoke_agent span in Jaeger; failed steps carry the exception.
+
+  - name: unverifiable share needs both a high share and enough volume
+    interval: 1m
+    input_series:
+      # 60 verdicts an hour, 45 of them unverifiable: fires after 30 minutes
+      - series: 'podcast_agent_verdicts_total{service_name="podcast-agent",podcast_agent_verdict="unverifiable"}'
+        values: "0+0.75x120"
+      - series: 'podcast_agent_verdicts_total{service_name="podcast-agent",podcast_agent_verdict="verified"}'
+        values: "0+0.25x120"
+      # a quiet second service: 4 verdicts an hour, all unverifiable, never enough volume to alert
+      - series: 'podcast_agent_verdicts_total{service_name="quiet",podcast_agent_verdict="unverifiable"}'
+        values: "0+0.0667x120"
+    alert_rule_test:
+      - eval_time: 80m
+        alertname: PodcastAgentUnverifiableShareHigh
+        exp_alerts:
+          - exp_labels: { severity: ticket, service_name: podcast-agent }
+            exp_annotations:
+              summary: Most claims are coming back unverifiable
+              description: >-
+                75% of verdicts in the last hour were unverifiable. Search may be down,
+                or the knowledge base may be stale for current topics.
+
+  - name: tool errors open a ticket
+    interval: 1m
+    input_series:
+      - series: 'podcast_agent_tool_calls_total{service_name="podcast-agent",gen_ai_tool_name="web_search",outcome="error"}'
+        values: "0+1x20"
+      - series: 'podcast_agent_tool_calls_total{service_name="podcast-agent",gen_ai_tool_name="search_knowledge_base",outcome="ok"}'
+        values: "0+5x20"
+    alert_rule_test:
+      - eval_time: 16m
+        alertname: PodcastAgentToolErrors
+        exp_alerts:
+          - exp_labels: { severity: ticket, service_name: podcast-agent, gen_ai_tool_name: web_search }
+            exp_annotations:
+              summary: web_search is failing
+              description: 15 tool errors in 15 minutes; fact-checks fall back to the remaining tools.
+
+  - name: failed model calls page
+    interval: 1m
+    input_series:
+      - series: 'gen_ai_client_operation_duration_seconds_count{service_name="podcast-agent",gen_ai_provider_name="anthropic",error_type="RateLimitError"}'
+        values: "0+1x20"
+      - series: 'gen_ai_client_operation_duration_seconds_count{service_name="podcast-agent",gen_ai_provider_name="anthropic"}'
+        values: "0+10x20"
+    alert_rule_test:
+      - eval_time: 12m
+        alertname: PodcastAgentModelErrors
+        exp_alerts:
+          - exp_labels: { severity: page, service_name: podcast-agent, gen_ai_provider_name: anthropic }
+            exp_annotations:
+              summary: Model calls are failing (anthropic)
+              description: 10 failed model calls in 10 minutes; check provider status, keys and rate limits.
