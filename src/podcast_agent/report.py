@@ -90,8 +90,8 @@ def render_markdown(r: EpisodeReport) -> str:
             out += ["", "Plan validator: " + "; ".join(r.plan.repair_notes)]
         out.append("")
     out += ["| Step | Status | Time | LLM attempts | Detail |", "|---|---|---|---|---|"]
-    for s in r.steps:
-        out.append(f"| {s.step} | {s.status} | {s.duration_ms / 1000:.1f}s | {s.attempts} | {_cell(s.detail)} |")
+    for st in r.steps:
+        out.append(f"| {st.step} | {st.status} | {st.duration_ms / 1000:.1f}s | {st.attempts} | {_cell(st.detail)} |")
     u = r.usage
     approx = "~" if u.estimated else ""
     out += [
@@ -111,7 +111,7 @@ def render_markdown(r: EpisodeReport) -> str:
 def render_index(reports: list[EpisodeReport], run_id: str) -> str:
     lines = [f"# Podcast agent run `{run_id}`", ""]
     if not reports:
-        return "\n".join(lines + ["_No episodes processed._", ""])
+        return "\n".join([*lines, "_No episodes processed._", ""])
     r0 = reports[0]
     lines += [f"Provider **{r0.provider}** ({r0.models.get('main')} / {r0.models.get('fast')})", ""]
     lines += [
@@ -138,7 +138,7 @@ def render_combined(reports: list[EpisodeReport], run_id: str) -> str:
     """One Markdown file with every episode's summary, notes and fact-check table (the PDF's output file)."""
     lines = ["# Podcast show notes and fact-checks", ""]
     if not reports:
-        return "\n".join(lines + ["_No episodes processed._", ""])
+        return "\n".join([*lines, "_No episodes processed._", ""])
     r0 = reports[0]
     lines += [
         f"Run `{run_id}` · provider **{r0.provider}** ({r0.models.get('main')} / {r0.models.get('fast')}) · "

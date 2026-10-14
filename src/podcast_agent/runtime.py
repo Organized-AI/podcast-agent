@@ -80,11 +80,12 @@ def git_commit() -> str:
     if os.getenv("GIT_COMMIT"):
         return os.environ["GIT_COMMIT"]
     try:
-        out = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, timeout=5,
+        # `git` from PATH is intended: this only labels the run, and a missing git just means "unknown".
+        out = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, timeout=5,  # noqa: S607
                              cwd=Path(__file__).resolve().parent)
         # Only code, config and data make a run irreproducible; regenerated outputs don't count as dirty.
         root = Path(__file__).resolve().parents[2]
-        dirty = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no", "--", "src", "pyproject.toml",
+        dirty = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no", "--", "src", "pyproject.toml",  # noqa: S607
                                 "data"], capture_output=True, text=True, timeout=5, cwd=root)
         if out.returncode == 0 and out.stdout.strip():
             return out.stdout.strip() + ("-dirty" if dirty.stdout.strip() else "")

@@ -74,7 +74,7 @@ def _score(text: str, weights: Counter) -> float:
 
 
 def _sentences(ep: Episode) -> list[tuple[Utterance, str]]:
-    out = []
+    out: list[tuple[Utterance, str]] = []
     for u in ep.utterances:
         sents = split_sentences(u.text)
         merged: list[str] = []
@@ -97,7 +97,7 @@ def _strip_pleasantries(text: str) -> str:
 
 
 def entities(text: str, exclude: set[str]) -> list[str]:
-    found = []
+    found: list[str] = []
     for sent in split_sentences(text):
         tokens = re.findall(r"[A-Za-z][A-Za-z'-]*", sent)
         for tok in tokens[1:]:
@@ -266,7 +266,7 @@ def extract_claims(context: dict[str, Any]) -> dict:
     max_claims: int = context["max_claims"]
     names = {t.lower() for s in ep.speakers for t in re.findall(r"[A-Za-z]+", s)}
     weights = keyword_weights(ep)
-    found = []
+    found: list[dict[str, Any]] = []
     prev_statement: dict[int, str] = {}
     last_statement = ""
     first_idx, last_idx = ep.utterances[0].idx, ep.utterances[-1].idx
@@ -359,7 +359,7 @@ def verify_step(context: dict[str, Any]) -> dict:
     if best is None or best["relevance"] < 0.5:
         return _finish("No source covers this claim closely enough.", "unverifiable", 0.3,
                        "No knowledge-base entry or search result addresses this claim directly.", [])
-    cited = [best] + [e for e in evidence if e is not best and e["relevance"] >= 0.5][:1]
+    cited = [best, *[e for e in evidence if e is not best and e["relevance"] >= 0.5][:1]]
     joined = " ".join(e["snippet"] + " " + e["title"] for e in cited)
     claim_years = set(re.findall(r"\b20\d{2}\b", claim.claim))
     evidence_years = set(re.findall(r"\b20\d{2}\b", joined))

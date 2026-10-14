@@ -32,7 +32,7 @@ def test_paraphrased_quote_is_rejected_then_fixed(data_dir):
     ]}
     provider = ScriptedProvider({"extract_notes": [bad, good]})
     ctx, state = make_ctx(provider), _state(data_dir)
-    detail, attempts = extract_notes(ctx, state, {})
+    _detail, attempts = extract_notes(ctx, state, {})
     assert attempts == 2
     assert "not verbatim" in provider.calls[1]["messages"][-1]["content"]
     q0 = state.notes.quotes[0]

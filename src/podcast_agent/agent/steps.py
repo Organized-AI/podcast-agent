@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel
 
@@ -89,8 +89,9 @@ def summarize(ctx: RunContext, state: EpisodeState, params: dict[str, Any]) -> t
     ep = state.episode
     s = ctx.settings
     lo, hi, accept_lo, accept_hi = summary_bounds(ep, s.summary_min_words, s.summary_max_words, s.summary_length_mode)
-    strategy = params.get("strategy") or (
-        "map_reduce" if ep.word_count > s.map_reduce_threshold_words else "single_pass"
+    strategy: Literal["single_pass", "map_reduce"] = (
+        "map_reduce" if params.get("strategy") == "map_reduce"
+        or (not params.get("strategy") and ep.word_count > s.map_reduce_threshold_words) else "single_pass"
     )
 
     def validate(out: SummaryOut) -> list[str]:
@@ -113,14 +114,14 @@ def summarize(ctx: RunContext, state: EpisodeState, params: dict[str, Any]) -> t
         segment_notes: list[list[str]] = []
         for i, seg in enumerate(segments, 1):
             seg_text = "\n".join(f"[{u.timestamp}] {u.speaker_name}: {u.text}" for u in seg)
-            res = call_structured(
+            seg_res = call_structured(
                 ctx, step="summarize", schema=MapOut, system=MAP_SYSTEM,
                 prompt=map_prompt(ep, seg_text, i, len(segments)), tier="fast", max_tokens=700,
                 task="summarize_map", context={"episode": ep, "segment": seg},
             )
-            attempts += res.attempts
-            segment_notes.append(res.value.notes)
-            ctx.trace.event("observation", "summarize", f"segment {i}/{len(segments)}: {len(res.value.notes)} notes", indent=1)
+            attempts += seg_res.attempts
+            segment_notes.append(seg_res.value.notes)
+            ctx.trace.event("observation", "summarize", f"segment {i}/{len(segments)}: {len(seg_res.value.notes)} notes", indent=1)
         res = call_structured(
             ctx, step="summarize", schema=SummaryOut, system=SUMMARY_SYSTEM,
             prompt=reduce_prompt(ep, segment_notes, lo, hi), max_tokens=900, validate=validate,
@@ -246,9 +247,9 @@ def extract_notes(ctx: RunContext, state: EpisodeState, params: dict[str, Any]) 
     state.notes = Notes(takeaways=takeaways, quotes=quotes, topics=topics)
     for i, t in enumerate(takeaways, 1):
         ctx.trace.event("observation", "extract_notes", f"takeaway {i}: {t.text}", indent=1)
-    for q in quotes:
+    for kept in quotes:
         ctx.trace.event("observation", "extract_notes",
-                        f"quote [{q.timestamp}] {q.speaker}: “{q.text}” (match {q.match_score:.2f})", indent=1)
+                        f"quote [{kept.timestamp}] {kept.speaker}: “{kept.text}” (match {kept.match_score:.2f})", indent=1)
     ctx.trace.event("observation", "extract_notes", "topics: " + " ".join(f"#{t}" for t in topics), indent=1)
     if res.unresolved:
         state.warnings.append(f"notes: {'; '.join(res.unresolved)}")
@@ -281,7 +282,7 @@ def extract_claims(ctx: RunContext, state: EpisodeState, params: dict[str, Any])
         for i, c in enumerate(out.claims, 1):
             if word_count(c.claim) < 4:
                 problems.append(f"claim {i} is not a complete standalone sentence")
-            u, score = locate_span(ep, c.quote or c.claim, c.timestamp)
+            _u, score = locate_span(ep, c.quote or c.claim, c.timestamp)
             if score < 0.85:
                 problems.append(f"claim {i}: the quote must be a verbatim span of the transcript line it comes from")
         if len({c.claim.lower() for c in out.claims}) != len(out.claims):
@@ -312,9 +313,9 @@ def extract_claims(ctx: RunContext, state: EpisodeState, params: dict[str, Any])
         )
     state.claims = claims
     by_type: dict[str, int] = {}
-    for c in claims:
-        by_type[c.type] = by_type.get(c.type, 0) + 1
-        flag = " · time-sensitive" if c.time_sensitive else ""
-        ctx.trace.event("observation", "extract_claims", f"{c.id} [{c.timestamp}] ({c.type}{flag}) {c.claim}", indent=1)
+    for cl in claims:
+        by_type[cl.type] = by_type.get(cl.type, 0) + 1
+        flag = " · time-sensitive" if cl.time_sensitive else ""
+        ctx.trace.event("observation", "extract_claims", f"{cl.id} [{cl.timestamp}] ({cl.type}{flag}) {cl.claim}", indent=1)
     mix = ", ".join(f"{n} {t}" for t, n in sorted(by_type.items()))
     return f"{len(claims)} check-worthy claims ({mix or 'none'})", res.attempts

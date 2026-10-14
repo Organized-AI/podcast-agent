@@ -9,7 +9,7 @@ An agentic AI system that takes raw podcast transcripts (`.json` or timestamped 
 3. **Fact-check.** Check-worthy claims are extracted and verified by a tool-using agent against a local knowledge base and a (mock or real) web search. Each claim is marked ✅ verified, ⚠️ possibly outdated/inaccurate or ❓ unverifiable, with a calibrated confidence score and cited evidence.
 4. **Reasoning log.** A readable trace of every plan, tool call (with its stated purpose), observation, self-correction and verdict, plus Claude's own thinking summaries, plus a structured JSONL version.
 
-The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is live at **[podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev)** (source: [docs/guide/public/index.html](docs/guide/public/index.html); deploy your own copy as a Cloudflare Worker with `cd docs/guide && npx wrangler deploy`). Its **Audit trail** tab is filled from a real run by `make guide` (`scripts/embed_audit.py`).
+The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is live at **[podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev)** (source: [website/public/index.html](website/public/index.html); deploy your own copy as a Cloudflare Worker with `make guide-deploy`). Its **Audit trail** tab is filled from a real run by `make guide` (`scripts/embed_audit.py`).
 
 ## Where each requirement lives
 
@@ -19,12 +19,12 @@ The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/
 | Top 5 takeaways, quotes with timestamps, topic tags | `agent/steps.py` → `extract_notes` (quotes are checked word-for-word against the transcript) |
 | Fact-checking via search, a local knowledge base or a reasoning step, marked ✅ / ⚠️ / ❓ | `agent/verifier.py` (tool loop), `data/knowledge_base.json`, `data/mock_web_index.json`, `tools/` |
 | A multi-step agent that plans and executes on its own | `agent/planner.py` (model-written plan, validated and repaired), `agent/pipeline.py` (executor) |
-| Containerized, runs locally via Docker | `Dockerfile`, `docker-compose.yml`; see [Quickstart](#quickstart-docker) |
+| Containerized, runs locally via Docker | `Dockerfile`, `deploy/compose/docker-compose.yml`; see [Quickstart](#quickstart-docker) |
 | A model running locally or on a cloud provider (Bedrock, OpenAI, Anthropic) | `src/podcast_agent/llm/`: `LLM_PROVIDER=anthropic`, `bedrock`, `openai`, `ollama` or `offline` |
 | Readable logs of the agent's reasoning steps and plans | `output/logs/run.log` (readable) and `output/logs/trace.jsonl` (structured); browse a full run in the guide's **Audit trail** tab |
 | An output JSON or Markdown file with summary, notes and fact-check table | `output/report.md` and `output/report.json` (plus one pair per episode) |
 | A deployment strategy with diagram and narrative | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/architecture.svg](docs/architecture.svg) |
-| A detailed README | This file, plus the [interactive guide](https://podcast-agent-guide.jordan-691.workers.dev) (`docs/guide/public/index.html`) |
+| A detailed README | This file, plus the [interactive guide](https://podcast-agent-guide.jordan-691.workers.dev) (`website/public/index.html`) |
 
 Sample outputs are committed for two complete runs, each with its audit (`audit.md`): [`samples/claude-run/`](samples/claude-run) (Claude Sonnet 5.5 and Haiku 5.5, run in Docker on an M1 MacBook: 36 of 36 audit checks pass) and [`samples/offline-mode/`](samples/offline-mode) (no API key, deterministic heuristics). Captured test, lint, Helm and Docker output from the same commit, including a tamper test the audit catches, is in [`samples/proof/`](samples/proof). The guide's **Audit trail** tab renders all of it and re-hashes the run's files in the browser.
 
@@ -61,7 +61,7 @@ docker run --rm -t --env-file .env -v "$PWD/output:/app/output" -v "$PWD/my_tran
   podcast-agent run /app/in --out output
 ```
 
-On Linux, add `--user "$(id -u):$(id -g)"` if the output volume isn't writable. `docker compose run --rm agent` does the same as the first `docker run`.
+On Linux, add `--user "$(id -u):$(id -g)"` if the output volume isn't writable. `make compose-run` (Compose file in `deploy/compose/`) does the same as the first `docker run`.
 
 ### No API key? Two options
 
@@ -71,9 +71,9 @@ On Linux, add `--user "$(id -u):$(id -g)"` if the output volume isn't writable. 
 docker run --rm -t -e LLM_PROVIDER=offline -v "$PWD/output:/app/output" podcast-agent
 
 # 2) Fully local model via Ollama
-docker compose --profile local-llm up -d ollama
-docker compose exec ollama ollama pull llama3.1:8b
-LLM_PROVIDER=ollama docker compose run --rm agent
+docker compose -f deploy/compose/docker-compose.yml --profile local-llm up -d ollama
+docker compose -f deploy/compose/docker-compose.yml exec ollama ollama pull llama3.1:8b
+LLM_PROVIDER=ollama docker compose -f deploy/compose/docker-compose.yml run --rm agent
 ```
 
 ### Claude on Amazon Bedrock
@@ -89,14 +89,15 @@ docker run --rm -t -v "$PWD/output:/app/output" -v "$HOME/.aws:/home/agent/.aws:
 ## Run without Docker
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
-export ANTHROPIC_API_KEY=...            # or LLM_PROVIDER=offline
-.venv/bin/podcast-agent run data/transcripts --out output
-.venv/bin/podcast-agent run data/transcripts/ep002_ai_healthcare.json --today 2026-10-13 --max-claims 5
-.venv/bin/podcast-agent audit output             # re-verify a run: hashes, quotes, caps, trace coverage
-.venv/bin/podcast-agent kb "FDA autonomous AI"    # query the knowledge base directly
-.venv/bin/podcast-agent serve --port 8080         # HTTP API: POST /v1/process, GET /healthz
-.venv/bin/pytest -q                               # 40 tests, no network or API key needed
+uv sync --locked --extra aws                   # Python 3.11+; installs exactly what uv.lock pins
+export ANTHROPIC_API_KEY=...                   # or LLM_PROVIDER=offline
+uv run podcast-agent run data/transcripts --out output
+uv run podcast-agent run data/transcripts/ep002_ai_healthcare.json --today 2026-10-13 --max-claims 5
+uv run podcast-agent audit output              # re-verify a run: hashes, quotes, caps, trace coverage
+uv run podcast-agent kb "FDA autonomous AI"    # query the knowledge base directly
+uv run podcast-agent serve --host 127.0.0.1    # HTTP API: POST /v1/process, GET /healthz
+make check                                     # lint, types, hermetic tests, drift checks
+make help                                      # every target, grouped by area
 ```
 
 ---
@@ -182,7 +183,7 @@ The full logs from a complete run are in [`samples/offline-mode/logs/`](samples/
 
 ## Configuration
 
-All settings are environment variables (see [`.env.example`](.env.example)); the main ones:
+All settings are environment variables. [`config/settings.yaml`](config/settings.yaml) lists every one with its default, generated from the code; [`.env.example`](.env.example) is the template. The main ones:
 
 | Variable | Default | Meaning |
 |---|---|---|
@@ -200,24 +201,27 @@ All settings are environment variables (see [`.env.example`](.env.example)); the
 
 ## Project layout
 
+Top-level folders follow [vllm-project/semantic-router](https://github.com/vllm-project/semantic-router); [AGENTS.md](AGENTS.md) has the full map and the rules for changing things.
+
 ```
-src/podcast_agent/
-  cli.py · runtime.py · server.py · worker.py   entry points: run · serve · worker (queue consumer)
+src/podcast_agent/        the package
+  cli.py · runtime.py · server.py · worker.py   entry points: run · serve · worker (queue consumer) · audit
   config.py · models.py · prompts.py            settings · typed contracts · every prompt (versioned)
   transcript.py · text.py                       JSON/TXT parsing, filler cleanup · BM25, fuzzy span matching
-  agent/planner.py                              profile → model plan → validate/repair → fallback
-  agent/pipeline.py                             executor: step registry, failure isolation, report assembly
-  agent/steps.py                                normalize · summarize (+map-reduce) · notes · claims
-  agent/verifier.py                             per-claim ReAct tool loop, evidence validation, calibration
-  llm/                                          Anthropic · OpenAI-compatible/Ollama · offline · cache · structured outputs
+  agent/                                        planner · executor · steps · per-claim ReAct verifier
+  llm/                                          Anthropic/Bedrock · OpenAI-compatible/Ollama · offline · cache · structured outputs
   tools/                                        knowledge base (BM25) · web search (mock / Tavily) + retries
-  heuristics.py                                 offline stand-ins for each model task
-  report.py · trace.py                          Markdown/JSON reports · reasoning trace (console + JSONL)
-data/transcripts/                               ep001–ep003 (provided) + ep004 (synthetic, from the PDF example)
-data/knowledge_base.json · mock_web_index.json  local KB (18 dated facts) · mock search corpus
-docs/DEPLOYMENT.md                              deployment strategy: diagram + narrative
-deploy/helm/podcast-agent/                      Helm chart: API + KEDA-scaled workers
-tests/                                          40 tests, including scripted-model tests of every correction path
+  report.py · trace.py · audit.py               reports · reasoning trace (console + JSONL) · run audit
+tests/                    hermetic tests (network blocked, credentials scrubbed)
+config/settings.yaml      every setting, generated from the code
+data/                     transcripts · dated knowledge base · mock search corpus
+evals/                    eval datasets, suites with thresholds, baselines
+e2e/                      end-to-end run against the Compose stack
+deploy/                   helm/ · compose/ · gitops/ (Argo CD) · observability/
+tools/                    make/*.mk · ci/ (drift and version checks) · guide/
+website/                  the interactive guide (Cloudflare Worker assets)
+docs/                     DEPLOYMENT.md (strategy, diagram) and other write-ups
+samples/                  committed runs and captured proof
 ```
 
 ## Making changes quickly

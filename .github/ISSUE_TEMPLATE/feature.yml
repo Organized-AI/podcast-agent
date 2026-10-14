@@ -1,0 +1,25 @@
+name: Feature request
+description: Propose a capability or an improvement
+labels: ["type/feature"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Who needs this and what they cannot do today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should change. How would we know it works (a test, an eval metric, a trace)?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [agent, telemetry, evals, gitops, ci, security, guide, docs]
+    validations:
+      required: true

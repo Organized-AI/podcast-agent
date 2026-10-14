@@ -1,18 +1,21 @@
-# docker compose run --rm agent                         → process data/transcripts → ./output
-# docker compose --profile api up api                   → HTTP API on :8080
-# docker compose --profile worker up worker             → drain ./queue/inbox → ./output/jobs
-# docker compose --profile local-llm up -d ollama       → local model (then LLM_PROVIDER=ollama)
+# Run from the repository root (paths below are relative to this file):
+#   docker compose -f deploy/compose/docker-compose.yml run --rm agent                    → data/transcripts → ./output
+#   docker compose -f deploy/compose/docker-compose.yml --profile api up api              → HTTP API on 127.0.0.1:8080
+#   docker compose -f deploy/compose/docker-compose.yml --profile worker up worker        → drain ./queue/inbox
+#   docker compose -f deploy/compose/docker-compose.yml --profile local-llm up -d ollama  → local model
+name: podcast-agent
 x-agent: &agent
-  build: .
+  build:
+    context: ../..
   image: podcast-agent:local
   env_file:
-    - path: .env
+    - path: ../../.env
       required: false
   environment:
     OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434/v1}
   volumes:
-    - ./data:/app/data:ro
-    - ./output:/app/output
+    - ../../data:/app/data:ro
+    - ../../output:/app/output
     - agent-cache:/cache
 
 services:
@@ -24,7 +27,7 @@ services:
     <<: *agent
     profiles: ["api"]
     command: ["serve", "--port", "8080"]
-    ports: ["8080:8080"]
+    ports: ["127.0.0.1:8080:8080"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/healthz')"]
       interval: 15s
@@ -36,15 +39,15 @@ services:
     profiles: ["worker"]
     command: ["worker", "--queue", "dir:///app/queue", "--output", "/app/output/jobs"]
     volumes:
-      - ./data:/app/data:ro
-      - ./output:/app/output
-      - ./queue:/app/queue
+      - ../../data:/app/data:ro
+      - ../../output:/app/output
+      - ../../queue:/app/queue
       - agent-cache:/cache
 
   ollama:
     profiles: ["local-llm"]
     image: ollama/ollama:latest
-    ports: ["11434:11434"]
+    ports: ["127.0.0.1:11434:11434"]
     volumes:
       - ollama:/root/.ollama
 

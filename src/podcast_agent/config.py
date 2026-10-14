@@ -5,8 +5,15 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from datetime import date
+from typing import overload
 
 
+@overload
+def _env(name: str) -> str | None: ...
+@overload
+def _env(name: str, default: str) -> str: ...
+@overload
+def _env(name: str, default: None) -> str | None: ...
 def _env(name: str, default: str | None = None) -> str | None:
     value = os.getenv(name)
     return value if value not in (None, "") else default

@@ -1,0 +1,51 @@
+# Install once: uv run --with pre-commit pre-commit install
+# Hook repos are pinned to commit SHAs; the comment names the tag.
+# data/ is hashed byte-for-byte by the committed run manifests, so hooks never rewrite it.
+exclude: ^(samples/|website/public/run/|data/|uv\.lock$)
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        exclude: ^deploy/helm/.*/templates/
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=700]
+      - id: detect-private-key
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e  # frozen: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  # Local hooks use the versions pinned in uv.lock, so they match CI exactly.
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: config-drift
+        name: config/settings.yaml is current
+        entry: uv run python tools/ci/gen_config.py --check
+        language: system
+        files: ^(src/podcast_agent/config\.py|\.env\.example|config/settings\.yaml)$
+        pass_filenames: false
+      - id: version-agreement
+        name: versions agree
+        entry: uv run python tools/ci/check_version.py
+        language: system
+        files: ^(pyproject\.toml|src/podcast_agent/__init__\.py|deploy/helm/podcast-agent/Chart\.yaml)$
+        pass_filenames: false

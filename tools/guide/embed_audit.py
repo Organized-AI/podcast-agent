@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Embed a real run's audit trail into the guide's Audit trail tab.
 
-    python scripts/embed_audit.py samples/offline-mode samples/proof docs/guide/public/index.html
+    python tools/guide/embed_audit.py samples/claude-run samples/proof website/public/index.html   (or: make guide)
 
 Reads the run manifest, report.json, logs/trace.jsonl and audit.json from a run folder, plus the
 captured build/test outputs in the proof folder, and writes them as one JSON block into the page
@@ -77,7 +77,7 @@ def proof_items(proof_dir: Path) -> list[dict]:
         status = "caught" if expect == "fail" and outcome == "fail" else outcome if expect == "pass" else "fail"
         lines = body.splitlines()
         if len(lines) > MAX_OUTPUT_LINES:
-            lines = lines[:MAX_OUTPUT_LINES] + [f"… {len(lines) - MAX_OUTPUT_LINES} more lines in samples/proof/{fname}"]
+            lines = [*lines[:MAX_OUTPUT_LINES], f"… {len(lines) - MAX_OUTPUT_LINES} more lines in samples/proof/{fname}"]
         items.append({"id": fname.removesuffix(".txt"), "file": f"samples/proof/{fname}", "title": title, "kind": kind,
                       "status": status, "headline": headline, **meta, "output": "\n".join(lines)})
     return items
@@ -120,7 +120,7 @@ def main(run_dir: str, proof_dir: str, html_path: str) -> None:
         plan = ep.get("plan") or {}
         episodes.append({
             "id": meta["episode_id"], "title": meta["title"], "words": meta["word_count"],
-            "speakers": [meta.get("host")] + list(meta.get("guests") or []),
+            "speakers": [meta.get("host"), *list(meta.get("guests") or [])],
             "summary_words": (ep.get("summary") or {}).get("word_count"),
             "summary_strategy": (ep.get("summary") or {}).get("strategy"),
             "plan": [{"step": s["step"], "params": s.get("params") or {}, "reason": s.get("reason", "")}

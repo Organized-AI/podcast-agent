@@ -17,7 +17,7 @@ def test_summary_self_corrects_when_too_short(data_dir):
     provider = ScriptedProvider({"summarize": [{"summary": "Too short."}, {"summary": good}]})
     ctx = make_ctx(provider)
     state = EpisodeState(episode=load_episode(data_dir / "transcripts" / "ep001_remote_work.json"))
-    detail, attempts = summarize(ctx, state, {"strategy": "single_pass"})
+    _detail, attempts = summarize(ctx, state, {"strategy": "single_pass"})
     assert attempts == 2
     assert state.summary.word_count == 240
     # the second call carried the validator's feedback back to the model

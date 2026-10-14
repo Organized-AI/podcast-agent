@@ -1,11 +1,14 @@
 # syntax=docker/dockerfile:1.7
-# ---- build: install the package into an isolated virtualenv --------------------------------
+# ---- build: install exactly what uv.lock pins into an isolated virtualenv ------------------
 FROM python:3.12-slim AS build
-ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+COPY --from=ghcr.io/astral-sh/uv:0.11.32 /uv /bin/uv
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PROJECT_ENVIRONMENT=/opt/venv UV_PYTHON_DOWNLOADS=never
 WORKDIR /src
-COPY pyproject.toml README.md ./
+# Dependencies first so code edits don't invalidate this layer.
+COPY pyproject.toml uv.lock README.md ./
+RUN uv sync --locked --no-dev --extra aws --no-install-project
 COPY src ./src
-RUN python -m venv /opt/venv && /opt/venv/bin/pip install ".[aws]"
+RUN uv sync --locked --no-dev --extra aws --no-editable
 
 # ---- runtime: slim, non-root, no build tooling ---------------------------------------------
 FROM python:3.12-slim AS runtime

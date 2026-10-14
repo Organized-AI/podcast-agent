@@ -9,6 +9,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
+from podcast_agent import __version__
 from podcast_agent.config import Settings
 from podcast_agent.models import Verdict
 
@@ -146,6 +147,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="podcast-agent", description="Agentic podcast show notes + fact-checking.")
+    parser.add_argument("--version", action="version", version=f"podcast-agent {__version__}")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     run = sub.add_parser("run", help="Process transcript files or directories")
@@ -181,7 +183,8 @@ def main(argv: list[str] | None = None) -> int:
     worker.set_defaults(func=cmd_worker)
 
     serve = sub.add_parser("serve", help="Run the HTTP API")
-    serve.add_argument("--host", default="0.0.0.0")
+    # Containers must listen on all interfaces; outside a container pass --host 127.0.0.1.
+    serve.add_argument("--host", default="0.0.0.0")  # noqa: S104
     serve.add_argument("--port", type=int, default=8080)
     serve.set_defaults(func=cmd_serve)
 
