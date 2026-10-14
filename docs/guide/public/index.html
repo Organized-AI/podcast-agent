@@ -1451,7 +1451,7 @@ cd docs/guide && npx wrangler deploy`;
   </section>
 
   <section class="au-sec" id="au-trace"><span class="kick">06 · Reasoning trace</span><h3>Explore all ${T.length} events.</h3>
-    <p class="lead">logs/trace.jsonl is the machine-readable twin of the console log: every plan, model call, thought, tool call, observation, self-correction and verdict, tagged with run, episode and step. Filter it the way you would in an observability tool; events that carry data open to show the payload. Full files: <a href="run/logs/trace.jsonl" download>trace.jsonl</a> · <a href="run/logs/run.log" download>run.log</a> · <a href="run/run_manifest.json" download>run_manifest.json</a>.</p>
+    <p class="lead">logs/trace.jsonl is the machine-readable twin of the console log: every plan, model call, thought, tool call, observation, self-correction and verdict, tagged with run, episode and step. Filter it the way you would in an observability tool; events that carry data open to show the payload. Full files: <a href="run/logs/trace.jsonl" target="_blank" rel="noopener">trace.jsonl</a> · <a href="run/logs/run.log" target="_blank" rel="noopener">run.log</a> · <a href="run/run_manifest.json" target="_blank" rel="noopener">run_manifest.json</a>.</p>
     <div class="au-tools"><select id="au-ep" aria-label="Episode"><option value="all">All episodes</option><option value="run">run</option>${E.map(e=>`<option value="${esc(e.id)}">${esc(e.id)}</option>`).join('')}</select>
       <select id="au-step" aria-label="Step"></select>
       <input id="au-q" type="search" placeholder="Search: KB-011, web_search, rejected…" autocomplete="off" aria-label="Search the trace"><span class="cnt" id="au-tcount"></span></div>
