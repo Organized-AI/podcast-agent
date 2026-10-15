@@ -3,6 +3,7 @@
 [![ci](https://github.com/Organized-AI/podcast-agent/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Organized-AI/podcast-agent/actions/workflows/ci.yml)
 [![security](https://github.com/Organized-AI/podcast-agent/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/Organized-AI/podcast-agent/actions/workflows/security.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Organized-AI/podcast-agent/badge)](https://scorecard.dev/viewer/?uri=github.com/Organized-AI/podcast-agent)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15516/badge)](https://www.bestpractices.dev/projects/15516)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Interactive guide:** [podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev) · **Proof it runs:** [Audit trail tab](https://podcast-agent-guide.jordan-691.workers.dev/#audit) (a real Claude run, re-checkable in the browser) · **Source:** [github.com/organized-ai/podcast-agent](https://github.com/organized-ai/podcast-agent)
