@@ -84,6 +84,8 @@ jobs:
         run: docker build --build-arg GIT_COMMIT="${GITHUB_SHA::7}" -t podcast-agent:ci .
       - name: Run every transcript offline in the container
         run: docker run --rm -e LLM_PROVIDER=offline podcast-agent:ci run data/transcripts --out /tmp/out --quiet
+      - name: The quickstart's .env works in the container (its response-cache directory can be created)
+        run: docker run --rm --env-file .env.example --entrypoint sh podcast-agent:ci -c 'mkdir -p "${LLM_CACHE_DIR:-/cache/llm}" && echo "cache dir ${LLM_CACHE_DIR:-/cache/llm} is writable"'
 
   observability:
     name: Observability stack
