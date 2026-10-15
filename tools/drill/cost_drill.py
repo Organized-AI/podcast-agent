@@ -76,8 +76,8 @@ def wait_for(what: str, check: Callable[[], T | None], timeout_s: int, every_s: 
 
 
 class GitHub:
-    def __init__(self, repo: str, token: str, author: dict[str, str]):
-        self.repo, self.author = repo, author
+    def __init__(self, repo: str, token: str, author: dict[str, str], base: str = "main"):
+        self.repo, self.author, self.base = repo, author, base
         self.http = httpx.Client(base_url=f"https://api.github.com/repos/{repo}", timeout=30, headers={
             "Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28"})
@@ -92,11 +92,11 @@ class GitHub:
             raise SystemExit(f"GitHub {method} {path}: HTTP {resp.status_code} {resp.text[:300]}")
         return resp.json() if resp.content else {}
 
-    def main_sha(self) -> str:
-        return str(self.call("GET", "/git/ref/heads/main")["object"]["sha"])
+    def base_sha(self) -> str:
+        return str(self.call("GET", f"/git/ref/heads/{self.base}")["object"]["sha"])
 
-    def read(self, path: str, ref: str = "main") -> tuple[str, str]:
-        data = self.call("GET", f"/contents/{path}", params={"ref": ref})
+    def read(self, path: str, ref: str | None = None) -> tuple[str, str]:
+        data = self.call("GET", f"/contents/{path}", params={"ref": ref or self.base})
         return base64.b64decode(data["content"]).decode(), data["sha"]
 
     def put_file(self, branch: str, path: str, content: str, message: str) -> None:
@@ -108,10 +108,10 @@ class GitHub:
 
     def open_pr(self, branch: str, files: dict[str, str], message: str, title: str, body: str,
                 labels: list[str]) -> PullRequest:
-        self.call("POST", "/git/refs", json={"ref": f"refs/heads/{branch}", "sha": self.main_sha()})
+        self.call("POST", "/git/refs", json={"ref": f"refs/heads/{branch}", "sha": self.base_sha()})
         for path, content in files.items():
             self.put_file(branch, path, content, message)
-        pr = self.call("POST", "/pulls", json={"title": title, "head": branch, "base": "main", "body": body})
+        pr = self.call("POST", "/pulls", json={"title": title, "head": branch, "base": self.base, "body": body})
         self.call("POST", f"/issues/{pr['number']}/labels", json={"labels": labels})
         return PullRequest(number=pr["number"], title=title, url=pr["html_url"], head_sha=pr["head"]["sha"],
                            opened_at=parse_time(pr["created_at"]))
@@ -294,7 +294,7 @@ def run(args: argparse.Namespace) -> int:
     if args.preflight:
         return 0
 
-    gh = GitHub(args.repo, github_token(), git_author())
+    gh = GitHub(args.repo, github_token(), git_author(), args.base)
     values, _ = gh.read(VALUES)
     budget = float(re.search(r'COST_BUDGET_USD:\s*"([0-9.]+)"', values).group(1))  # type: ignore[union-attr]
 
@@ -419,6 +419,8 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--repo", default=os.getenv("GITHUB_REPOSITORY", "Organized-AI/podcast-agent"))
     ap.add_argument("--lab-host", default=os.getenv("LAB_HOST", "127.0.0.1"))
+    ap.add_argument("--base", default=os.getenv("DRILL_BASE", "main"),
+                    help="the branch Argo CD deploys dev from (bootstrap.sh REVISION); default main")
     ap.add_argument("--claims", default="40", help="the claim budget the fault sets (default 40)")
     ap.add_argument("--steps", default="12", help="the tool calls per claim the fault sets (default 12)")
     ap.add_argument("--preflight", action="store_true", help="only check that the lab is ready")
