@@ -32,6 +32,8 @@ The coverage floor is a ratchet: raise it when coverage goes up, never lower it.
 
 Every behavior change ships with a test that fails before the change and passes after it. Bug fixes add a regression test; new verdict or eval behavior adds an eval case in `evals/datasets/`. Tests are hermetic: `tests/conftest.py` blocks outbound network and scrubs credentials.
 
+Code that parses untrusted input (transcripts, ids) has a fuzzer in `fuzz/` with invariants it must keep: parse, or raise `TranscriptError`, and never produce an unsafe file name. `make fuzz` runs them locally, and CI fuzzes every pull request that changes the code. A crash becomes an issue and a regression test.
+
 ## Pull requests
 
 1. Open or pick an issue first, so the change has a stated purpose.

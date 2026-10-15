@@ -1,0 +1,44 @@
+# Fuzzing with ClusterFuzzLite and Atheris: the transcript parsers and the episode-id sanitizer take
+# untrusted input from the API, so any input must parse or raise TranscriptError, quickly.
+# Pull requests that touch the code fuzz for 5 minutes; a weekly batch run fuzzes for 30.
+name: fuzzing
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "fuzz/**"
+      - "uv.lock"
+      - ".clusterfuzzlite/**"
+      - ".github/workflows/fuzzing.yml"
+  schedule:
+    - cron: "23 5 * * 0"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: fuzzing-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fuzz:
+    name: Fuzz (ClusterFuzzLite)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Build the fuzzers
+        id: build
+        uses: google/clusterfuzzlite/actions/build_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1  # v1
+        with:
+          language: python
+          sanitizer: address
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run the fuzzers
+        uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1  # v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sanitizer: address
+          mode: ${{ github.event_name == 'pull_request' && 'code-change' || 'batch' }}
+          fuzz-seconds: ${{ github.event_name == 'pull_request' && 300 || 1800 }}

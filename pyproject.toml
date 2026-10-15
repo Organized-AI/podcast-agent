@@ -93,6 +93,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S106", "S108"]  # asserts and fake credentials are what tests are made of
 "tools/**" = ["S603", "S607"]                    # CI helpers call git and helm by name
+"fuzz/**" = ["S101"]                             # a failed assert is how a fuzzer reports a broken invariant
 
 # --- types ----------------------------------------------------------------------------------
 [tool.mypy]

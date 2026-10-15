@@ -64,20 +64,52 @@ def load_episode(path: str | Path) -> Episode:
     return parse_txt_transcript(text, source_path=str(path), fallback_id=path.stem)
 
 
+def _text(value: object, field: str, where: str) -> str | None:
+    """A JSON scalar as text. Objects and arrays are not text: the transcript is malformed."""
+    if value is None:
+        return None
+    if isinstance(value, (dict, list)):
+        raise TranscriptError(f"{field} must be text, not a JSON {'object' if isinstance(value, dict) else 'array'}, in {where}")
+    return str(value)
+
+
+def _guest_names(value: object, where: str) -> list[str]:
+    """Guests as a list of names, or one comma-separated string (as in TXT headers)."""
+    if value is None or value == "":
+        return []
+    if isinstance(value, str):
+        return [g.strip() for g in value.split(",") if g.strip()]
+    if isinstance(value, list) and all(isinstance(g, str) for g in value):
+        return [g.strip() for g in value if g.strip()]
+    raise TranscriptError(f"guests must be a list of names or a comma-separated string in {where}")
+
+
 def parse_json_transcript(data: dict | list, source_path: str | None = None, fallback_id: str = "episode") -> Episode:
+    """Parse a transcript object (or a bare list of utterances).
+
+    The input is untrusted (it arrives through the API), so any malformed shape raises TranscriptError,
+    which the API returns as 422, never another exception. fuzz/fuzz_transcript_json.py checks this.
+    """
+    where = source_path or "input"
     if isinstance(data, list):
         data = {"transcript": data}
+    if not isinstance(data, dict):
+        raise TranscriptError(f"A transcript must be a JSON object or a list of utterances in {where}")
     rows = data.get("transcript") or data.get("utterances") or []
+    if not isinstance(rows, list):
+        raise TranscriptError(f"transcript must be a list of utterances in {where}")
     if not rows:
-        raise TranscriptError(f"No transcript entries found in {source_path or 'input'}")
-    host = data.get("host")
-    guests = list(data.get("guests") or [])
+        raise TranscriptError(f"No transcript entries found in {where}")
+    host = _text(data.get("host"), "host", where)
+    guests = _guest_names(data.get("guests"), where)
     utterances = []
     for i, row in enumerate(rows):
-        ts = str(row.get("timestamp") or row.get("time") or "00:00")
-        speaker = str(row.get("speaker") or "Unknown").strip()
+        if not isinstance(row, dict):
+            raise TranscriptError(f"utterance {i} must be an object with speaker and text in {where}")
+        ts = _text(row.get("timestamp") or row.get("time"), f"utterance {i} timestamp", where) or "00:00"
+        speaker = (_text(row.get("speaker"), f"utterance {i} speaker", where) or "Unknown").strip()
         name, role = resolve_speaker(speaker, host, guests)
-        raw = str(row.get("text") or "").strip()
+        raw = (_text(row.get("text"), f"utterance {i} text", where) or "").strip()
         utterances.append(
             Utterance(
                 idx=i,
@@ -86,14 +118,14 @@ def parse_json_transcript(data: dict | list, source_path: str | None = None, fal
                 speaker=speaker,
                 speaker_name=name,
                 role=role,
-                section=row.get("section"),
+                section=_text(row.get("section"), f"utterance {i} section", where),
                 text=raw,
                 raw_text=raw,
             )
         )
     return Episode(
         episode_id=safe_episode_id(data.get("episode_id"), fallback_id),
-        title=str(data.get("title") or fallback_id.replace("_", " ").title()),
+        title=_text(data.get("title"), "title", where) or fallback_id.replace("_", " ").title(),
         host=host,
         guests=guests,
         utterances=utterances,
@@ -192,6 +224,6 @@ def _name_tokens(name: str) -> set[str]:
 
 def _safe_seconds(ts: str) -> int:
     try:
-        return timestamp_to_seconds(ts)
+        return max(0, timestamp_to_seconds(ts))
     except ValueError:
         return 0

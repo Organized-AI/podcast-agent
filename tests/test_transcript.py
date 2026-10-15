@@ -1,8 +1,12 @@
+import pytest
+
 from podcast_agent.models import timestamp_to_seconds
 from podcast_agent.transcript import (
+    TranscriptError,
     clean_text,
     load_episode,
     normalize_episode,
+    parse_json_transcript,
     parse_txt_transcript,
     resolve_speaker,
 )
@@ -74,3 +78,35 @@ def test_header_pattern_has_no_polynomial_backtracking():
     assert HEADER_LINE.match(hostile) is None
     assert time.perf_counter() - started < 0.5
     assert HEADER_LINE.match("  Title :  The Future of Remote Work").groups() == ("Title", "The Future of Remote Work")
+
+
+# Found by fuzz/fuzz_transcript_json.py (#49): malformed shapes raised AttributeError/TypeError (an API 500).
+MALFORMED = [
+    {"transcript": ["hello"]},
+    ["guests"],
+    {"transcript": {"a": 1}},
+    {"transcript": "not a list"},
+    {"transcript": [{"text": "hi"}], "guests": 5},
+    {"transcript": [{"text": "hi"}], "guests": ["Ann", 3]},
+    {"transcript": [{"text": "hi", "speaker": "A"}], "host": ["x"]},
+    {"transcript": [{"text": {"nested": True}}]},
+    {"transcript": [{"text": "hi", "section": ["a"]}]},
+    {"transcript": [{"text": "hi"}], "title": {"t": 1}},
+]
+
+
+@pytest.mark.parametrize("doc", MALFORMED)
+def test_malformed_json_transcripts_raise_transcript_error(doc):
+    with pytest.raises(TranscriptError):
+        parse_json_transcript(doc)
+
+
+def test_guests_may_be_a_comma_separated_string():
+    ep = parse_json_transcript({"guests": "Dr. Lee, Sam", "transcript": [{"speaker": "Sam", "text": "Hi."}]})
+    assert ep.guests == ["Dr. Lee", "Sam"] and ep.utterances[0].role == "guest"
+
+
+def test_negative_timestamps_do_not_give_negative_seconds():
+    ep = parse_json_transcript({"transcript": [{"timestamp": "-5:00", "speaker": "A", "text": "Hi."}]})
+    assert ep.utterances[0].seconds == 0
+
