@@ -28,3 +28,14 @@ def test_helm_alert_rules_match_the_observability_stack():
     chart = ROOT / "deploy" / "helm" / "podcast-agent" / "files" / "alerts.yml"
     stack = ROOT / "deploy" / "observability" / "prometheus" / "alerts.yml"
     assert chart.read_text() == stack.read_text(), "copy deploy/observability/prometheus/alerts.yml into the chart's files/"
+
+
+def test_every_alert_rule_has_a_promtool_test():
+    """The guide says every alert rule is unit-tested; keep it true as rules are added."""
+    import yaml
+
+    prom = ROOT / "deploy" / "observability" / "prometheus"
+    rules = {r["alert"] for g in yaml.safe_load((prom / "alerts.yml").read_text())["groups"] for r in g["rules"]}
+    tested = {case["alertname"] for t in yaml.safe_load((prom / "alerts_test.yml").read_text())["tests"]
+              for case in t.get("alert_rule_test", [])}
+    assert rules == tested, f"no promtool test for: {sorted(rules - tested)}"

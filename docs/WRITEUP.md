@@ -33,7 +33,7 @@ Seekr asked for an agent that turns raw podcast transcripts into fact-checked sh
 
 **What I did**
 
-- It's for producers who publish show notes and need every factual claim checked: a 200–300 word summary, five takeaways, quotes checked word for word, a fact-check table marked ✅ ⚠️ ❓, and a readable reasoning log.
+- It's for producers who publish show notes and need every factual claim checked: a 200–300 word summary, five takeaways, quotes matched to the line they come from, a fact-check table marked ✅ ⚠️ ❓, and a readable reasoning log.
 - I built it to the spec first, as v0.1.0. Then I made it operable, as v0.2.0.
 - This guide is the evidence: the Audit trail is a real Claude run, and every card links to a CI job, a pull request or a captured run.
 
@@ -54,7 +54,7 @@ The model writes the plan, code validates it, and the steps run with every decis
 
 - Haiku writes the plan. In the Claude run it skipped normalization on the three clean JSON transcripts, and set a budget of 2–6 tool calls per claim. Sonnet writes the summary and notes and verifies the claims; Haiku extracts them.
 - The summary writes the transcript to Sonnet's prompt cache, and the notes read it back at 5% of the input price.
-- `podcast-agent audit` re-checks a finished run from its files: hashes, quotes verbatim at their timestamp, every claim grounded in its transcript line, confidence within the evidence cap.
+- `podcast-agent audit` re-checks a finished run from its files: hashes, every quote re-matched to its line (90% or closer), every claim grounded in its transcript line, confidence within the evidence cap.
 
 **What I learned: Let the model plan, but never let the run depend on it.** The planner chooses which steps to run, the summary strategy, how many claims to extract and the fact-checker's tool budget. It can also return a bad plan, so a deterministic validator repairs it and a fallback plan exists. Every other output is checked against a schema and business rules, with the error fed back for up to three attempts. A step that still fails is isolated: what depends on it is skipped, and the report comes out with warnings. The model makes the decisions; code enforces the contract.
 
@@ -157,11 +157,11 @@ Evidence: [FIG. 6 · Merge to cluster](https://podcast-agent-guide.jordan-691.wo
 
 ## 8. Operate: one trace, two backends
 
-Every run is one OpenTelemetry trace. The Collector sends it to Jaeger and MLflow, and CI proves that an MLflow outage doesn't cost Jaeger a span.
+With telemetry on, every run is one OpenTelemetry trace. The Collector sends it to Jaeger and MLflow, and CI proves that during an MLflow outage Jaeger still gets every span.
 
 - **128 / 128** spans in both Jaeger and MLflow for a full (offline) run
 - **37** queued spans delivered after an MLflow outage
-- **6** alert rules, unit-tested
+- **7** alert rules, each unit-tested with promtool
 - **0** transcript text in spans, by default
 
 **What I did**

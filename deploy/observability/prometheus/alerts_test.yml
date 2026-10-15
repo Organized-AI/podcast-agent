@@ -109,3 +109,55 @@ tests:
       - eval_time: 13m
         alertname: PodcastAgentCostBudgetExceeded
         exp_alerts: []
+
+  - name: slow model calls open a ticket after ten minutes; a fast model never does
+    interval: 1m
+    input_series:
+      # every Sonnet call lands between 20.48 s and 40.96 s, so p95 interpolates to about 40 s
+      - series: 'gen_ai_client_operation_duration_seconds_bucket{gen_ai_request_model="claude-sonnet-5-5",le="20.48"}'
+        values: "0x40"
+      - series: 'gen_ai_client_operation_duration_seconds_bucket{gen_ai_request_model="claude-sonnet-5-5",le="40.96"}'
+        values: "0+2x40"
+      - series: 'gen_ai_client_operation_duration_seconds_bucket{gen_ai_request_model="claude-sonnet-5-5",le="+Inf"}'
+        values: "0+2x40"
+      # every Haiku call finishes under 1.28 s
+      - series: 'gen_ai_client_operation_duration_seconds_bucket{gen_ai_request_model="claude-haiku-5-5",le="1.28"}'
+        values: "0+5x40"
+      - series: 'gen_ai_client_operation_duration_seconds_bucket{gen_ai_request_model="claude-haiku-5-5",le="+Inf"}'
+        values: "0+5x40"
+    alert_rule_test:
+      - eval_time: 8m
+        alertname: PodcastAgentModelLatencyHigh
+        exp_alerts: []
+      - eval_time: 20m
+        alertname: PodcastAgentModelLatencyHigh
+        exp_alerts:
+          - exp_labels: { severity: ticket, gen_ai_request_model: claude-sonnet-5-5 }
+            exp_annotations:
+              summary: p95 model latency above 30s for claude-sonnet-5-5
+              description: Slow model calls back up the queue; consider a faster tier for extraction steps.
+
+  - name: self-corrections need both a high share and enough calls
+    interval: 1m
+    input_series:
+      # 60 model calls an hour, half of them rejected and retried
+      - series: 'gen_ai_client_operation_duration_seconds_count{service_name="podcast-agent"}'
+        values: "0+1x120"
+      - series: 'podcast_agent_self_corrections_total{service_name="podcast-agent",podcast_agent_step_name="extract_notes"}'
+        values: "0+0.5x120"
+      # a quiet second service: every output retried, but only 6 calls an hour
+      - series: 'gen_ai_client_operation_duration_seconds_count{service_name="quiet"}'
+        values: "0+0.1x120"
+      - series: 'podcast_agent_self_corrections_total{service_name="quiet",podcast_agent_step_name="summarize"}'
+        values: "0+0.1x120"
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: PodcastAgentSelfCorrectionsHigh
+        exp_alerts: []
+      - eval_time: 80m
+        alertname: PodcastAgentSelfCorrectionsHigh
+        exp_alerts:
+          - exp_labels: { severity: ticket, service_name: podcast-agent }
+            exp_annotations:
+              summary: More than a quarter of model outputs are being rejected and retried
+              description: A prompt or model change may have broken the output format; compare against the eval baseline.
