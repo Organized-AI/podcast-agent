@@ -1,0 +1,145 @@
+# Who may talk to what in the observability namespace. Ingress is denied unless a policy below allows it, so a
+# compromised or careless pod elsewhere in the cluster cannot reach Postgres, write traces or silence alerts.
+#
+# "The node" is the kind node itself: kubelet probes and NodePort traffic (the tailnet-only dashboards, through
+# tailscale serve → 127.0.0.1 → the node port) arrive from it after kube-proxy's masquerade. In kind that is the
+# pod network's gateway (10.244.0.1) or the node's address on the docker network (172.18.0.0/16).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+---
+# Postgres: MLflow and its backup job only. Its readiness probe runs inside the pod, so the node needs no access.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: postgres }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: mlflow }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: postgres-backup }
+      ports:
+        - { port: 5432, protocol: TCP }
+---
+# MLflow: traces from the Collector, setup from the bootstrap job, people through the tailnet port.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mlflow
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: mlflow }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: otel-collector }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: mlflow-bootstrap }
+        - ipBlock: { cidr: 10.244.0.1/32 }
+        - ipBlock: { cidr: 172.18.0.0/16 }
+      ports:
+        - { port: 5000, protocol: TCP }
+---
+# The Collector: OTLP from the agent's namespace; its Prometheus exporter for Prometheus; health checks from the node.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: otel-collector
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: otel-collector }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: podcast-agent-dev }
+      ports:
+        - { port: 4317, protocol: TCP }
+        - { port: 4318, protocol: TCP }
+    - from:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: prometheus }
+      ports:
+        - { port: 8889, protocol: TCP }
+    - from:
+        - ipBlock: { cidr: 10.244.0.1/32 }
+      ports:
+        - { port: 13133, protocol: TCP }
+---
+# Jaeger: spans from the Collector; queries from the incident bridge and through the tailnet port.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: jaeger
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: jaeger }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: otel-collector }
+      ports:
+        - { port: 4317, protocol: TCP }
+    - from:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: podcast-agent-dev }
+          podSelector:
+            matchLabels: { app.kubernetes.io/component: incident-bridge }
+        - ipBlock: { cidr: 10.244.0.1/32 }
+        - ipBlock: { cidr: 172.18.0.0/16 }
+      ports:
+        - { port: 16686, protocol: TCP }
+    - from:
+        - ipBlock: { cidr: 10.244.0.1/32 }
+      ports:
+        - { port: 13133, protocol: TCP }
+---
+# Prometheus: queries from the incident bridge and through the tailnet port.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prometheus
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: prometheus }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: podcast-agent-dev }
+          podSelector:
+            matchLabels: { app.kubernetes.io/component: incident-bridge }
+        - ipBlock: { cidr: 10.244.0.1/32 }
+        - ipBlock: { cidr: 172.18.0.0/16 }
+      ports:
+        - { port: 9090, protocol: TCP }
+---
+# Alertmanager: alerts from Prometheus; people through the tailnet port (who can also create silences, so the tailnet
+# ACL should limit port 30903 to the people on call).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alertmanager
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: alertmanager }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: prometheus }
+        - ipBlock: { cidr: 10.244.0.1/32 }
+        - ipBlock: { cidr: 172.18.0.0/16 }
+      ports:
+        - { port: 9093, protocol: TCP }
