@@ -5,6 +5,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- Fuzzing: Atheris fuzzers for the TXT and JSON transcript parsers and the episode-id sanitizer (`fuzz/`), built and run by ClusterFuzzLite on every pull request that touches the code (5 minutes) and weekly (30 minutes). Base images are pinned by digest and dependencies are installed from `uv.lock` with hashes.
 - The first live eval run with Claude (Sonnet 5.5 + Haiku 5.5) met all 14 gates: 25 of 25 fact-check verdicts, every citation valid, Brier 0.033, every quote verbatim, every expected claim found, judge 0.83. It is the baseline in `evals/baselines/live.json`, and its report is in `samples/proof/evals-live/`. The judge's two invented facts, both in ep004's summary, are #51.
 - `podcast-agent eval --baseline-from <eval.json>` writes a suite's baseline from a reviewed, passing report, such as the nightly artifact, without running the suite again.
 - Deploy pull requests are opened as the `organized-ai-gitops` GitHub App (`actions/create-github-app-token`), so their checks run as on any pull request, with no manual approval. Without the App, the workflows fall back to `GITHUB_TOKEN` and dispatch the checks themselves.
@@ -12,6 +13,9 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - A standing lab cluster (`make lab`): Argo CD on kind tracking `main`, with dev running the digest Git names, pulled from GHCR, so a merged deploy pull request rolls the pods without anyone touching the cluster. It uses its own kubeconfig, listens on localhost, and can be published to the tailnet only. The chart can expose the API as a NodePort for it (`api.service.type`, `api.service.nodePort`).
 - `/healthz` reports the commit the running image was built from, so a rollout is visible from outside the cluster.
 - Guide: a v0.2.0 view that answers the six review points on v0.1.0 with evidence, summarizes what the release added and measured, shows how it shipped (one digest from dev to prod) and lists what is not done yet. The Audit trail adds proof cards for the release run, the dev and prod digest with its SLSA provenance, and the OpenSSF Scorecard.
+
+### Fixed
+- Malformed JSON transcripts (an utterance that is not an object, `guests` or `host` of the wrong type, a nested value where text belongs) raised `AttributeError` or `TypeError`, so the API answered 500. They now raise `TranscriptError`, a 422 naming the field. A string `guests` value is split on commas instead of into characters, and negative timestamps count as 0 seconds (#49, found by the new JSON fuzzer).
 
 ### Security
 - `SECURITY.md` adds guidance for government and regulated deployments: the secure-development practices mapped to NIST SP 800-218 (SSDF 1.1) with the evidence for each, and how to run inside an authorization boundary (provider choice, air-gapped operation, telemetry, egress, identity, FIPS and hardened base images, deploy-by-digest, audit retention).

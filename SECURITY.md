@@ -70,7 +70,7 @@ Podcast Agent is open-source software, not a hosted service. It holds no FedRAMP
 | PW.1 Design to meet security requirements | Read-only, allow-listed tools; model output validated against schemas and business rules; confidence capped by evidence in code |
 | PW.4 Reuse well-secured components | `uv.lock` pins every Python dependency with hashes; base images are pinned by digest; Dependabot proposes updates after a 7-day cooldown |
 | PW.7 Review and analyze code | Every change is a pull request; CodeQL (Python and Actions), ruff/bandit, mypy and zizmor run on each one |
-| PW.8 Test executable code | Unit and integration tests, the Docker image run end to end, the Helm chart rendered and schema-checked for every environment, Argo CD deploying the chart on a kind cluster, and labeled evals of the agent's verdicts |
+| PW.8 Test executable code | Unit and integration tests, the Docker image run end to end, the Helm chart rendered and schema-checked for every environment, Argo CD deploying the chart on a kind cluster, labeled evals of the agent's verdicts, and fuzzing of the transcript parsers with ClusterFuzzLite and Atheris on every pull request |
 | PW.9 Secure settings by default | Telemetry content capture off, the API bound to localhost outside Kubernetes, non-root read-only containers, NetworkPolicy on, failed steps degrade to ❓ unverifiable |
 | RV.1 Find vulnerabilities continuously | CodeQL and Trivy on every pull request, every push to `main` and weekly; dependency review on every pull request; Dependabot and OpenSSF Scorecard weekly |
 | RV.2 Assess and fix them | Private reporting with the response times above; fixes ship as a patch release and are listed under **Security** in the changelog |

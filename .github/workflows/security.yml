@@ -98,6 +98,9 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           trivyignores: .trivyignore
+          # The ClusterFuzzLite build image runs as root by OSS-Fuzz design (it installs into the image and
+          # writes fuzzers to /out). It is built in CI only, never deployed; the runtime Dockerfile is scanned.
+          skip-files: .clusterfuzzlite/Dockerfile
           exit-code: "1"
       - name: Report the repository to the Security tab
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
@@ -108,6 +111,7 @@ jobs:
           scan-ref: .
           scanners: vuln,secret,misconfig
           trivyignores: .trivyignore
+          skip-files: .clusterfuzzlite/Dockerfile   # see the gate above
           format: sarif
           output: trivy-repo.sarif
       - uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d  # v4.38.3

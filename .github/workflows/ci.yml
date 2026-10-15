@@ -27,7 +27,7 @@ jobs:
           enable-cache: true
       - run: uv sync --locked --extra aws
       - name: Lint (ruff, with bandit rules)
-        run: uv run ruff check src tests tools e2e
+        run: uv run ruff check src tests tools e2e fuzz
       - name: Types (mypy)
         run: uv run mypy
       - name: Tests (hermetic, warnings are errors, coverage floor)

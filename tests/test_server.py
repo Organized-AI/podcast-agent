@@ -34,3 +34,17 @@ def test_healthz_reports_the_build_commit(monkeypatch, data_dir):
     body = TestClient(server.app).get("/healthz").json()
     server._commit.cache_clear()
     assert body["status"] == "ok" and body["commit"] == "sha-abc1234"
+
+
+def test_malformed_transcript_is_a_422_not_a_500(monkeypatch, data_dir):
+    monkeypatch.setenv("LLM_PROVIDER", "offline")
+    monkeypatch.setenv("KB_PATH", str(data_dir / "knowledge_base.json"))
+    monkeypatch.setenv("MOCK_WEB_PATH", str(data_dir / "mock_web_index.json"))
+    from podcast_agent import server
+
+    server._shared.cache_clear()
+    client = TestClient(server.app, raise_server_exceptions=False)
+    r = client.post("/v1/process", json={"transcript": {"transcript": ["hello"]}})
+    assert r.status_code == 422
+    assert "utterance 0" in r.json()["detail"]
+

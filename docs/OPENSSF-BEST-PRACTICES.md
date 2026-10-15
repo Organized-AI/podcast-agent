@@ -98,10 +98,10 @@ Status: **Met** unless marked N/A. 67 criteria: 13 basics, 9 change control, 8 r
 | `static_analysis_common_vulnerabilities` | CodeQL `security-extended` queries, ruff's bandit (`S`) rules, zizmor for workflow injection and permissions, Trivy for Dockerfile and Kubernetes misconfiguration. |
 | `static_analysis_fixed` | CI fails on ruff, mypy, zizmor and Trivy (high or critical) findings, so they are fixed before merge; CodeQL alerts are triaged in the Security tab. |
 | `static_analysis_often` | On every pull request and every push to `main`, plus a weekly scheduled run. |
-| `dynamic_analysis` | Every change runs the test suite with branch coverage, an offline end-to-end run with its audit, re-audits of the committed runs and a Docker run of every transcript. |
+| `dynamic_analysis` | Every change runs the test suite with branch coverage, an offline end-to-end run with its audit, re-audits of the committed runs and a Docker run of every transcript. Code changes are also fuzzed: ClusterFuzzLite runs the Atheris fuzzers in `fuzz/` against the transcript parsers and the episode-id sanitizer on every pull request and weekly; the first run found #49. |
 | `dynamic_analysis_unsafe` | N/A: the project is Python, a memory-safe language, with no C extensions of its own. |
 | `dynamic_analysis_enable_assertions` | Tests run with assertions on (never `python -O`) and treat every warning as an error. |
-| `dynamic_analysis_fixed` | A failing test, audit or end-to-end run blocks the merge, so problems are fixed first. |
+| `dynamic_analysis_fixed` | A failing test, audit or end-to-end run blocks the merge, so problems are fixed first. A fuzzer crash is filed as an issue and fixed with a regression test (#49). |
 
 ## Keeping the badge
 
