@@ -13,4 +13,11 @@ helm: ## Lint the chart against values.schema.json and validate the rendered man
 	      | kubeconform -strict -summary -schema-location default -schema-location '$(CRD_SCHEMAS)' - || exit 1; \
 	  else echo "kubeconform not installed: rendered only"; helm template podcast-agent $(CHART) $$values > /dev/null || exit 1; fi; \
 	done
-.PHONY: helm
+	@echo "== Argo CD manifests"
+	@if command -v kubeconform >/dev/null; then \
+	  kubeconform -strict -summary -schema-location default -schema-location '$(CRD_SCHEMAS)' deploy/gitops/argocd/; \
+	else echo "kubeconform not installed: skipped"; fi
+
+gitops-e2e: ## Argo CD on a throwaway kind cluster deploys dev from HEAD (HEAD must be pushed)
+	e2e/gitops-kind.sh
+.PHONY: helm gitops-e2e

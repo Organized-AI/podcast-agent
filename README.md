@@ -14,7 +14,7 @@ An agentic AI system that takes raw podcast transcripts (`.json` or timestamped 
 3. **Fact-check.** Check-worthy claims are extracted and verified by a tool-using agent against a local knowledge base and a (mock or real) web search. Each claim is marked ✅ verified, ⚠️ possibly outdated/inaccurate or ❓ unverifiable, with a calibrated confidence score and cited evidence.
 4. **Reasoning log.** A readable trace of every plan, tool call (with its stated purpose), observation, self-correction and verdict, plus Claude's own thinking summaries, plus a structured JSONL version.
 
-The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. An interactive architecture guide you can click through is live at **[podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev)** (source: [website/public/index.html](website/public/index.html); deploy your own copy as a Cloudflare Worker with `make guide-deploy`). Its **Audit trail** tab is filled from a real run by `make guide` (`tools/guide/embed_audit.py`).
+The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**; how changes reach a cluster through Argo CD is in **[docs/GITOPS.md](docs/GITOPS.md)**. An interactive architecture guide you can click through is live at **[podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev)** (source: [website/public/index.html](website/public/index.html); deploy your own copy as a Cloudflare Worker with `make guide-deploy`). Its **Audit trail** tab is filled from a real run by `make guide` (`tools/guide/embed_audit.py`).
 
 ## Where each requirement lives
 
