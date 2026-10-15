@@ -1,0 +1,71 @@
+# What a good run must contain for each bundled transcript. `podcast-agent eval` scores a run folder
+# (report.json) against this file without calling a model.
+#
+# summary.mentions: each entry is a list of alternatives; at least one must appear in the summary
+#                   (case-insensitive substring), e.g. [documentation, handbook].
+# claims:           a fact-check matches when its claim contains every word in `match`; its verdict must be
+#                   one of `acceptable`. Unmatched expectations count against claim recall.
+version: 1
+episodes:
+  ep001:
+    transcript: data/transcripts/ep001_remote_work.json
+    summary:
+      words: [180, 330]
+      mentions:
+        - [async]
+        - [documentation, handbook]
+        - [trust]
+        - [GitLab, Automattic, Doist]
+        - [outcome, goals, deliverable]
+        - [loneliness, isolat, connection, retreat]
+    notes: { takeaways: 5, quotes: [3, 5], topics: [4, 10] }
+    claims:
+      - { match: [GitLab], acceptable: [verified, possibly_outdated_or_inaccurate] }
+      - { match: [remote-first, talent], acceptable: [possibly_outdated_or_inaccurate, unverifiable] }
+
+  ep002:
+    transcript: data/transcripts/ep002_ai_healthcare.json
+    summary:
+      words: [180, 330]
+      mentions:
+        - [X-ray, imaging, radiology]
+        - [FDA, regulat]
+        - [triage, chatbot]
+        - [privacy, bias]
+        - [interoperab]
+    notes: { takeaways: 5, quotes: [3, 5], topics: [4, 10] }
+    claims:
+      - { match: [FDA, autonom], acceptable: [possibly_outdated_or_inaccurate] }
+      - { match: [X-ray], acceptable: [verified] }
+      - { match: [pandemic], acceptable: [verified] }
+
+  ep003:
+    transcript: data/transcripts/ep003_bootstrapping.json
+    summary:
+      words: [180, 330]
+      mentions:
+        - [bootstrap]
+        - [venture, VC]
+        - [control, dilut]
+        - [market]
+    notes: { takeaways: 5, quotes: [3, 5], topics: [4, 10] }
+    claims:
+      - { match: [break-even], acceptable: [unverifiable] }
+      - { match: [fintech], acceptable: [unverifiable] }
+
+  ep004:
+    transcript: data/transcripts/ep004_pdf_example.txt
+    summary:
+      words: [120, 330]
+      mentions:
+        - [NASA, Mars]
+        - [Perseverance, Jezero]
+        - [Bitcoin, crypto]
+        - [Nvidia]
+    notes: { takeaways: 5, quotes: [3, 5], topics: [4, 10] }
+    claims:
+      - { match: [Mars, sample], acceptable: [possibly_outdated_or_inaccurate] }
+      - { match: [Perseverance, landed], acceptable: [verified] }
+      - { match: [Bitcoin, "200"], acceptable: [possibly_outdated_or_inaccurate] }
+      - { match: [Nvidia, trillion], acceptable: [verified] }
+      - { match: [Mars, "2040"], acceptable: [unverifiable] }
