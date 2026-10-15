@@ -32,11 +32,12 @@ jobs:
         run: uv run mypy
       - name: Tests (hermetic, warnings are errors, coverage floor)
         run: uv run pytest -q --cov --cov-report=term
-      - name: Drift (generated config, versions, lock)
+      - name: Drift (generated config, versions, lock, walkthrough)
         run: |
           uv run python tools/ci/gen_config.py --check
           uv run python tools/ci/check_version.py
           uv lock --check
+          uv run python tools/guide/embed_walkthrough.py --check
       - name: Evals (offline suite; thresholds gate the job)
         run: |
           uv run podcast-agent eval --suite evals/suites/offline.yaml --out evals/reports/offline

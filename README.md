@@ -6,7 +6,7 @@
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15516/badge)](https://www.bestpractices.dev/projects/15516)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**Interactive guide:** [podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev) · **Proof it runs:** [Audit trail tab](https://podcast-agent-guide.jordan-691.workers.dev/#audit) (a real Claude run, re-checkable in the browser) · **Source:** [github.com/organized-ai/podcast-agent](https://github.com/organized-ai/podcast-agent)
+**Interactive guide:** [podcast-agent-guide.jordan-691.workers.dev](https://podcast-agent-guide.jordan-691.workers.dev) · **The story:** [write-up](docs/WRITEUP.md), or [present it stop by stop](https://podcast-agent-guide.jordan-691.workers.dev/#walk-1) · **Proof it runs:** [Audit trail tab](https://podcast-agent-guide.jordan-691.workers.dev/#audit) (a real Claude run, re-checkable in the browser) · **Source:** [github.com/organized-ai/podcast-agent](https://github.com/organized-ai/podcast-agent)
 
 An agentic AI system that takes raw podcast transcripts (`.json` or timestamped `.txt`) and produces publish-ready show notes. It is for ad agencies and podcast producers who publish show notes and need every factual claim checked, with a record of how each verdict was reached. For each episode it writes:
 

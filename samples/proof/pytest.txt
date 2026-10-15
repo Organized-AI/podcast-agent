@@ -1,7 +1,7 @@
 # command: pytest --cov --cov-report=term
 # machine: Linux workspace · x86_64 · Python 3.13.16
-# commit: 421cf57
-# captured: 2026-10-15T17:02:06Z
+# commit: f306efe
+# captured: 2026-10-15T19:03:49Z
 
 ============================= test session starts ==============================
 platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
@@ -12,26 +12,27 @@ plugins: timeout-2.4.0, anyio-4.15.1, cov-7.1.0
 timeout: 60.0s
 timeout method: signal
 timeout func_only: False
-collected 137 items
+collected 145 items
 
 tests/test_audit.py ...                                                  [  2%]
 tests/test_config.py .                                                   [  2%]
 tests/test_eval_datasets.py ..                                           [  4%]
-tests/test_evals.py ................                                     [ 16%]
+tests/test_evals.py .................                                    [ 15%]
 tests/test_gitops.py .........                                           [ 22%]
-tests/test_hermetic.py ..                                                [ 24%]
-tests/test_notes.py ...                                                  [ 26%]
-tests/test_propagation.py .....                                          [ 29%]
-tests/test_providers_and_reports.py ..........                           [ 37%]
-tests/test_release_tools.py ........                                     [ 43%]
-tests/test_repo_drift.py ...                                             [ 45%]
-tests/test_safe_ids.py ...........                                       [ 53%]
-tests/test_server.py ...                                                 [ 55%]
-tests/test_structured_and_summary.py .....                               [ 59%]
-tests/test_telemetry.py ...............                                  [ 70%]
-tests/test_trace_fanout.py ........                                      [ 75%]
-tests/test_transcript.py ....................                            [ 90%]
-tests/test_verifier.py ............                                      [ 99%]
+tests/test_hermetic.py ..                                                [ 23%]
+tests/test_notes.py ...                                                  [ 25%]
+tests/test_propagation.py .....                                          [ 28%]
+tests/test_providers_and_reports.py ..........                           [ 35%]
+tests/test_release_tools.py ........                                     [ 41%]
+tests/test_repo_drift.py ...                                             [ 43%]
+tests/test_safe_ids.py ...........                                       [ 51%]
+tests/test_server.py ...                                                 [ 53%]
+tests/test_structured_and_summary.py .....                               [ 56%]
+tests/test_telemetry.py ...............                                  [ 66%]
+tests/test_trace_fanout.py ........                                      [ 72%]
+tests/test_transcript.py ....................                            [ 86%]
+tests/test_verifier.py ............                                      [ 94%]
+tests/test_walkthrough.py .......                                        [ 99%]
 tests/test_worker.py .                                                   [100%]
 
 ================================ tests coverage ================================
@@ -74,5 +75,5 @@ TOTAL                                          3193    429    888    123    84%
 
 8 files skipped due to complete coverage.
 Required test coverage of 83.0% reached. Total coverage: 84.42%
-============================= 137 passed in 10.18s =============================
+============================= 145 passed in 9.86s ==============================
 exit: 0

@@ -11,6 +11,7 @@ test: ## Hermetic tests with the coverage floor
 drift: ## Generated files and versions agree with their sources
 	$(UV) run python tools/ci/gen_config.py --check
 	$(UV) run python tools/ci/check_version.py
+	$(UV) run python tools/guide/embed_walkthrough.py --check
 	$(UV) lock --check
 
 check: lint types test drift evals ## Everything a pull request must pass locally

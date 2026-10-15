@@ -1,7 +1,7 @@
 # command: ruff check src tests tools e2e fuzz
 # machine: Linux workspace · x86_64 · Python 3.13.16
-# commit: 421cf57
-# captured: 2026-10-15T17:02:06Z
+# commit: f306efe
+# captured: 2026-10-15T19:03:26Z
 
 All checks passed!
 exit: 0
