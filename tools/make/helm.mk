@@ -13,6 +13,9 @@ helm: ## Lint the chart against values.schema.json and validate the rendered man
 	      | kubeconform -strict -summary -schema-location default -schema-location '$(CRD_SCHEMAS)' - || exit 1; \
 	  else echo "kubeconform not installed: rendered only"; helm template podcast-agent $(CHART) $$values > /dev/null || exit 1; fi; \
 	done
+	@echo "== prod's NetworkPolicy lets pods reach the Collector (telemetry is on there)"
+	@helm template podcast-agent $(CHART) -f $(CHART)/values-prod.yaml --show-only templates/networkpolicy.yaml \
+	  | grep -q 'port: 4318' || { echo "prod turns telemetry on, but its NetworkPolicy allows no egress to the OTLP port"; exit 1; }
 	@echo "== Argo CD manifests"
 	@if command -v kubeconform >/dev/null; then \
 	  kubeconform -strict -summary -schema-location default -schema-location '$(CRD_SCHEMAS)' deploy/gitops/argocd/; \
