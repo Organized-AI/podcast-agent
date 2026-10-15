@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from podcast_agent import telemetry
+from podcast_agent.cost import usd
 from podcast_agent.models import (
     Claim,
     Episode,
@@ -72,9 +73,13 @@ def process_episode(ctx: RunContext, episode: Episode, run_id: str) -> EpisodeRe
             "gen_ai.usage.input_tokens": report.usage.input_tokens,
             "gen_ai.usage.output_tokens": report.usage.output_tokens,
         })
+        telemetry.record_episode_cost(span, report.usage.cost_usd, budget=report.usage.budget_usd,
+                                      mode=ctx.settings.cost_budget_mode, over=report.usage.over_budget,
+                                      kind=telemetry.traffic(episode.episode_id))
         if failed:
             span.set_attribute("podcast_agent.steps.failed", failed)
-        telemetry.EPISODES.add(1, {"podcast_agent.episode.status": status})
+        telemetry.EPISODES.add(1, {"podcast_agent.episode.status": status,
+                                   "podcast_agent.traffic": telemetry.traffic(episode.episode_id)})
         return report
 
 
@@ -133,11 +138,19 @@ def _process_episode(ctx: RunContext, episode: Episode, run_id: str) -> EpisodeR
                 state.warnings.append(f"{name} failed: {exc}")
                 results.append(StepResult(step=name, status="failed", duration_ms=_ms(t0), detail=str(exc)))
 
+    budget = ctx.usage.budget_usd = ctx.settings.cost_budget_usd
+    if budget is not None and ctx.usage.cost_usd > budget:
+        ctx.usage.over_budget = True
+        overrun = (f"cost {usd(ctx.usage.cost_usd)} is over the {usd(budget)} episode budget "
+                   f"({ctx.settings.cost_budget_mode} mode)")
+        ctx.trace.warn("budget", overrun)
+        state.warnings.append(overrun)
+    approx = "~" if ctx.usage.estimated else ""
     ctx.trace.event(
         "result", "done",
         f"{episode.episode_id} finished in {(time.perf_counter() - started):.1f}s · "
         f"{ctx.usage.llm_calls} LLM calls ({ctx.usage.cached_calls} cached) · "
-        f"{'~' if ctx.usage.estimated else ''}{ctx.usage.input_tokens:,} in / {ctx.usage.output_tokens:,} out tokens",
+        f"{approx}{ctx.usage.input_tokens:,} in / {ctx.usage.output_tokens:,} out tokens · {approx}{usd(ctx.usage.cost_usd)}",
     )
     return EpisodeReport(
         run_id=run_id,

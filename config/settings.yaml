@@ -95,3 +95,11 @@ settings:
     field: today
     default: "<today's date>"
     help: "pin 'today' for reproducible fact-checks, e.g. 2026-10-13"
+  - env: COST_BUDGET_USD
+    field: cost_budget_usd
+    default: "0.2"
+    help: "Per-episode budget in USD at list prices; 'off' for none. An episode over it raises PodcastAgentCostBudgetExceeded."
+  - env: COST_BUDGET_MODE
+    field: cost_budget_mode
+    default: "warn"
+    help: "warn (record the overrun, finish the episode) | enforce (stop verifying claims once the budget is spent)"

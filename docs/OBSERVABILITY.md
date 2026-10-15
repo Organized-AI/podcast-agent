@@ -69,6 +69,9 @@ In Kubernetes, set `otel.enabled=true` and `otel.endpoint` in the Helm values to
 | `PodcastAgentUnverifiableShareHigh` | over 60% of at least 10 verdicts in an hour were ❓, for 30 minutes | ticket |
 | `PodcastAgentToolErrors` | more than 5 tool errors in 15 minutes | ticket |
 | `PodcastAgentSelfCorrectionsHigh` | over 25% of at least 20 model outputs in an hour were rejected and retried, for 30 minutes | ticket |
+| `PodcastAgentCostBudgetExceeded` | any episode, canary or live, cost more than its budget (`COST_BUDGET_USD`) in 5 minutes | ticket |
+
+`PodcastAgentCostBudgetExceeded` goes from Alertmanager to the incident bridge (`podcast-agent incident-bridge`), which opens a GitHub issue with the spend by step and model, the most expensive trace in Jaeger and MLflow, and the deploy and pull request before the alert. When the alert resolves, the bridge comments the timeline with MTTD and MTTR and closes the issue. [docs/runbooks/cost-budget.md](runbooks/cost-budget.md) is the runbook.
 
 `make observability-check` validates the Collector and Prometheus configs and runs the alert unit tests in [alerts_test.yml](../deploy/observability/prometheus/alerts_test.yml) with promtool.
 
@@ -122,11 +125,16 @@ POST /v1/jobs                      SERVER span (FastAPI's native OpenTelemetry),
 |---|---|---|
 | `gen_ai.client.token.usage` | histogram, `{token}` | `gen_ai.token.type` (input, output), provider, request and response model |
 | `gen_ai.client.operation.duration` | histogram, seconds | provider, model, `error.type` on failure |
-| `podcast_agent.episodes` | counter | `podcast_agent.episode.status` |
+| `podcast_agent.episodes` | counter | `podcast_agent.episode.status`, `podcast_agent.traffic` (live, canary) |
+| `podcast_agent.cost.usd` | counter, `{USD}` | spend at list prices: `podcast_agent.step.name`, `gen_ai.request.model`, `podcast_agent.cost.priced_as`, `podcast_agent.llm.tier` |
+| `podcast_agent.episode.cost.usd` | histogram, `{USD}` | spend per episode: `podcast_agent.traffic` |
+| `podcast_agent.budget.violations` | counter | episodes over budget: `podcast_agent.budget.usd`, `podcast_agent.budget.mode`, `podcast_agent.traffic`; every series starts at 0, so the alert sees the first one |
 | `podcast_agent.verdicts` | counter | `podcast_agent.verdict`, `podcast_agent.claim.type` |
 | `podcast_agent.self_corrections` | counter | `podcast_agent.step.name` |
 | `podcast_agent.tool_calls` | counter | `gen_ai.tool.name`, `outcome` (ok, empty, error) |
 | `http.server.request.duration`, `http.server.active_requests` | histogram, gauge | from FastAPI: method, route, status code |
+
+Each pod reports its own series (`service.instance.id` is the pod name), so a rollout is not mistaken for a counter reset. Spend is priced in `src/podcast_agent/cost.py`; a model with no list price of its own, such as the offline heuristics, is priced as the configured Claude model of the same tier. The `invoke_agent` span carries `podcast_agent.cost.usd`, `podcast_agent.cost.budget_usd` and `podcast_agent.cost.over_budget`, and an episode over budget gets a `podcast_agent.budget_exceeded` event.
 
 Responses served from the local response cache get a span (with `podcast_agent.llm.response_cache_hit=true`) but no token or duration metrics, because no model call was made.
 

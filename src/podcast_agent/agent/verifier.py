@@ -16,6 +16,7 @@ from pydantic import AliasChoices, BaseModel, Field, ValidationError
 from podcast_agent import telemetry
 from podcast_agent.agent.pipeline import EpisodeState, register
 from podcast_agent.agent.policy import prediction_is_checkable
+from podcast_agent.cost import usd
 from podcast_agent.llm.base import LLMRefusal
 from podcast_agent.llm.structured import extract_json
 from podcast_agent.models import Claim, Evidence, FactCheck, Verdict
@@ -193,7 +194,7 @@ def _verify_claim(
             # A refusal is a policy decision, not a parse error: don't resend the same request.
             ctx.trace.error(step, f"model declined: {exc}", indent=1, category=exc.category)
             break
-        ctx.record_usage(resp)
+        ctx.record_usage(resp, step="verify_claims", tier="main")
         ctx.trace.llm_call(step, resp)
         messages.append({"role": "assistant", "content": resp.text})
         try:
@@ -307,6 +308,17 @@ def _verify_claim(
     )
 
 
+def over_budget_check(ctx: RunContext, claim: Claim) -> FactCheck:
+    """Enforce mode: the episode has spent its budget, so this claim goes to a person instead of the model."""
+    budget = ctx.settings.cost_budget_usd or 0.0
+    ctx.trace.warn("verify_claims", f"{claim.id}: not checked, the {usd(budget)} episode budget is spent", indent=1)
+    return FactCheck(
+        claim=claim, verdict=Verdict.UNVERIFIABLE, confidence=0.2, raw_confidence=0.0,
+        rationale=f"Not checked: the episode reached its {usd(budget)} cost budget before this claim; "
+                  "flagged for human review.",
+    )
+
+
 @register("verify_claims")
 def verify_claims(ctx: RunContext, state: EpisodeState, params: dict[str, Any]) -> tuple[str, int]:
     claims = state.claims or []
@@ -315,7 +327,10 @@ def verify_claims(ctx: RunContext, state: EpisodeState, params: dict[str, Any]) 
     available = ["search_knowledge_base"] + (["web_search"] if ctx.search else [])
     tools = [t for t in (params.get("tools") or available) if t in available] or available
     max_steps = int(params.get("max_steps_per_claim") or ctx.settings.max_steps_per_claim)
-    state.fact_checks = [verify_claim(ctx, c, state.episode.title, max_steps, tools) for c in claims]
+    state.fact_checks = [
+        over_budget_check(ctx, c) if ctx.budget_spent() else verify_claim(ctx, c, state.episode.title, max_steps, tools)
+        for c in claims
+    ]
     counts = {v: sum(1 for fc in state.fact_checks if fc.verdict == v) for v in Verdict}
     calls = sum(fc.tool_calls for fc in state.fact_checks)
     return (

@@ -19,7 +19,6 @@ data:
   OTEL_SERVICE_NAME: "podcast-agent"
   OTEL_TRACES_SAMPLER: {{ .Values.otel.sampler | quote }}
   OTEL_TRACES_SAMPLER_ARG: {{ .Values.otel.samplerArg | quote }}
-  OTEL_RESOURCE_ATTRIBUTES: {{ printf "k8s.namespace.name=%s,service.namespace=%s" .Release.Namespace .Release.Name | quote }}
   DEPLOY_ENV: {{ .Values.otel.environment | default .Release.Namespace | quote }}
   OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT: {{ .Values.otel.captureContent | quote }}
   {{- end }}

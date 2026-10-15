@@ -67,6 +67,18 @@ SELF_CORRECTIONS = _meter.create_counter(
     "podcast_agent.self_corrections", unit="{correction}", description="Model outputs rejected and retried, by step"
 )
 TOOL_CALLS = _meter.create_counter("podcast_agent.tool_calls", unit="{call}", description="Tool calls, by tool and outcome")
+# Spend is an estimate at list prices (cost.py). "{USD}" is an annotation, so Prometheus names keep the "usd" in the name.
+COST = _meter.create_counter(
+    "podcast_agent.cost.usd", unit="{USD}", description="Estimated model spend at list prices, by step and model"
+)
+EPISODE_COST = _meter.create_histogram(
+    "podcast_agent.episode.cost.usd", unit="{USD}", description="Estimated model spend per episode",
+    explicit_bucket_boundaries_advisory=[0.01, 0.02, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.75, 1, 2, 5],
+)
+BUDGET_VIOLATIONS = _meter.create_counter(
+    "podcast_agent.budget.violations", unit="{episode}", description="Episodes that cost more than their budget"
+)
+TRAFFIC = ("live", "canary")
 
 _providers: list[Any] = []
 
@@ -236,6 +248,47 @@ def record_chat(current: Span, resp: LLMResponse, *, provider: str, request_mode
     OPERATION_DURATION.record(duration_s, base)
     TOKEN_USAGE.record(resp.input_tokens, {**base, "gen_ai.token.type": "input"})
     TOKEN_USAGE.record(resp.output_tokens, {**base, "gen_ai.token.type": "output"})
+
+
+def record_cost(usd: float, *, model: str, priced_as: str, step: str, tier: str) -> None:
+    COST.add(usd, _clean({"gen_ai.request.model": model, "podcast_agent.cost.priced_as": priced_as,
+                          "podcast_agent.step.name": step or None, "podcast_agent.llm.tier": tier}))
+
+
+def traffic(episode_id: str) -> str:
+    """Synthetic canary episodes (ids starting with "canary") are counted apart from live traffic."""
+    return "canary" if episode_id.startswith("canary") else "live"
+
+
+def budget_attributes(budget: float | None, mode: str, kind: str) -> dict[str, str]:
+    return {"podcast_agent.budget.usd": "off" if budget is None else f"{budget:.2f}",
+            "podcast_agent.budget.mode": mode, "podcast_agent.traffic": kind}
+
+
+def start_budget_series(budget: float | None, mode: str) -> None:
+    """Export the violations counter at zero from the start.
+
+    Prometheus's increase() needs two samples, so a series that first appears at 1 hides the first episode that
+    went over budget; starting every series at 0 lets the alert fire on that first episode.
+    """
+    for kind in TRAFFIC:
+        BUDGET_VIOLATIONS.add(0, budget_attributes(budget, mode, kind))
+
+
+def record_episode_cost(current: Span, usd: float, *, budget: float | None, mode: str, over: bool, kind: str) -> None:
+    """Put the episode's spend and budget on its span; count it, and count it again if it went over budget."""
+    current.set_attributes(_clean({
+        "podcast_agent.cost.usd": round(usd, 6),
+        "podcast_agent.cost.budget_usd": budget,
+        "podcast_agent.cost.over_budget": over,
+        "podcast_agent.traffic": kind,
+    }))
+    attributes = budget_attributes(budget, mode, kind)
+    EPISODE_COST.record(usd, {"podcast_agent.traffic": kind})
+    if over:
+        BUDGET_VIOLATIONS.add(1, attributes)
+        current.add_event("podcast_agent.budget_exceeded",
+                          {**attributes, "podcast_agent.cost.usd": round(usd, 6)})
 
 
 def record_chat_error(provider: str, request_model: str, duration_s: float, exc: BaseException) -> None:

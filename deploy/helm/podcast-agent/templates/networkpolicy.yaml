@@ -23,6 +23,15 @@ spec:
     - ports:   # model APIs, SQS, S3, search — HTTPS only
         - port: 443
           protocol: TCP
+  {{- if or .Values.canary.enabled .Values.incidentBridge.enabled }}
+    - to:      # the canary and the incident bridge call the API
+        - podSelector:
+            matchLabels:
+              {{- include "podcast-agent.selector" (dict "root" . "component" "api") | nindent 14 }}
+      ports:
+        - port: {{ .Values.api.port }}
+          protocol: TCP
+  {{- end }}
   {{- if .Values.otel.enabled }}
   {{- $otlpPort := regexFind ":[0-9]+" (regexReplaceAll "^[a-zA-Z][a-zA-Z0-9+.-]*://" .Values.otel.endpoint "") | trimPrefix ":" }}
   {{- if and $otlpPort (ne $otlpPort "443") }}

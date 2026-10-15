@@ -275,6 +275,11 @@ class Usage(BaseModel):
     output_tokens: int = 0
     cache_read_tokens: int = 0
     estimated: bool = False  # True when token counts are estimates (offline provider)
+    # Estimated spend at list prices (src/podcast_agent/cost.py), and how it compares with the episode budget.
+    cost_usd: float = 0.0
+    cost_by_step: dict[str, float] = Field(default_factory=dict)
+    budget_usd: float | None = None
+    over_budget: bool = False
 
 
 class EpisodeMeta(BaseModel):
