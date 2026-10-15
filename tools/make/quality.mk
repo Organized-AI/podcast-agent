@@ -13,7 +13,7 @@ drift: ## Generated files and versions agree with their sources
 	$(UV) run python tools/ci/check_version.py
 	$(UV) lock --check
 
-check: lint types test drift ## Everything a pull request must pass locally
+check: lint types test drift evals ## Everything a pull request must pass locally
 
 precommit: ## Run every pre-commit hook on all files
 	$(UV) run --with pre-commit pre-commit run --all-files

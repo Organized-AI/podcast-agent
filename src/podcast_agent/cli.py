@@ -108,6 +108,45 @@ def cmd_audit(args: argparse.Namespace) -> int:
     return 1 if c["fail"] else 0
 
 
+def cmd_eval(args: argparse.Namespace) -> int:
+    import yaml
+
+    from podcast_agent.evals.datasets import load_episode_expectations
+    from podcast_agent.evals.runner import SuiteResult, render_markdown, run_suite, score_run, write_reports
+    from podcast_agent.runtime import build_context
+    from podcast_agent.trace import Tracer
+
+    console = Console(highlight=False)
+    if args.score:  # score run folders only: no suite, no thresholds, no model
+        expectations = load_episode_expectations(args.expectations)
+        sections = [score_run(d, expectations) for d in args.score]
+        result = SuiteResult(suite="score", description="Run folders scored against " + args.expectations,
+                             provider="none", sections=sections)
+    else:
+        suite = yaml.safe_load(Path(args.suite).read_text(encoding="utf-8"))
+        ctx = None
+        if suite.get("factcheck"):
+            settings = _apply_overrides(Settings(), args)
+            if suite.get("provider") and not args.provider:
+                settings.provider = suite["provider"]
+            tracer = Tracer(f"eval-{Path(args.suite).stem}", console=Console(quiet=True), verbose=False)
+            ctx = build_context(settings, tracer)
+        telemetry.setup()
+        try:
+            result = run_suite(args.suite, ctx)
+        finally:
+            telemetry.shutdown()
+    print(render_markdown(result))  # raw Markdown, so tables are not re-wrapped
+    if args.out:
+        json_path, md_path = write_reports(result, args.out)
+        console.print(f"Wrote {json_path} and {md_path}")
+    misses = [c for c in result.checks if not c.passed]
+    for c in misses:
+        console.print(f"[bold red]FAIL[/bold red] {c.section}.{c.metric} = {c.value:g} "
+                      f"({'needs ≥' if c.direction == 'min' else 'needs ≤'} {c.threshold:g})")
+    return 1 if misses else 0
+
+
 def cmd_kb(args: argparse.Namespace) -> int:
     from podcast_agent.tools.knowledge_base import KnowledgeBase
 
@@ -178,6 +217,17 @@ def main(argv: list[str] | None = None) -> int:
     audit.add_argument("--transcripts", action="append", help="where to find source transcripts if moved")
     audit.add_argument("--no-write", action="store_true", help="print only; don't write audit.json/audit.md")
     audit.set_defaults(func=cmd_audit)
+
+    ev = sub.add_parser("eval", help="Run an eval suite (thresholds gate the exit code) or score run folders")
+    ev.add_argument("--suite", default="evals/suites/offline.yaml", help="suite file (default: the offline suite)")
+    ev.add_argument("--score", action="append", metavar="RUN_DIR", help="only score these run folders (no model)")
+    ev.add_argument("--expectations", default="evals/datasets/episodes.yaml", help="for --score")
+    ev.add_argument("--out", help="write eval.json and eval.md here")
+    ev.add_argument("--provider", choices=["auto", "anthropic", "bedrock", "openai", "ollama", "offline"])
+    ev.add_argument("--model", help="main model id")
+    ev.add_argument("--fast-model", help="fast model id")
+    ev.add_argument("--no-cache", action="store_true", help="bypass the local LLM response cache")
+    ev.set_defaults(func=cmd_eval)
 
     kb = sub.add_parser("kb", help="Query the local knowledge base")
     kb.add_argument("query")

@@ -1,0 +1,42 @@
+# Runs on every pull request (make evals). No API key: the fact-check cases go through the offline
+# heuristics, and the committed runs are scored from their files. Thresholds are a ratchet: raise them
+# when a change improves a score, never lower them to make a change pass.
+name: offline
+description: Fact-check cases through the offline heuristics, plus the committed runs scored without a model.
+provider: offline
+
+factcheck:
+  dataset: evals/datasets/factcheck.jsonl
+  max_steps_per_claim: 4
+  thresholds:
+    verdict_accuracy: 0.96
+    macro_f1: 0.91
+    citation_validity: 1.0         # every ✅ / ⚠️ cites tool evidence
+    kb_recall: 0.88                # and cites the entry that decides the case
+    brier: { max: 0.05 }
+    accuracy.future-deadline: 1.0  # #13: an unexpired prediction is ❓
+    accuracy.passed-deadline: 1.0
+    accuracy.anecdote: 1.0
+
+runs:
+  # The committed Claude run predates the #13 fix: "Mars before 2040" is ⚠️ there. Raise
+  # claim_verdict_accuracy to 1.0 when a new run is committed.
+  - name: claude-run
+    path: samples/claude-run
+    expectations: evals/datasets/episodes.yaml
+    thresholds:
+      summary_in_range: 1.0
+      summary_coverage: 1.0
+      notes_shape_ok: 1.0
+      quote_fidelity: 1.0
+      claim_recall: 1.0
+      claim_verdict_accuracy: 0.9
+  - name: offline-mode
+    path: samples/offline-mode
+    expectations: evals/datasets/episodes.yaml
+    thresholds:
+      summary_in_range: 1.0
+      notes_shape_ok: 1.0
+      quote_fidelity: 1.0
+      claim_recall: 0.8
+      claim_verdict_accuracy: 0.9
