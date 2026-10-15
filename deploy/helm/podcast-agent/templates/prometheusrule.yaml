@@ -1,0 +1,14 @@
+{{- if .Values.monitoring.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "podcast-agent.fullname" . }}
+  labels:
+    {{- include "podcast-agent.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.prometheusRule.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- /* files/alerts.yml is a copy of deploy/observability/prometheus/alerts.yml; a test keeps them equal */}}
+  {{- (.Files.Get "files/alerts.yml" | fromYaml) | toYaml | nindent 2 }}
+{{- end }}

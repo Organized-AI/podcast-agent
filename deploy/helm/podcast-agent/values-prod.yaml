@@ -1,0 +1,35 @@
+# prod: EKS with External Secrets, KEDA, SQS/S3 and the Prometheus Operator (see docs/DEPLOYMENT.md).
+# Image digests come from deploy/gitops/envs/prod/values.yaml, bumped by the release workflow's PR.
+config:
+  LLM_PROVIDER: anthropic
+
+externalSecrets:
+  enabled: true
+  remoteKey: prod/podcast-agent
+
+api:
+  replicaCount: 3
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+
+worker:
+  enabled: true
+  keda:
+    enabled: true
+    minReplicas: 0
+    maxReplicas: 20
+
+otel:
+  enabled: true
+  environment: prod
+  sampler: parentbased_traceidratio
+  samplerArg: "0.25"
+  captureContent: false
+
+monitoring:
+  prometheusRule:
+    enabled: true
+    labels:
+      release: kube-prometheus-stack

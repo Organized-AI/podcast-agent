@@ -2,6 +2,7 @@
 image:
   repository: ghcr.io/organized-ai/podcast-agent
   tag: "0.1.0"
+  digest: ""                 # sha256:… — takes precedence over tag; set per environment by GitOps
   pullPolicy: IfNotPresent
 
 serviceAccount:
@@ -25,6 +26,7 @@ secrets:
   # Secret with ANTHROPIC_API_KEY (and optionally TAVILY_API_KEY). Created by External Secrets
   # when externalSecrets.enabled=true, otherwise must already exist in the namespace.
   name: podcast-agent-secrets
+  optional: false            # true only where no key is needed (the offline provider)
 
 externalSecrets:
   enabled: false
@@ -93,6 +95,13 @@ worker:
 podDisruptionBudget:
   enabled: true
   minAvailable: 1
+
+# Prometheus Operator alert rules (the same rules as deploy/observability/prometheus/alerts.yml).
+# The agent pushes OTLP to a Collector, so scrape the Collector's Prometheus exporter, not the pods.
+monitoring:
+  prometheusRule:
+    enabled: false
+    labels: {}               # e.g. release: kube-prometheus-stack, to match the operator's ruleSelector
 
 networkPolicy:
   enabled: true            # ingress only to the API port; egress only DNS + HTTPS

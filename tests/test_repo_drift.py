@@ -21,3 +21,10 @@ def test_settings_reference_is_current(monkeypatch):
 def test_versions_agree(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["check_version.py"])
     assert _load("check_version").main() == 0
+
+
+def test_helm_alert_rules_match_the_observability_stack():
+    """The chart ships a copy (Helm can only read files inside the chart); both must say the same thing."""
+    chart = ROOT / "deploy" / "helm" / "podcast-agent" / "files" / "alerts.yml"
+    stack = ROOT / "deploy" / "observability" / "prometheus" / "alerts.yml"
+    assert chart.read_text() == stack.read_text(), "copy deploy/observability/prometheus/alerts.yml into the chart's files/"

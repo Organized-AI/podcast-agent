@@ -53,13 +53,24 @@ jobs:
   helm:
     name: Helm chart
     runs-on: ubuntu-latest
+    env:
+      KUBECONFORM_VERSION: "0.8.0"
+      KUBECONFORM_SHA256: 9bc2bffbf71f261128533edaf912153948b7ff238f9a531ae6d34466ec287883
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
       - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310  # v5.0.1
-      - run: helm lint deploy/helm/podcast-agent
-      - run: helm template demo deploy/helm/podcast-agent > /dev/null
+        with:
+          version: v4.3.0
+      - name: Install kubeconform (checksum verified)
+        run: |
+          curl -sSfL -o kubeconform.tgz \
+            "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz"
+          echo "${KUBECONFORM_SHA256}  kubeconform.tgz" | sha256sum --check -
+          tar -xzf kubeconform.tgz kubeconform && sudo mv kubeconform /usr/local/bin/
+      - name: Lint, render and validate every environment (values schema + Kubernetes and CRD schemas)
+        run: make helm
 
   docker:
     name: Docker image
