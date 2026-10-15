@@ -5,6 +5,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- The cost drill waits for a person to merge each pull request once CI passes, as a fix would in a real incident, and counts the wait toward MTTR (`--auto-merge` merges on green). `--base` runs it against the branch the lab deploys from. The first drill ran end to end on the claws-mac-mini lab: MTTD 1m 1s, MTTR 10m 33s, no customer episode over budget (postmortem in `docs/postmortems/`).
 - The lab runs the observability stack through Argo CD (`deploy/gitops/argocd/observability.yaml`). It has:
   - the Collector, Jaeger (in memory, capped at 3,000 traces), Prometheus (the repository's `alerts.yml`) and Alertmanager (which posts to the incident bridge), all as a kustomization;
   - a private MLflow from its official Helm chart, with Postgres, basic auth, and a Collector user that may only edit experiment 0.

@@ -8,14 +8,16 @@ Against the lab (deploy/gitops/lab) and the GitHub repository, with the offline 
 
   0. preflight  dev is synced and healthy, the alert rule is loaded, the canary is running, nothing is firing
   1. baseline   the canary is under budget
-  2. inject     a pull request raises dev's claim budget; merged once CI passes
+  2. inject     a pull request raises dev's claim budget; merged once CI passes and someone approves it
   3. detect     Argo CD rolls it out, the canary goes over budget, PodcastAgentCostBudgetExceeded fires
   4. notify     the incident bridge opens a GitHub issue; the drill checks the evidence in it
-  5. mitigate   a revert pull request, merged once CI passes; Argo CD rolls it out
+  5. mitigate   a revert pull request, merged the same way; Argo CD rolls it out
   6. recover    the canary comes back under budget, the alert resolves, the bridge closes the issue
   7. learn      a postmortem in docs/postmortems/, follow-up issues, and the drill's log in samples/proof/
 
-GitHub access: GH_TOKEN or GITHUB_TOKEN, else `gh auth token`. Commits are authored with your git identity.
+Each pull request waits for the PR Gate and then for a person to merge it, as a fix would in a real incident; the wait
+counts toward MTTR. --auto-merge merges on green instead. GitHub access: GH_TOKEN or GITHUB_TOKEN, else `gh auth token`.
+Commits are authored with your git identity (or DRILL_AUTHOR_NAME and DRILL_AUTHOR_EMAIL).
 """
 
 from __future__ import annotations
@@ -74,8 +76,8 @@ def wait_for(what: str, check: Callable[[], T | None], timeout_s: int, every_s: 
 
 
 class GitHub:
-    def __init__(self, repo: str, token: str, author: dict[str, str]):
-        self.repo, self.author = repo, author
+    def __init__(self, repo: str, token: str, author: dict[str, str], base: str = "main"):
+        self.repo, self.author, self.base = repo, author, base
         self.http = httpx.Client(base_url=f"https://api.github.com/repos/{repo}", timeout=30, headers={
             "Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28"})
@@ -90,11 +92,11 @@ class GitHub:
             raise SystemExit(f"GitHub {method} {path}: HTTP {resp.status_code} {resp.text[:300]}")
         return resp.json() if resp.content else {}
 
-    def main_sha(self) -> str:
-        return str(self.call("GET", "/git/ref/heads/main")["object"]["sha"])
+    def base_sha(self) -> str:
+        return str(self.call("GET", f"/git/ref/heads/{self.base}")["object"]["sha"])
 
-    def read(self, path: str, ref: str = "main") -> tuple[str, str]:
-        data = self.call("GET", f"/contents/{path}", params={"ref": ref})
+    def read(self, path: str, ref: str | None = None) -> tuple[str, str]:
+        data = self.call("GET", f"/contents/{path}", params={"ref": ref or self.base})
         return base64.b64decode(data["content"]).decode(), data["sha"]
 
     def put_file(self, branch: str, path: str, content: str, message: str) -> None:
@@ -106,10 +108,10 @@ class GitHub:
 
     def open_pr(self, branch: str, files: dict[str, str], message: str, title: str, body: str,
                 labels: list[str]) -> PullRequest:
-        self.call("POST", "/git/refs", json={"ref": f"refs/heads/{branch}", "sha": self.main_sha()})
+        self.call("POST", "/git/refs", json={"ref": f"refs/heads/{branch}", "sha": self.base_sha()})
         for path, content in files.items():
             self.put_file(branch, path, content, message)
-        pr = self.call("POST", "/pulls", json={"title": title, "head": branch, "base": "main", "body": body})
+        pr = self.call("POST", "/pulls", json={"title": title, "head": branch, "base": self.base, "body": body})
         self.call("POST", f"/issues/{pr['number']}/labels", json={"labels": labels})
         return PullRequest(number=pr["number"], title=title, url=pr["html_url"], head_sha=pr["head"]["sha"],
                            opened_at=parse_time(pr["created_at"]))
@@ -119,7 +121,8 @@ class GitHub:
         done = [r for r in runs if r["status"] == "completed"]
         return done[0]["conclusion"] if done else None
 
-    def merge_after_ci(self, pr: PullRequest) -> PullRequest:
+    def merge_after_ci(self, pr: PullRequest, auto: bool) -> PullRequest:
+        """Wait for the PR Gate, then merge (auto) or wait for a person to merge, as in a real incident."""
         say(f"  waiting for {GATE} on #{pr.number}")
         conclusion = wait_for(f"CI on #{pr.number}", lambda: self.gate(pr.head_sha), 30 * 60, 15)
         if conclusion != "success":
@@ -127,12 +130,18 @@ class GitHub:
         pr.ci_passed_at = datetime.now(UTC)
         say(f"  {GATE} passed on #{pr.number} after {duration((pr.ci_passed_at - pr.opened_at).total_seconds())}"
             if pr.opened_at else f"  {GATE} passed on #{pr.number}")
-        merged = self.call("PUT", f"/pulls/{pr.number}/merge", json={
-            "merge_method": "squash", "commit_title": f"{pr.title} (#{pr.number})", "sha": pr.head_sha})
-        pr.merge_sha = merged["sha"]
-        pr.merged_at = parse_time(self.call("GET", f"/pulls/{pr.number}")["merged_at"])
-        self.call("DELETE", f"/git/refs/heads/{self.call('GET', f'/pulls/{pr.number}')['head']['ref']}")
-        say(f"  merged #{pr.number} as {pr.merge_sha[:7]}")
+        if auto:
+            self.call("PUT", f"/pulls/{pr.number}/merge", json={
+                "merge_method": "squash", "commit_title": f"{pr.title} (#{pr.number})", "sha": pr.head_sha})
+        else:
+            say(f"  ready for review: merge #{pr.number} to continue ({pr.url})")
+        merged = wait_for(f"#{pr.number} to be merged", lambda: (lambda d: d if d.get("merged_at") else None)(
+            self.call("GET", f"/pulls/{pr.number}")), 2 * 60 * 60, 10)
+        pr.merge_sha, pr.merged_at = merged["merge_commit_sha"], parse_time(merged["merged_at"])
+        if auto:
+            self.call("DELETE", f"/git/refs/heads/{merged['head']['ref']}")
+        waited = f", {duration((pr.merged_at - pr.ci_passed_at).total_seconds())} after CI" if pr.merged_at else ""
+        say(f"  #{pr.number} merged as {pr.merge_sha[:7]}{waited}")
         return pr
 
     def incident_since(self, since: datetime) -> dict[str, Any] | None:
@@ -285,7 +294,7 @@ def run(args: argparse.Namespace) -> int:
     if args.preflight:
         return 0
 
-    gh = GitHub(args.repo, github_token(), git_author())
+    gh = GitHub(args.repo, github_token(), git_author(), args.base)
     values, _ = gh.read(VALUES)
     budget = float(re.search(r'COST_BUDGET_USD:\s*"([0-9.]+)"', values).group(1))  # type: ignore[union-attr]
 
@@ -308,7 +317,7 @@ def run(args: argparse.Namespace) -> int:
          "(offline provider, no API spend). The drill reverts it. See docs/runbooks/cost-budget.md."),
         ["drill", "area/gitops"])
     say(f"  opened #{bad.number} {bad.url}")
-    gh.merge_after_ci(bad)
+    gh.merge_after_ci(bad, args.auto_merge)
     record = DrillRecord(repo=args.repo, environment="dev", budget_usd=budget, bad_pr=bad, baseline=base,
                          change={"MAX_CLAIMS": ("8", args.claims), "MAX_STEPS_PER_CLAIM": ("4", args.steps)})
 
@@ -340,7 +349,7 @@ def run(args: argparse.Namespace) -> int:
     record.revert_pr = revert
     gh.comment(incident, f"Mitigation: #{revert.number} reverts #{bad.number}; merging once CI passes.")
     say(f"  opened #{revert.number} {revert.url}")
-    gh.merge_after_ci(revert)
+    gh.merge_after_ci(revert, args.auto_merge)
     mitigated = record.mitigated_at = wait_for(f"Argo CD to deploy {revert.merge_sha[:7]}",
                                                lambda: lab.deployed_at(revert.merge_sha), 10 * 60, 5)
     say(f"  Argo CD synced {revert.merge_sha[:7]} at {iso(record.mitigated_at)}: mitigated "
@@ -400,7 +409,8 @@ def run(args: argparse.Namespace) -> int:
          "Written by `tools/drill/cost_drill.py`; `samples/proof/drill-cost.txt` is the drill's log."),
         ["drill", "documentation", "area/ops"])
     say(f"  opened #{pm.number} {pm.url}")
-    gh.merge_after_ci(pm)
+    if args.auto_merge:
+        gh.merge_after_ci(pm, auto=True)
     (ROOT / PROOF).write_text("\n".join(LOG) + "\n", encoding="utf-8")
     return 0
 
@@ -409,11 +419,15 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--repo", default=os.getenv("GITHUB_REPOSITORY", "Organized-AI/podcast-agent"))
     ap.add_argument("--lab-host", default=os.getenv("LAB_HOST", "127.0.0.1"))
+    ap.add_argument("--base", default=os.getenv("DRILL_BASE", "main"),
+                    help="the branch Argo CD deploys dev from (bootstrap.sh REVISION); default main")
     ap.add_argument("--claims", default="40", help="the claim budget the fault sets (default 40)")
     ap.add_argument("--steps", default="12", help="the tool calls per claim the fault sets (default 12)")
     ap.add_argument("--preflight", action="store_true", help="only check that the lab is ready")
     ap.add_argument("--no-followups", action="store_true", help="write the postmortem without filing follow-ups")
     ap.add_argument("--no-publish", action="store_true", help="write the postmortem locally; open no pull request")
+    ap.add_argument("--auto-merge", action="store_true",
+                    help="merge each pull request once CI passes (default: wait for a person to merge it)")
     return run(ap.parse_args(argv))
 
 

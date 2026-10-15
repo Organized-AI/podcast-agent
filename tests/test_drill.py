@@ -49,13 +49,25 @@ def record(**overrides) -> DrillRecord:
     return r
 
 
+DEV_VALUES = """# dev: a small cluster
+config:
+  LLM_PROVIDER: offline
+  SEARCH_PROVIDER: mock
+  # the canary normally costs about half of this
+  COST_BUDGET_USD: "0.15"
+
+secrets:
+  optional: true
+"""
+
+
 def test_the_fault_adds_the_budgets_to_devs_config_block():
-    values = (ROOT / "deploy" / "helm" / "podcast-agent" / "values-dev.yaml").read_text()
-    changed = _drill().raise_claim_budget(values, "40", "12")
-    assert yaml.safe_load(changed)["config"] == {**yaml.safe_load(values)["config"], "MAX_CLAIMS": "40",
+    # A fixture, not the live values-dev.yaml: on the drill's own pull request that file already has the fault.
+    changed = _drill().raise_claim_budget(DEV_VALUES, "40", "12")
+    assert yaml.safe_load(changed)["config"] == {**yaml.safe_load(DEV_VALUES)["config"], "MAX_CLAIMS": "40",
                                                  "MAX_STEPS_PER_CLAIM": "12"}
     assert changed.replace('  # Check every claim in long episodes, not just the first eight.\n  MAX_CLAIMS: "40"\n'
-                           '  MAX_STEPS_PER_CLAIM: "12"\n', "") == values
+                           '  MAX_STEPS_PER_CLAIM: "12"\n', "") == DEV_VALUES
 
 
 def test_a_drill_cannot_start_while_another_ones_change_is_live():
@@ -87,6 +99,11 @@ def test_follow_ups_follow_from_the_measurements():
                       "Revert deploy config faster: CI was most of the time to mitigate",
                       "Resolve the cost alert when the canary recovers, not five minutes later",
                       "Page when live episodes go over budget; keep the canary at ticket"]
+    # A merge that waits on a reviewer adds its own follow-up.
+    slow_review = record(revert_pr=PullRequest(72, "r", "u", opened_at=at(3), ci_passed_at=at(3.5), merged_at=at(6.5)),
+                         resolved_at=at(9))
+    assert [f.title for f in plan_followups(slow_review, PATH)][1] == (
+        "Make reverting a deploy-config change a one-person action")
     # A quick revert and a quickly resolving alert leave only the two that always apply.
     quick = record(revert_pr=PullRequest(72, "r", "u", opened_at=at(3), ci_passed_at=at(3.5)), resolved_at=at(9))
     assert len(plan_followups(quick, PATH)) == 2
@@ -107,7 +124,7 @@ def test_the_postmortem_tells_the_story_with_the_numbers():
     assert "**Customers: none.** 0 live episodes went over budget" in text
     assert "| Argo CD synced dev: **impact starts** | 2026-10-15T21:00:00Z | 30s after merge |" in text
     assert "| Incident issue #71 opened by the bridge | 2026-10-15T21:02:12Z | 12s after the alert |" in text
-    assert "| #72 merged after CI | 2026-10-15T21:06:12Z | CI 3m 0s |" in text
+    assert "| #72 merged after CI | 2026-10-15T21:06:12Z | CI 3m 0s, merged 12s after |" in text
     assert "MTTD 2m 0s, MTTR 8m 5s (its comment on #71)" in text
     assert "checking 35 claims instead of 8" in text
     assert "35 claims and 92 model calls instead of 8 and 28, $0.21 instead of $0.07" in text

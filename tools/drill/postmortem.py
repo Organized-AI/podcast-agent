@@ -88,6 +88,12 @@ class DrillRecord:
         return between(pr.opened_at, pr.ci_passed_at) if pr else None
 
     @property
+    def revert_review_s(self) -> float | None:
+        """From CI passing on the revert to someone merging it."""
+        pr = self.revert_pr
+        return between(pr.ci_passed_at, pr.merged_at) if pr else None
+
+    @property
     def time_to_mitigate_s(self) -> float | None:
         return between(self.alert_fired_at, self.mitigated_at)
 
@@ -139,6 +145,19 @@ def plan_followups(record: DrillRecord, postmortem_path: str) -> list[FollowUp]:
                   "**Proposal:** a fast path for pull requests that only revert `deploy/` changes: run the required "
                   "PR Gate on the Helm render and the config checks, and leave the full suite to the push to main."),
         ))
+    review = record.revert_review_s
+    if review is not None and mitigate and review / mitigate >= 0.4:
+        items.append(FollowUp(
+            title="Make reverting a deploy-config change a one-person action",
+            labels=["type/feature", "area/gitops", "area/ops"],
+            problem=f"The revert waited {duration(review)} for a merge after CI passed, "
+                    f"{review / mitigate:.0%} of the time to mitigate",
+            body=(f"{ref}\n\nThe revert passed CI and then waited {duration(review)} to be merged, "
+                  f"{review / mitigate:.0%} of the {duration(mitigate)} from alert to fix. A revert restores a "
+                  "configuration that was already reviewed and ran in production.\n\n"
+                  "**Proposal:** let the on-call merge a pure revert of a `deploy/` change on a green PR Gate "
+                  "without a second approval (a ruleset bypass for revert branches), and record who merged it."),
+        ))
     lag = record.resolve_lag_s
     if lag is not None and lag >= 180:
         items.append(FollowUp(
@@ -176,7 +195,9 @@ def render(record: DrillRecord, postmortem_path: str) -> str:
 
     timeline = [
         row(f"#{bad.number} opened: \"{bad.title}\"", bad.opened_at),
-        row(f"#{bad.number} merged after CI", bad.merged_at, f"CI {duration(between(bad.opened_at, bad.ci_passed_at))}"),
+        row(f"#{bad.number} merged after CI", bad.merged_at,
+            f"CI {duration(between(bad.opened_at, bad.ci_passed_at))}, merged "
+            f"{duration(between(bad.ci_passed_at, bad.merged_at))} after"),
         row(f"Argo CD synced {record.environment}: **impact starts**", record.deployed_at,
             f"{duration(between(bad.merged_at, record.deployed_at))} after merge"),
         row("First canary over budget", record.over_budget[0].start if record.over_budget else None,
@@ -191,7 +212,7 @@ def render(record: DrillRecord, postmortem_path: str) -> str:
             row(f"Revert #{revert.number} opened", revert.opened_at,
                 f"{duration(between(record.issue_opened_at, revert.opened_at))} after the issue"),
             row(f"#{revert.number} merged after CI", revert.merged_at,
-                f"CI {duration(record.revert_ci_s)}"),
+                f"CI {duration(record.revert_ci_s)}, merged {duration(record.revert_review_s)} after"),
         ]
     timeline += [
         row("Argo CD synced the revert: **mitigated**", record.mitigated_at,
