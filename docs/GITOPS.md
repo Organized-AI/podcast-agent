@@ -81,20 +81,58 @@ By default the lab also runs the observability stack ([deploy/gitops/argocd/obse
 
 dev sends telemetry to the Collector. The Collector fans traces out to Jaeger and MLflow, and Prometheus evaluates [alerts.yml](../deploy/observability/prometheus/alerts.yml), the same file Compose and the chart use. Alertmanager posts every alert to the incident bridge in dev.
 
-MLflow is private in three ways:
+MLflow holds every span of every run, so it is locked down:
 
-- **Basic auth.** The Collector writes as its own user, which may edit experiment 0 and nothing else.
-- **Storage.** Tracking data is in Postgres and artifacts are on a volume.
-- **Reach.** It can be reached only inside the cluster and on the tailnet.
+- **Accounts.** Basic auth, and a new account can do nothing until it is granted something (`default_permission = NO_PERMISSIONS`). The bootstrap Job grants exactly three:
+  - `collector` may edit experiment 0, which is how the Collector writes traces, and nothing else;
+  - a personal account (`MLFLOW_USER`, default `jordan`) may read experiment 0, so day to day nobody signs in as `admin`;
+  - `admin` is for managing users.
 
-`bootstrap.sh` generates the passwords into the `mlflow-secrets` Secret, and they never leave the cluster.
+  The Job runs on every sync and leaves existing users and grants as they are.
+- **Network.** Every pod in `observability` refuses connections unless a NetworkPolicy ([networkpolicies.yaml](../deploy/gitops/observability/networkpolicies.yaml)) admits them:
+  - only MLflow and the backup job reach Postgres;
+  - only the Collector and the bootstrap Job reach MLflow inside the cluster;
+  - only dev's namespace sends OTLP to the Collector;
+  - the node reaches the dashboards for the node ports.
+- **Reach.** The node ports listen on 127.0.0.1, and `tailscale serve` publishes them to the tailnet only.
+- **Backups.** A CronJob dumps MLflow's two databases (tracking, and users and permissions) every night at 03:17 UTC and keeps seven days ([postgres-backup.yaml](../deploy/gitops/observability/postgres-backup.yaml)).
+
+`bootstrap.sh` generates the passwords into the `mlflow-secrets` Secret, and they never leave the cluster. Your personal password:
+
+```bash
+kubectl -n observability get secret mlflow-secrets -o jsonpath='{.data.USER_PASSWORD}' | base64 -d
+```
 
 | | Node port (127.0.0.1, and the tailnet with `TAILSCALE_SERVE=1`) |
 |---|---|
 | Jaeger | 30686 |
-| MLflow | 30500 (user `admin`; the password is in `mlflow-secrets`) |
+| MLflow | 30500 (your personal account; `admin` only to manage users) |
 | Prometheus | 30909 |
 | Alertmanager | 30903 |
+
+Two settings live outside this repository:
+
+- **HTTPS.** The tailnet already encrypts traffic between devices. If you also want `https://` URLs, turn on HTTPS certificates in the Tailscale admin console (DNS → HTTPS Certificates), then serve with `tailscale serve --bg --https=30500 http://127.0.0.1:30500`. Add that address to `cors_allowed_origins` in `mlflow-values.yaml`.
+- **Who on the tailnet.** Anyone on the tailnet can reach these ports. A tailnet access rule that allows the lab host's ports only for your own devices narrows that to you.
+
+To restore MLflow from a backup, stop MLflow, restore both dumps from a pod that carries the backup job's label (Postgres's NetworkPolicy admits it), and start MLflow again:
+
+```bash
+IMAGE=$(kubectl -n observability get cronjob postgres-backup -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')
+kubectl -n observability scale deploy/mlflow --replicas=0
+kubectl -n observability run restore --rm -it --restart=Never --image="$IMAGE" \
+  --labels=app.kubernetes.io/name=postgres-backup --overrides='{"spec":{"containers":[{"name":"restore",
+    "image":"'"$IMAGE"'","command":["sh"],"stdin":true,"tty":true,
+    "env":[{"name":"PGPASSWORD","valueFrom":{"secretKeyRef":{"name":"mlflow-secrets","key":"POSTGRES_PASSWORD"}}}],
+    "volumeMounts":[{"name":"backups","mountPath":"/backups"}]}],
+    "volumes":[{"name":"backups","persistentVolumeClaim":{"claimName":"postgres-backups"}}]}}'
+# in the pod: ls /backups, pick a stamp, then
+#   pg_restore -h postgres -U mlflow -d mlflow --clean --if-exists /backups/mlflow-<stamp>.dump
+#   pg_restore -h postgres -U mlflow -d mlflow_auth --clean --if-exists /backups/mlflow_auth-<stamp>.dump
+kubectl -n observability scale deploy/mlflow --replicas=1
+```
+
+The dumps live on a volume on the same node, so they guard against mistakes and corruption, not against losing the machine. Copy them off the node for that.
 
 For the bridge to open real GitHub issues, give it a token that can write them:
 

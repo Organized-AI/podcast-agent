@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import importlib.util
+import json
 import re
 from pathlib import Path
 
+import pytest
 import yaml
 from conftest import ROOT
 
@@ -142,3 +145,59 @@ def test_new_mlflow_users_start_with_no_permissions():
     text = BOOTSTRAP.read_text()
     assert "default_permission = NO_PERMISSIONS" in text and "default_permission = READ" not in text
     assert "--from-literal=USER_NAME=" in text  # the personal account, so day to day nobody signs in as admin
+
+
+def test_argo_cd_reruns_the_mlflow_bootstrap_on_each_sync():
+    (job,) = [d for d in _manifests() if d["kind"] == "Job"]
+    # A Job's pod template is immutable: only delete-and-recreate picks up a new script or spec.
+    assert job["metadata"]["annotations"]["argocd.argoproj.io/sync-options"] == "Force=true,Replace=true"
+    # A Job that deletes itself is recreated by self-heal and runs again a day later.
+    assert "ttlSecondsAfterFinished" not in job["spec"]
+
+
+def _mlflow_bootstrap(monkeypatch):
+    monkeypatch.setenv("ADMIN_PASSWORD", "unused")
+    spec = importlib.util.spec_from_file_location("mlflow_bootstrap", OBS / "config" / "mlflow_bootstrap.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class FakeMlflow:
+    """Answers the bootstrap's permission calls as MLflow 3.17 does: a second grant is 400 RESOURCE_ALREADY_EXISTS."""
+
+    def __init__(self, grants):
+        self.grants, self.calls = dict(grants), []
+
+    def __call__(self, method, path, body=None, auth=None):
+        self.calls.append(path.split("?")[0].rsplit("/", 1)[-1])
+        if path.endswith("/grant"):
+            if body["username"] in self.grants:
+                return 400, '{"error_code": "RESOURCE_ALREADY_EXISTS"}'
+            self.grants[body["username"]] = body["permission"]
+            return 200, "{}"
+        if path.endswith("/revoke"):
+            del self.grants[body["username"]]
+            return 200, "{}"
+        user = path.split("username=")[1].split("&")[0]
+        return (200, json.dumps({"permission": self.grants[user]})) if user in self.grants else (404, "{}")
+
+
+@pytest.mark.parametrize(("before", "calls"), [
+    ({}, ["grant", "get"]),
+    ({"jordan": "READ"}, ["grant", "get", "get"]),
+    ({"jordan": "EDIT"}, ["grant", "get", "revoke", "grant", "get"]),
+], ids=["new", "same", "different"])
+def test_a_rerun_of_the_mlflow_bootstrap_leaves_exactly_the_grant_it_asks_for(monkeypatch, before, calls):
+    module = _mlflow_bootstrap(monkeypatch)
+    mlflow = FakeMlflow(before)
+    monkeypatch.setattr(module, "call", mlflow)
+    module.grant("jordan", "READ")
+    assert mlflow.grants == {"jordan": "READ"} and mlflow.calls == calls
+
+
+def test_the_mlflow_bootstrap_stops_on_any_other_error(monkeypatch):
+    module = _mlflow_bootstrap(monkeypatch)
+    monkeypatch.setattr(module, "call", lambda *args, **kwargs: (403, '{"error_code": "PERMISSION_DENIED"}'))
+    with pytest.raises(SystemExit, match="HTTP 403"):
+        module.grant("jordan", "READ")
