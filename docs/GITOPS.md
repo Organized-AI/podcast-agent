@@ -47,6 +47,7 @@ The kind test proves the wiring and then deletes the cluster. The lab keeps one 
 ```bash
 make lab                       # or TAILSCALE_SERVE=1 make lab to reach it from other machines on the tailnet
 make lab-status                # Synced Healthy at <commit>, then /healthz with the running image's commit
+make lab-watch                 # record it: start, merge the dev pull request, read samples/proof/lab-sync.txt
 ```
 
 [deploy/gitops/lab/bootstrap.sh](../deploy/gitops/lab/bootstrap.sh):

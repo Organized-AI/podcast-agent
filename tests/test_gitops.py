@@ -103,3 +103,12 @@ def test_lab_bootstrap_keeps_to_its_own_kubeconfig_and_the_tailnet():
     assert "ARGOCD_SHA256=" in (ROOT / "e2e" / "gitops-kind.sh").read_text()
     assert "sed -n '/^ARGOCD_VERSION=/p; /^ARGOCD_SHA256=/p' e2e/gitops-kind.sh" in script
 
+
+def test_lab_watch_only_records_a_change_that_happened():
+    """The proof must start from a running pod and must not claim a new revision on timeout."""
+    script = (ROOT / "deploy" / "gitops" / "lab" / "watch.sh").read_text()
+    gate = script.index("until ready")
+    assert gate < script.index('before=$(field')
+    assert 'no new revision within ${WAIT_HOURS}h' in script and "exit 1" in script
+    assert script.index('if [ "$rev" = "$before" ]') < script.index("Argo CD moved to")
+

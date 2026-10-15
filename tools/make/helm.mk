@@ -31,6 +31,9 @@ lab-status: ## What the lab runs: Argo CD's view of dev, then the API's /healthz
 	  -o jsonpath='{.status.sync.status} {.status.health.status} at {.status.sync.revision}{"\n"}'
 	@curl -sS http://127.0.0.1:30080/healthz; echo
 
+lab-watch: ## Record dev syncing itself: run, merge the dev pull request, read samples/proof/lab-sync.txt
+	deploy/gitops/lab/watch.sh samples/proof/lab-sync.txt
+
 lab-down: ## Delete the lab cluster (other kind clusters are untouched)
 	kind delete cluster --name $(LAB) --kubeconfig $(LAB_KUBECONFIG)
-.PHONY: helm gitops-e2e lab lab-status lab-down
+.PHONY: helm gitops-e2e lab lab-status lab-watch lab-down
