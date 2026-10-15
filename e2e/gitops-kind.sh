@@ -35,8 +35,9 @@ curl -sSfL -o "$manifest" "https://raw.githubusercontent.com/argoproj/argo-cd/${
 [ "$(sha256 "$manifest")" = "$ARGOCD_SHA256" ] || { echo "Argo CD manifest checksum mismatch"; exit 1; }
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f - >/dev/null
 kubectl apply -n argocd --server-side --force-conflicts -f "$manifest" >/dev/null
-kubectl -n argocd rollout status deploy/argocd-repo-server --timeout=300s
-kubectl -n argocd rollout status deploy/argocd-applicationset-controller --timeout=300s
+# Every component, Redis included: the repo-server caches manifests in Redis, and an Application created while
+# Redis is still starting can fail its first comparison with DeadlineExceeded (seen on #69 and #88).
+kubectl -n argocd wait deploy --all --for=condition=Available --timeout=300s
 kubectl -n argocd rollout status statefulset/argocd-application-controller --timeout=300s
 
 step "AppProject + ApplicationSet at ${REVISION:0:12}"
@@ -45,15 +46,24 @@ kubectl apply -f deploy/gitops/argocd/project.yaml
 
 step "waiting for $APP to be Synced and Healthy"
 status=""
-for _ in $(seq 1 60); do
+for i in $(seq 1 120); do
   status=$(kubectl -n argocd get application "$APP" -o jsonpath='{.status.sync.status} {.status.health.status}' 2>/dev/null || true)
   echo "  $status"
   [ "$status" = "Synced Healthy" ] && break
+  # A comparison that failed (say, a manifest generation that timed out) waits for the next reconcile; ask for a
+  # fresh one every 30 seconds instead.
+  if [ $((i % 6)) = 0 ] && kubectl -n argocd get application "$APP" \
+       -o jsonpath='{.status.conditions[*].type}' 2>/dev/null | grep -q ComparisonError; then
+    echo "  comparison failed; asking Argo CD for a hard refresh"
+    kubectl -n argocd annotate application "$APP" argocd.argoproj.io/refresh=hard --overwrite >/dev/null
+  fi
   sleep 5
 done
 if [ "$status" != "Synced Healthy" ]; then
   kubectl -n argocd get application "$APP" -o yaml | sed -n '/^status:/,$p' | head -60
   kubectl -n "$NS" get pods,events 2>/dev/null | tail -30
+  kubectl -n argocd get pods -o wide
+  kubectl -n argocd logs deploy/argocd-repo-server --tail=40 || true
   exit 1
 fi
 
