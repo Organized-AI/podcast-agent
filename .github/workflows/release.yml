@@ -70,6 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      attestations: read     # the image's signed provenance, attached to the release
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -87,6 +88,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --notes-file notes.md --verify-tag --latest
+      # The same Sigstore-signed SLSA provenance publish.yml attested for the digest, as release assets:
+      # the full bundle for `gh attestation verify --bundle`, and the DSSE envelope as .intoto.jsonl.
+      - name: Attach the signed build provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          DIGEST: ${{ needs.promote.outputs.digest }}
+        run: tools/ci/release_provenance.sh "$TAG" "$DIGEST"
 
   bump-prod:
     name: Open the prod deployment pull request
