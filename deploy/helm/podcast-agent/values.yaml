@@ -1,7 +1,7 @@
 # One image, two roles: `serve` (API) and `worker` (queue consumer). See docs/DEPLOYMENT.md.
 image:
   repository: ghcr.io/organized-ai/podcast-agent
-  tag: "0.1.0"
+  tag: "0.2.0"
   digest: ""                 # sha256:… — takes precedence over tag; set per environment by GitOps
   pullPolicy: IfNotPresent
 
