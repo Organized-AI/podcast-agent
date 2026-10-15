@@ -40,6 +40,37 @@ make gitops-e2e          # or: e2e/gitops-kind.sh <commit>   (the commit must be
 
 [e2e/gitops-kind.sh](../e2e/gitops-kind.sh) creates a throwaway kind cluster and installs a checksum-verified Argo CD v3.5.4. It applies the project and an ApplicationSet rendered for dev at the given commit, using a locally built image, because an unmerged commit has no published image. It then waits for `podcast-agent-dev` to be Synced and Healthy and calls `/healthz` inside the API pod. The `gitops-e2e` workflow runs the same script on every pull request that touches `deploy/`.
 
+## A standing lab cluster
+
+The kind test proves the wiring and then deletes the cluster. The lab keeps one running, so that "dev syncs itself on merge" can be watched rather than taken on trust:
+
+```bash
+make lab                       # or TAILSCALE_SERVE=1 make lab to reach it from other machines on the tailnet
+make lab-status                # Synced Healthy at <commit>, then /healthz with the running image's commit
+```
+
+[deploy/gitops/lab/bootstrap.sh](../deploy/gitops/lab/bootstrap.sh):
+
+- creates the kind cluster `podcast-agent-lab` with its own kubeconfig, `~/.kube/podcast-agent-lab`, so other clusters and the current kubectl context are untouched;
+- installs the same checksum-verified Argo CD as the kind test;
+- applies the AppProject and the ApplicationSet's dev Application, tracking `main`.
+
+The image is not overridden: dev runs the digest named in `deploy/gitops/envs/dev/values.yaml`, pulled from GHCR, exactly as a real cluster would. Two lab-only additions:
+
+- The API is exposed as a NodePort on `:30080`, and the Argo CD dashboard on `:30090`.
+- Both listen on 127.0.0.1. With `TAILSCALE_SERVE=1` they are also published to the tailnet only, never to the local network.
+
+Argo CD checks Git every 30 seconds instead of every 3 minutes. The dashboard is read-only without a login, so anyone on the tailnet can watch it but not sync or delete.
+
+What a merge looks like:
+
+1. A pull request merges to `main`. `publish` builds and attests `sha-<commit>`, then opens **Deploy sha-<commit> to dev**.
+2. You merge that pull request.
+3. Within the reconcile interval, Argo CD sees the new digest in Git, renders the chart and rolls the API pod. The **Refresh** button skips the wait.
+4. `/healthz` reports the new `commit`.
+
+At no point does anyone run `kubectl` or `helm` against the cluster.
+
 ## The automation
 
 | Workflow | Trigger | What it does |

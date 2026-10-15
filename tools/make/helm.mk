@@ -20,4 +20,17 @@ helm: ## Lint the chart against values.schema.json and validate the rendered man
 
 gitops-e2e: ## Argo CD on a throwaway kind cluster deploys dev from HEAD (HEAD must be pushed)
 	e2e/gitops-kind.sh
-.PHONY: helm gitops-e2e
+LAB := podcast-agent-lab
+LAB_KUBECONFIG := $(HOME)/.kube/$(LAB)
+
+lab: ## Standing lab cluster: Argo CD on kind tracking main (TAILSCALE_SERVE=1 publishes it to the tailnet)
+	deploy/gitops/lab/bootstrap.sh
+
+lab-status: ## What the lab runs: Argo CD's view of dev, then the API's /healthz
+	@KUBECONFIG=$(LAB_KUBECONFIG) kubectl -n argocd get application podcast-agent-dev \
+	  -o jsonpath='{.status.sync.status} {.status.health.status} at {.status.sync.revision}{"\n"}'
+	@curl -sS http://127.0.0.1:30080/healthz; echo
+
+lab-down: ## Delete the lab cluster (other kind clusters are untouched)
+	kind delete cluster --name $(LAB) --kubeconfig $(LAB_KUBECONFIG)
+.PHONY: helm gitops-e2e lab lab-status lab-down
