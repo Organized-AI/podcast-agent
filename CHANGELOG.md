@@ -5,6 +5,8 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- The first live eval run with Claude (Sonnet 5.5 + Haiku 5.5) met all 14 gates: 25 of 25 fact-check verdicts, every citation valid, Brier 0.033, every quote verbatim, every expected claim found, judge 0.83. It is the baseline in `evals/baselines/live.json`, and its report is in `samples/proof/evals-live/`. The judge's two invented facts, both in ep004's summary, are #51.
+- `podcast-agent eval --baseline-from <eval.json>` writes a suite's baseline from a reviewed, passing report, such as the nightly artifact, without running the suite again.
 - Deploy pull requests are opened as the `organized-ai-gitops` GitHub App (`actions/create-github-app-token`), so their checks run as on any pull request, with no manual approval. Without the App, the workflows fall back to `GITHUB_TOKEN` and dispatch the checks themselves.
 - Every GitHub Release carries the image's Sigstore-signed SLSA provenance as assets (`podcast-agent-<tag>.sigstore.json` and `.intoto.jsonl`), attached by `tools/ci/release_provenance.sh` from the attestation `publish` created. v0.2.0 was backfilled.
 - A standing lab cluster (`make lab`): Argo CD on kind tracking `main`, with dev running the digest Git names, pulled from GHCR, so a merged deploy pull request rolls the pods without anyone touching the cluster. It uses its own kubeconfig, listens on localhost, and can be published to the tailnet only. The chart can expose the API as a NodePort for it (`api.service.type`, `api.service.nodePort`).
