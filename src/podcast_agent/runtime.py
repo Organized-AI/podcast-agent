@@ -45,6 +45,7 @@ def build_search(settings: Settings) -> SearchTool | None:
 
 
 def build_context(settings: Settings, tracer: Tracer) -> RunContext:
+    telemetry.start_budget_series(settings.cost_budget_usd, settings.cost_budget_mode)
     return RunContext(
         settings=settings,
         llm=build_provider(settings),

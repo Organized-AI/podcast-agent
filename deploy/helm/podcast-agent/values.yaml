@@ -21,6 +21,9 @@ config:
   MAX_CLAIMS: "8"
   MAX_STEPS_PER_CLAIM: "4"
   LLM_CACHE_DIR: /cache/llm
+  # Per-episode budget at list prices; an episode over it raises PodcastAgentCostBudgetExceeded (docs/runbooks/cost-budget.md).
+  COST_BUDGET_USD: "0.20"
+  COST_BUDGET_MODE: warn
 
 secrets:
   # Secret with ANTHROPIC_API_KEY (and optionally TAVILY_API_KEY). Created by External Secrets
@@ -98,6 +101,30 @@ worker:
 podDisruptionBudget:
   enabled: true
   minAvailable: 1
+
+# Synthetic canary: a CronJob that sends a long, claim-dense episode through the API. Its metrics carry
+# podcast_agent.traffic="canary", so a change that makes episodes more expensive shows on the canary before a customer
+# episode (docs/runbooks/cost-budget.md).
+canary:
+  enabled: false
+  schedule: "* * * * *"
+  transcript: data/canary/canary_roundtable.json
+  resources:
+    requests: { cpu: 20m, memory: 96Mi }
+    limits: { cpu: 200m, memory: 192Mi }
+
+# Incident bridge: Alertmanager's webhook receiver. It opens an enriched GitHub issue per alert group and closes it
+# with the timeline when the alert resolves (src/podcast_agent/ops/incident.py). Without the token Secret it runs dry.
+incidentBridge:
+  enabled: false
+  port: 8080
+  repository: Organized-AI/podcast-agent
+  githubTokenSecret: incident-bridge-github   # key "token": a token that can write issues; created out of band
+  env: {}                 # PROMETHEUS_URL, JAEGER_URL, ARGOCD_URL, *_UI_URL, MLFLOW_EXPERIMENT_ID (see the module)
+  egressPorts: []         # ports of the in-cluster sources above, for the NetworkPolicy
+  resources:
+    requests: { cpu: 20m, memory: 128Mi }
+    limits: { cpu: 250m, memory: 256Mi }
 
 # Prometheus Operator alert rules (the same rules as deploy/observability/prometheus/alerts.yml).
 # The agent pushes OTLP to a Collector, so scrape the Collector's Prometheus exporter, not the pods.

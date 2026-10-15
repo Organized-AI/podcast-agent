@@ -1,0 +1,95 @@
+{{- if .Values.incidentBridge.enabled }}
+{{- $sel := dict "root" . "component" "incident-bridge" }}
+{{- $b := .Values.incidentBridge }}
+# Incident bridge (values.yaml: incidentBridge): Alertmanager posts here; it opens and closes GitHub issues.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "podcast-agent.fullname" . }}-incident-bridge
+  labels:
+    {{- include "podcast-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: incident-bridge
+spec:
+  replicas: 1    # one writer, so two deliveries of the same alert cannot race to open two issues
+  selector:
+    matchLabels:
+      {{- include "podcast-agent.selector" $sel | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "podcast-agent.selector" $sel | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "podcast-agent.serviceAccountName" . }}
+      automountServiceAccountToken: false
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: incident-bridge
+          image: {{ include "podcast-agent.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          args: ["incident-bridge", "--host", "0.0.0.0", "--port", "{{ $b.port }}"]
+          env:
+            - name: GITHUB_REPOSITORY
+              value: {{ $b.repository | quote }}
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $b.githubTokenSecret }}
+                  key: token
+                  optional: true    # without it the bridge runs dry and logs the issues it would open
+            {{- range $k, $v := $b.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ $b.port }}
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+          resources:
+            {{- toYaml $b.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "podcast-agent.fullname" . }}-incident-bridge
+  labels:
+    {{- include "podcast-agent.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "podcast-agent.selector" $sel | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ $b.port }}
+      targetPort: http
+{{- if and .Values.networkPolicy.enabled $b.egressPorts }}
+---
+# The bridge reads Prometheus, Jaeger and Argo CD inside the cluster; the release's policy allows only HTTPS out.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "podcast-agent.fullname" . }}-incident-bridge
+  labels:
+    {{- include "podcast-agent.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "podcast-agent.selector" $sel | nindent 6 }}
+  policyTypes: ["Egress"]
+  egress:
+    - ports:
+        {{- range $b.egressPorts }}
+        - port: {{ . }}
+          protocol: TCP
+        {{- end }}
+{{- end }}
+{{- end }}

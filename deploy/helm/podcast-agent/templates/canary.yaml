@@ -1,0 +1,47 @@
+{{- if .Values.canary.enabled }}
+{{- $sel := dict "root" . "component" "canary" }}
+# Synthetic canary (values.yaml: canary). One episode a minute through the API; the CronJob never overlaps itself.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "podcast-agent.fullname" . }}-canary
+  labels:
+    {{- include "podcast-agent.labels" . | nindent 4 }}
+    app.kubernetes.io/component: canary
+spec:
+  schedule: {{ .Values.canary.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 120
+      ttlSecondsAfterFinished: 600
+      template:
+        metadata:
+          labels:
+            {{- include "podcast-agent.selector" $sel | nindent 12 }}
+        spec:
+          restartPolicy: Never
+          serviceAccountName: {{ include "podcast-agent.serviceAccountName" . }}
+          automountServiceAccountToken: false
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          containers:
+            - name: canary
+              image: {{ include "podcast-agent.image" . | quote }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              securityContext:
+                {{- toYaml .Values.securityContext | nindent 16 }}
+              args: ["canary", "--url", "http://{{ include "podcast-agent.fullname" . }}-api",
+                     "--transcript", {{ .Values.canary.transcript | quote }}]
+              resources:
+                {{- toYaml .Values.canary.resources | nindent 16 }}
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir: {}
+{{- end }}

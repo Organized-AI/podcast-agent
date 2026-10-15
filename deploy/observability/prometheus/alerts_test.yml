@@ -79,3 +79,33 @@ tests:
             exp_annotations:
               summary: Model calls are failing (anthropic)
               description: 10 failed model calls in 10 minutes; check provider status, keys and rate limits.
+
+  - name: a canary episode over budget opens a ticket, which resolves after five clean minutes
+    interval: 1m
+    input_series:
+      # starts at 0 (the agent exports every series at zero), then two canary episodes go over budget
+      - series: 'podcast_agent_budget_violations_total{service_name="podcast-agent",deployment_environment_name="dev",podcast_agent_budget_usd="0.15",podcast_agent_traffic="canary"}'
+        values: "0x5 1 2 2x12"
+      - series: 'podcast_agent_budget_violations_total{service_name="podcast-agent",deployment_environment_name="dev",podcast_agent_budget_usd="0.15",podcast_agent_traffic="live"}'
+        values: "0x19"
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: PodcastAgentCostBudgetExceeded
+        exp_alerts: []
+      - eval_time: 7m
+        alertname: PodcastAgentCostBudgetExceeded
+        exp_alerts:
+          - exp_labels:
+              severity: ticket
+              service_name: podcast-agent
+              deployment_environment_name: dev
+              podcast_agent_budget_usd: "0.15"
+            exp_annotations:
+              summary: Episodes are costing more than their $0.15 budget
+              description: >-
+                2 episode(s) went over the per-episode cost budget in the last 5 minutes.
+                The incident bridge opens a GitHub issue with the spend by step, the most expensive trace and the last deploy.
+              runbook_url: https://github.com/Organized-AI/podcast-agent/blob/main/docs/runbooks/cost-budget.md
+      - eval_time: 13m
+        alertname: PodcastAgentCostBudgetExceeded
+        exp_alerts: []

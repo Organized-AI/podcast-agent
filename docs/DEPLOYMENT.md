@@ -139,6 +139,7 @@ Every run records actual token usage per step in `run_manifest.json`, so these e
 4. **Response and search caching** (implemented for LLM responses). Re-running an episode costs nothing, and a redelivered job replays its finished steps from cache. In production the cache moves to Redis so all workers share it.
 5. **Planner budgets.** The planner sizes the claim budget to the transcript, and every claim has a tool-call cap.
 6. **Gateway budgets.** Per-tenant monthly token budgets with alerts at 80% and a hard stop or downgrade at 100%.
+7. **Episode budgets** (implemented). `COST_BUDGET_USD` caps each episode at list prices. Over it, `warn` mode raises `PodcastAgentCostBudgetExceeded` and `enforce` mode stops checking claims. A canary episode every minute catches a costlier deploy before a customer's episode does ([runbook](runbooks/cost-budget.md)).
 
 **Fixed infrastructure costs more than tokens at agency scale.** At 500 episodes a month LLM spend is under $100. An EKS control plane, NAT gateways, Aurora and two or three nodes cost more than that. So the footprint should follow the client (section 8): a small agency gets the serverless or single-VM option; Kubernetes is for multi-tenant, enterprise or self-hosted needs. Workers are stateless and idempotent, so they can run on Spot capacity and scale to zero between drops.
 

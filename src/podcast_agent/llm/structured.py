@@ -113,7 +113,7 @@ def call_structured(
             task=task or step,
             context=ctx_payload,
         )
-        ctx.record_usage(resp)
+        ctx.record_usage(resp, step=step, tier=tier)
         ctx.trace.llm_call(step, resp, attempt)
         if resp.stop_reason == "max_tokens":
             ctx.trace.warn(step, "response hit the max_tokens limit and may be truncated")

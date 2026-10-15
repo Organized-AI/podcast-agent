@@ -65,3 +65,17 @@ groups:
         annotations:
           summary: More than a quarter of model outputs are being rejected and retried
           description: A prompt or model change may have broken the output format; compare against the eval baseline.
+
+      - alert: PodcastAgentCostBudgetExceeded
+        # The agent starts each violations series at 0, so the first episode over budget counts as an increase.
+        expr: >-
+          sum by (service_name, deployment_environment_name, podcast_agent_budget_usd)
+          (increase(podcast_agent_budget_violations_total[5m])) > 0
+        labels:
+          severity: ticket
+        annotations:
+          summary: Episodes are costing more than their ${{ $labels.podcast_agent_budget_usd }} budget
+          description: >-
+            {{ $value | printf "%.0f" }} episode(s) went over the per-episode cost budget in the last 5 minutes.
+            The incident bridge opens a GitHub issue with the spend by step, the most expensive trace and the last deploy.
+          runbook_url: https://github.com/Organized-AI/podcast-agent/blob/main/docs/runbooks/cost-budget.md

@@ -234,6 +234,18 @@ def cmd_serve(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_canary(args: argparse.Namespace) -> int:
+    from podcast_agent.ops import canary
+
+    return canary.main(["--url", args.url, "--transcript", args.transcript, "--timeout", str(args.timeout)])
+
+
+def cmd_incident_bridge(args: argparse.Namespace) -> int:
+    from podcast_agent.ops import incident
+
+    return incident.main(["--host", args.host, "--port", str(args.port)])
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="podcast-agent", description="Agentic podcast show notes + fact-checking.")
     parser.add_argument("--version", action="version", version=f"podcast-agent {__version__}")
@@ -290,6 +302,17 @@ def main(argv: list[str] | None = None) -> int:
     serve.add_argument("--host", default="0.0.0.0")  # noqa: S104
     serve.add_argument("--port", type=int, default=8080)
     serve.set_defaults(func=cmd_serve)
+
+    canary = sub.add_parser("canary", help="Send the synthetic canary episode through the API and report its cost")
+    canary.add_argument("--url", required=True, help="the API's base URL")
+    canary.add_argument("--transcript", default="data/canary/canary_roundtable.json")
+    canary.add_argument("--timeout", type=float, default=90.0, help="seconds to wait for the episode")
+    canary.set_defaults(func=cmd_canary)
+
+    bridge = sub.add_parser("incident-bridge", help="Alertmanager webhook that opens and closes enriched GitHub issues")
+    bridge.add_argument("--host", default="0.0.0.0")  # noqa: S104
+    bridge.add_argument("--port", type=int, default=8080)
+    bridge.set_defaults(func=cmd_incident_bridge)
 
     args = parser.parse_args(argv)
     return args.func(args)

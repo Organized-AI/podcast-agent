@@ -1,9 +1,16 @@
 # dev: a small cluster (kind works) with no cloud dependencies. The API runs the offline provider, so it
 # needs no API key; the worker is off because dev has no SQS or KEDA. Image digests come from
 # deploy/gitops/envs/dev/values.yaml, which CI updates after every merge to main.
+#
+# dev is also the lab where the cost drill runs (tools/drill/cost_drill.py): telemetry goes to the Collector in the
+# observability namespace (deploy/gitops/observability), the canary runs every minute, and the incident bridge turns
+# alerts into GitHub issues.
 config:
   LLM_PROVIDER: offline
   SEARCH_PROVIDER: mock
+  # Offline token counts are estimates that run well under Claude's measured usage, so dev's budget is set against
+  # the canary: it normally costs about $0.07 here, half this budget.
+  COST_BUDGET_USD: "0.15"
 
 secrets:
   optional: true
@@ -23,5 +30,25 @@ podDisruptionBudget:
   enabled: false
 
 otel:
-  enabled: false
+  enabled: true
   environment: dev
+
+canary:
+  enabled: true
+
+incidentBridge:
+  enabled: true
+  env:
+    PROMETHEUS_URL: http://prometheus.observability.svc.cluster.local:9090
+    JAEGER_URL: http://jaeger.observability.svc.cluster.local:16686
+    ARGOCD_URL: http://argocd-server.argocd.svc.cluster.local
+    ARGOCD_APP: podcast-agent-dev
+    API_URL: http://podcast-agent-api
+    MLFLOW_EXPERIMENT_ID: "0"
+    # What the issue links to: the lab's dashboards, published to the tailnet only (deploy/gitops/lab/bootstrap.sh)
+    PROMETHEUS_UI_URL: http://claws-mac-mini:30909
+    ALERTMANAGER_UI_URL: http://claws-mac-mini:30903
+    JAEGER_UI_URL: http://claws-mac-mini:30686
+    MLFLOW_UI_URL: http://claws-mac-mini:30500
+    ARGOCD_UI_URL: http://claws-mac-mini:30090
+  egressPorts: [9090, 16686, 8080]   # Prometheus, Jaeger query, argocd-server's container port

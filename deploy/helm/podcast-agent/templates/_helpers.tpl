@@ -53,6 +53,16 @@ envFrom:
   - secretRef:
       name: {{ .Values.secrets.name }}
       optional: {{ .Values.secrets.optional }}
+{{- if .Values.otel.enabled }}
+env:
+  - name: K8S_POD_NAME
+    valueFrom:
+      fieldRef: { fieldPath: metadata.name }
+  # service.instance.id gives each pod its own metric series. Without it two pods' cumulative counters land on one
+  # Prometheus series during a rollout, and the drop from one pod's count to the other's reads as a counter reset.
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: {{ printf "service.instance.id=$(K8S_POD_NAME),k8s.pod.name=$(K8S_POD_NAME),k8s.namespace.name=%s,service.namespace=%s" .Release.Namespace .Release.Name | quote }}
+{{- end }}
 volumeMounts:
   - name: tmp
     mountPath: /tmp

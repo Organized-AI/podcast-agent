@@ -5,6 +5,18 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- **Cost budget per episode, with detection and an enriched ticket** (#68):
+  - **Pricing.** Every model call is priced at list prices (`src/podcast_agent/cost.py`). A model with no price of its own, such as the offline heuristics, is priced as the tier's Claude model. Reports and manifests carry the cost per episode and per step.
+  - **Metrics.** The new metrics are `podcast_agent.cost.usd`, `podcast_agent.episode.cost.usd` and `podcast_agent.budget.violations`.
+  - **Budget.** `COST_BUDGET_USD` sets the budget per episode (default $0.20). In `warn` mode an episode over it is recorded and finishes. In `enforce` mode the claims left once the budget is spent are flagged for review.
+  - **Canary.** A synthetic canary, `podcast-agent canary`, runs as a CronJob in dev: one long, claim-dense episode a minute, labeled `podcast_agent.traffic=canary`. A change that makes episodes more expensive therefore shows on the canary before it reaches a customer's episode.
+  - **Alert.** `PodcastAgentCostBudgetExceeded` fires on any episode over budget. It has promtool tests.
+  - **Incident bridge.** `podcast-agent incident-bridge` receives the alert from Alertmanager and opens a GitHub issue with the evidence:
+    - episodes over budget, canary vs live;
+    - cost now vs an hour earlier, and spend by step and by model;
+    - the most expensive trace, in Jaeger and MLflow;
+    - the Argo CD deploy before the alert, with the pull request and diff behind it.
+  - **Resolution.** When the alert resolves, the bridge comments the timeline with MTTD and MTTR and closes the issue. The runbook is `docs/runbooks/cost-budget.md`.
 - Guide: a **Walkthrough** tab that tells the project's story in eleven stops, from the brief to production. **Present** shows one stop at a time, with what to say, what to show (each link jumps to the figure or proof card and offers a way back) and commands to run live; arrow keys and presenter clickers move between stops, and N hides the speaker notes. **Write-up** shows every stop on one page, each ending with what was learned and why. The content lives in `website/walkthrough.yaml`; `make walkthrough` rebuilds the tab and `docs/WRITEUP.md`, and `make drift` (in CI) fails if they are out of date or a link points nowhere. Proof cards on the Audit trail now have ids, so `#pf-<proof>` links land on one.
 - Traces fan out to MLflow as well as Jaeger. The Collector's traces pipeline has a second exporter, `otlp_http/mlflow`, to MLflow's OTLP endpoint; the agent is unchanged. MLflow 3.17 joins the Compose `observability` profile (pinned by digest, SQLite store, 127.0.0.1:5050), and `make observe` now also checks that MLflow holds the run's trace with every span Jaeger has, the GenAI spans typed as AGENT, CHAT_MODEL and TOOL, the token usage rolled up, and no content. `make observe-outage`, which CI runs after it, stops MLflow, checks that a run still reaches Jaeger in full, restarts MLflow and checks that the Collector's retry delivers every queued span.
 - Guide: the v0.2.0 page now shows what has closed since release and what is still open, each with its evidence. The Audit trail adds the live Claude run (gates and per-episode judge scores), the lab's recorded sync on merge, and the public verification of v0.2.0's provenance.
@@ -19,6 +31,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - Guide: a v0.2.0 view that answers the six review points on v0.1.0 with evidence, summarizes what the release added and measured, shows how it shipped (one digest from dev to prod) and lists what is not done yet. The Audit trail adds proof cards for the release run, the dev and prod digest with its SLSA provenance, and the OpenSSF Scorecard.
 
 ### Changed
+- Each pod reports telemetry as its own instance (`service.instance.id` is the pod name). Before, two pods' cumulative counters shared one Prometheus series during a rollout, which looks like a counter reset and can make `increase()` count events that did not happen.
 - The Collector's OTLP exporters use their current names, `otlp_grpc` and `otlp_http`; Collector 0.161 logs the old `otlp` and `otlphttp` names as deprecated.
 
 ### Fixed

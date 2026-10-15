@@ -91,6 +91,15 @@ class Settings:
     # "Today" for the fact-checker. Pin it (AGENT_TODAY=2026-10-13) for reproducible runs.
     today: str = field(default_factory=lambda: _env("AGENT_TODAY", date.today().isoformat()))
 
+    # --- cost -------------------------------------------------------------------------------
+    # Per-episode budget in USD at list prices (src/podcast_agent/cost.py); "off" for none.
+    cost_budget_usd: float | None = field(default_factory=lambda: _env_float("COST_BUDGET_USD", 0.20))
+    cost_budget_mode: str = field(default_factory=lambda: _env("COST_BUDGET_MODE", "warn"))  # warn|enforce
+
+    def __post_init__(self) -> None:
+        if self.cost_budget_mode not in ("warn", "enforce"):
+            raise ValueError(f"COST_BUDGET_MODE must be warn or enforce, not {self.cost_budget_mode!r}")
+
     def resolved_provider(self) -> str:
         if self.provider != "auto":
             return self.provider
