@@ -1,0 +1,914 @@
+{
+  "suite": "live",
+  "description": "Claude end to end. The labeled fact-check cases, a fresh run of every bundled transcript scored against the expectations, and the rubric judge on each summary.",
+  "provider": "provider=anthropic · main=claude-sonnet-5-5 · fast=claude-haiku-5-5",
+  "passed": true,
+  "sections": [
+    {
+      "name": "factcheck",
+      "kind": "factcheck",
+      "metrics": {
+        "cases": 25.0,
+        "verdict_accuracy": 1.0,
+        "macro_f1": 1.0,
+        "citation_validity": 1.0,
+        "kb_recall": 1.0,
+        "brier": 0.0331,
+        "ece": 0.1618,
+        "tool_calls_per_case": 1.88,
+        "llm_calls": 72.0,
+        "input_tokens": 90921.0,
+        "output_tokens": 8701.0,
+        "accuracy.ambiguous": 1.0,
+        "accuracy.anecdote": 1.0,
+        "accuracy.contradicted": 1.0,
+        "accuracy.future-deadline": 1.0,
+        "accuracy.issue-13": 1.0,
+        "accuracy.no-deadline": 1.0,
+        "accuracy.passed-deadline": 1.0,
+        "accuracy.stale-fact": 1.0,
+        "accuracy.verified-fact": 1.0
+      },
+      "rows": [
+        {
+          "id": "nasa-msr-2026",
+          "tags": [
+            "stale-fact"
+          ],
+          "expected": "possibly_outdated_or_inaccurate",
+          "acceptable": [
+            "possibly_outdated_or_inaccurate"
+          ],
+          "verdict": "possibly_outdated_or_inaccurate",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 4,
+          "cited_kb": [
+            "KB-030"
+          ],
+          "kb_expected": [
+            "KB-030"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "bitcoin-200k-2025",
+          "tags": [
+            "passed-deadline"
+          ],
+          "expected": "possibly_outdated_or_inaccurate",
+          "acceptable": [
+            "possibly_outdated_or_inaccurate"
+          ],
+          "verdict": "possibly_outdated_or_inaccurate",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.95,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-032"
+          ],
+          "kb_expected": [
+            "KB-032"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "mars-humans-2040",
+          "tags": [
+            "future-deadline",
+            "issue-13"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.5,
+          "raw_confidence": 0.6,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-034"
+          ],
+          "kb_expected": [
+            "KB-034"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "bitcoin-500k-2030",
+          "tags": [
+            "future-deadline",
+            "issue-13"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.5,
+          "raw_confidence": 0.6,
+          "tool_evidence": 3,
+          "cited_kb": [
+            "KB-032"
+          ],
+          "kb_expected": [],
+          "tool_calls": 2
+        },
+        {
+          "id": "nvidia-10t-2028",
+          "tags": [
+            "future-deadline",
+            "issue-13"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.5,
+          "raw_confidence": 0.6,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-033"
+          ],
+          "kb_expected": [
+            "KB-033"
+          ],
+          "tool_calls": 3
+        },
+        {
+          "id": "async-standard",
+          "tags": [
+            "no-deadline"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.5,
+          "raw_confidence": 0.5,
+          "tool_evidence": 4,
+          "cited_kb": [
+            "KB-003",
+            "KB-001",
+            "KB-002"
+          ],
+          "kb_expected": [],
+          "tool_calls": 3
+        },
+        {
+          "id": "offices-optional-hubs",
+          "tags": [
+            "no-deadline"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.5,
+          "raw_confidence": 0.6,
+          "tool_evidence": 3,
+          "cited_kb": [
+            "KB-003",
+            "KB-004"
+          ],
+          "kb_expected": [],
+          "tool_calls": 3
+        },
+        {
+          "id": "remote-first-dominate-2025",
+          "tags": [
+            "passed-deadline",
+            "ambiguous"
+          ],
+          "expected": "possibly_outdated_or_inaccurate",
+          "acceptable": [
+            "possibly_outdated_or_inaccurate",
+            "unverifiable"
+          ],
+          "verdict": "possibly_outdated_or_inaccurate",
+          "correct": true,
+          "confidence": 0.65,
+          "raw_confidence": 0.65,
+          "tool_evidence": 3,
+          "cited_kb": [
+            "KB-004"
+          ],
+          "kb_expected": [
+            "KB-004"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "perseverance-landing",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.95,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-031"
+          ],
+          "kb_expected": [
+            "KB-031"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "perseverance-samples",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-031",
+            "KB-030"
+          ],
+          "kb_expected": [
+            "KB-031"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "nvidia-5t-first",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.93,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-033"
+          ],
+          "kb_expected": [
+            "KB-033"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "fda-autonomy-not-soon",
+          "tags": [
+            "contradicted"
+          ],
+          "expected": "possibly_outdated_or_inaccurate",
+          "acceptable": [
+            "possibly_outdated_or_inaccurate"
+          ],
+          "verdict": "possibly_outdated_or_inaccurate",
+          "correct": true,
+          "confidence": 0.85,
+          "raw_confidence": 0.85,
+          "tool_evidence": 3,
+          "cited_kb": [
+            "KB-012",
+            "KB-010",
+            "KB-011"
+          ],
+          "kb_expected": [
+            "KB-012"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "fda-reviews-ai",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 3,
+          "cited_kb": [
+            "KB-010",
+            "KB-012",
+            "KB-011"
+          ],
+          "kb_expected": [
+            "KB-010"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "hospitals-ai-xrays",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.85,
+          "raw_confidence": 0.85,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-011"
+          ],
+          "kb_expected": [
+            "KB-011"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "triage-chatbots",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.7,
+          "raw_confidence": 0.7,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-013"
+          ],
+          "kb_expected": [
+            "KB-013"
+          ],
+          "tool_calls": 3
+        },
+        {
+          "id": "pandemic-digital-health",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.85,
+          "raw_confidence": 0.85,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-015"
+          ],
+          "kb_expected": [
+            "KB-015"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "ai-bias-clinical-data",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-014"
+          ],
+          "kb_expected": [
+            "KB-014"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "gitlab-handbook",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.8,
+          "raw_confidence": 0.8,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-001"
+          ],
+          "kb_expected": [
+            "KB-001"
+          ],
+          "tool_calls": 3
+        },
+        {
+          "id": "automattic-distributed",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.7,
+          "raw_confidence": 0.7,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-002"
+          ],
+          "kb_expected": [
+            "KB-002"
+          ],
+          "tool_calls": 3
+        },
+        {
+          "id": "hybrid-most-common",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.75,
+          "raw_confidence": 0.75,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-004"
+          ],
+          "kb_expected": [
+            "KB-004"
+          ],
+          "tool_calls": 3
+        },
+        {
+          "id": "vc-dilutes-control",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-021",
+            "KB-020"
+          ],
+          "kb_expected": [
+            "KB-020",
+            "KB-021"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "bootstrapping-tradeoff",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-022",
+            "KB-020"
+          ],
+          "kb_expected": [
+            "KB-022"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "samir-saas-breakeven",
+          "tags": [
+            "anecdote"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.5,
+          "raw_confidence": 0.85,
+          "tool_evidence": 3,
+          "cited_kb": [
+            "KB-022"
+          ],
+          "kb_expected": [],
+          "tool_calls": 3
+        },
+        {
+          "id": "emily-fintech-seed",
+          "tags": [
+            "anecdote"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.5,
+          "raw_confidence": 0.85,
+          "tool_evidence": 4,
+          "cited_kb": [
+            "KB-020"
+          ],
+          "kb_expected": [],
+          "tool_calls": 2
+        },
+        {
+          "id": "emily-raised-rounds",
+          "tags": [
+            "anecdote"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.5,
+          "raw_confidence": 0.7,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-020"
+          ],
+          "kb_expected": [],
+          "tool_calls": 2
+        }
+      ],
+      "checks": [
+        {
+          "section": "factcheck",
+          "metric": "verdict_accuracy",
+          "value": 1.0,
+          "threshold": 0.85,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "macro_f1",
+          "value": 1.0,
+          "threshold": 0.8,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "citation_validity",
+          "value": 1.0,
+          "threshold": 0.95,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "accuracy.future-deadline",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "accuracy.anecdote",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "brier",
+          "value": 0.0331,
+          "threshold": 0.15,
+          "direction": "max",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "fresh",
+      "kind": "run",
+      "metrics": {
+        "episodes": 4.0,
+        "summary_in_range": 1.0,
+        "summary_coverage": 1.0,
+        "notes_shape_ok": 1.0,
+        "quote_fidelity": 1.0,
+        "claim_recall": 1.0,
+        "claim_verdict_accuracy": 1.0,
+        "llm_calls_per_episode": 18.25,
+        "tokens_per_episode": 27466.0,
+        "judge_score": 0.8312,
+        "judge.faithfulness": 4.75,
+        "judge.coverage": 5.0,
+        "judge.concision": 3.75,
+        "invented_facts": 2.0
+      },
+      "rows": [
+        {
+          "episode": "ep001",
+          "judge": {
+            "score": 0.95,
+            "faithfulness": 5,
+            "coverage": 5,
+            "concision": 4,
+            "invented_facts": []
+          },
+          "summary_words": 269,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 5,
+          "quotes_verbatim": 5,
+          "claims": [
+            {
+              "match": [
+                "GitLab"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            },
+            {
+              "match": [
+                "remote-first",
+                "talent"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            }
+          ],
+          "llm_calls": 22,
+          "tokens": 33834
+        },
+        {
+          "episode": "ep002",
+          "judge": {
+            "score": 0.95,
+            "faithfulness": 5,
+            "coverage": 5,
+            "concision": 4,
+            "invented_facts": []
+          },
+          "summary_words": 282,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 5,
+          "quotes_verbatim": 5,
+          "claims": [
+            {
+              "match": [
+                "FDA",
+                "autonom"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            },
+            {
+              "match": [
+                "X-ray"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            },
+            {
+              "match": [
+                "pandemic"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            }
+          ],
+          "llm_calls": 17,
+          "tokens": 26104
+        },
+        {
+          "episode": "ep003",
+          "judge": {
+            "score": 0.95,
+            "faithfulness": 5,
+            "coverage": 5,
+            "concision": 4,
+            "invented_facts": []
+          },
+          "summary_words": 270,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 5,
+          "quotes_verbatim": 5,
+          "claims": [
+            {
+              "match": [
+                "break-even"
+              ],
+              "found": true,
+              "verdict": "unverifiable",
+              "correct": true
+            },
+            {
+              "match": [
+                "fintech"
+              ],
+              "found": true,
+              "verdict": "unverifiable",
+              "correct": true
+            }
+          ],
+          "llm_calls": 14,
+          "tokens": 19049
+        },
+        {
+          "episode": "ep004",
+          "judge": {
+            "score": 0.475,
+            "faithfulness": 4,
+            "coverage": 5,
+            "concision": 3,
+            "invented_facts": [
+              "Chris Bell is the host and Nina Alvarez is the guest (roles not stated in the transcript)",
+              "The episode 'leaves' the claims as unresolved claims rather than conclusions, with Alvarez's optimism about Mars as a clear opinion (editorializing not in the transcript)"
+            ]
+          },
+          "summary_words": 219,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 4,
+          "quotes_verbatim": 4,
+          "claims": [
+            {
+              "match": [
+                "Mars",
+                "sample"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            },
+            {
+              "match": [
+                "Perseverance",
+                "landed"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            },
+            {
+              "match": [
+                "Bitcoin",
+                "200"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            },
+            {
+              "match": [
+                "Nvidia",
+                "trillion"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            },
+            {
+              "match": [
+                "Mars",
+                "2040"
+              ],
+              "found": true,
+              "verdict": "unverifiable",
+              "correct": true
+            }
+          ],
+          "llm_calls": 20,
+          "tokens": 30877
+        }
+      ],
+      "checks": [
+        {
+          "section": "fresh",
+          "metric": "summary_in_range",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "fresh",
+          "metric": "summary_coverage",
+          "value": 1.0,
+          "threshold": 0.9,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "fresh",
+          "metric": "notes_shape_ok",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "fresh",
+          "metric": "quote_fidelity",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "fresh",
+          "metric": "claim_recall",
+          "value": 1.0,
+          "threshold": 0.8,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "fresh",
+          "metric": "claim_verdict_accuracy",
+          "value": 1.0,
+          "threshold": 0.85,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "fresh",
+          "metric": "judge_score",
+          "value": 0.8312,
+          "threshold": 0.7,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "fresh",
+          "metric": "invented_facts",
+          "value": 2.0,
+          "threshold": 2.0,
+          "direction": "max",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

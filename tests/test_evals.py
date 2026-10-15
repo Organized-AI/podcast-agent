@@ -173,3 +173,34 @@ def test_every_suite_gates_metrics_that_exist(suite_file):
         assert set(suite["factcheck"].get("thresholds") or {}) <= fc_names
     for spec in suite.get("runs") or []:
         assert set(spec.get("thresholds") or {}) <= run_names, spec.get("name")
+
+
+def _report(suite: str, passed: bool) -> dict:
+    checks = [{"section": "factcheck", "metric": "verdict_accuracy", "value": 0.96, "threshold": 0.85,
+               "direction": "min", "passed": True},
+              {"section": "factcheck", "metric": "verdict_accuracy vs baseline", "value": 0.96, "threshold": 0.9,
+               "direction": "min", "passed": True}]
+    return {"suite": suite, "passed": passed, "sections": [{"name": "factcheck", "checks": checks}]}
+
+
+def test_baseline_from_a_reviewed_report_without_running_the_suite(tmp_path, monkeypatch):
+    """The nightly artifact can be accepted as the baseline: same snapshot as --update-baseline, no model calls."""
+    monkeypatch.chdir(tmp_path)
+    suite = tmp_path / "live.yaml"
+    suite.write_text("name: live\nprovider: anthropic\nfactcheck: {dataset: x.jsonl}\nbaseline: {path: base/live.json}\n")
+    good = tmp_path / "good.json"
+    good.write_text(json.dumps(_report("live", True)))
+    assert main(["eval", "--suite", str(suite), "--baseline-from", str(good)]) == 0
+    assert json.loads((tmp_path / "base" / "live.json").read_text()) == {"factcheck": {"verdict_accuracy": 0.96}}
+
+
+@pytest.mark.parametrize(("suite_name", "passed"), [("offline", True), ("live", False)])
+def test_baseline_from_refuses_another_suite_or_a_failing_run(tmp_path, monkeypatch, suite_name, passed):
+    monkeypatch.chdir(tmp_path)
+    suite = tmp_path / "live.yaml"
+    suite.write_text("name: live\nbaseline: {path: base/live.json}\n")
+    report = tmp_path / "r.json"
+    report.write_text(json.dumps(_report(suite_name, passed)))
+    assert main(["eval", "--suite", str(suite), "--baseline-from", str(report)]) == 2
+    assert not (tmp_path / "base" / "live.json").exists()
+

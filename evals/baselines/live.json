@@ -1,0 +1,20 @@
+{
+  "factcheck": {
+    "verdict_accuracy": 1.0,
+    "macro_f1": 1.0,
+    "citation_validity": 1.0,
+    "accuracy.future-deadline": 1.0,
+    "accuracy.anecdote": 1.0,
+    "brier": 0.0331
+  },
+  "fresh": {
+    "summary_in_range": 1.0,
+    "summary_coverage": 1.0,
+    "notes_shape_ok": 1.0,
+    "quote_fidelity": 1.0,
+    "claim_recall": 1.0,
+    "claim_verdict_accuracy": 1.0,
+    "judge_score": 0.8312,
+    "invented_facts": 2.0
+  }
+}

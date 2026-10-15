@@ -233,6 +233,17 @@ def baseline_snapshot(result: SuiteResult) -> dict[str, dict[str, float]]:
     return {s.name: {c.metric: c.value for c in s.checks if not c.metric.endswith(" vs baseline")} for s in result.sections}
 
 
+def baseline_from_report(report: dict[str, Any], suite_name: str) -> dict[str, dict[str, float]]:
+    """The same snapshot, from a written eval.json: a reviewed run (the nightly artifact) becomes the baseline
+    without running, and paying for, the suite again. Only a passing report of the same suite is accepted."""
+    if report.get("suite") != suite_name:
+        raise ValueError(f"the report is for suite {report.get('suite')!r}, not {suite_name!r}")
+    if not report.get("passed"):
+        raise ValueError("the report did not meet its thresholds; a failing run cannot become the baseline")
+    return {s["name"]: {c["metric"]: c["value"] for c in s["checks"] if not c["metric"].endswith(" vs baseline")}
+            for s in report["sections"]}
+
+
 def run_suite(path: str | Path, ctx: RunContext | None = None, *, root: str | Path = ".",
               work_dir: str | Path | None = None) -> SuiteResult:
     """Run every section of a suite file. ``ctx`` is needed when the suite runs cases, fresh runs or the judge.

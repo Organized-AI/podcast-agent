@@ -126,6 +126,24 @@ def cmd_eval(args: argparse.Namespace) -> int:
     from podcast_agent.trace import Tracer
 
     console = Console(highlight=False)
+    if args.baseline_from:  # accept a reviewed report as the baseline, without running the suite again
+        from podcast_agent.evals.runner import baseline_from_report
+
+        suite = yaml.safe_load(Path(args.suite).read_text(encoding="utf-8"))
+        base = (suite.get("baseline") or {}).get("path")
+        if not base:
+            console.print("[red]--baseline-from: this suite has no baseline path[/red]")
+            return 2
+        try:
+            snapshot = baseline_from_report(json.loads(Path(args.baseline_from).read_text(encoding="utf-8")),
+                                            suite.get("name", Path(args.suite).stem))
+        except (OSError, ValueError, KeyError) as exc:
+            console.print(f"[red]--baseline-from: {exc}[/red]")
+            return 2
+        Path(base).parent.mkdir(parents=True, exist_ok=True)
+        Path(base).write_text(json.dumps(snapshot, indent=2) + "\n", encoding="utf-8")
+        console.print(f"Wrote baseline {base} from {args.baseline_from}")
+        return 0
     if args.score:  # score run folders only: no suite, no thresholds, no model
         expectations = load_episode_expectations(args.expectations)
         sections = [score_run(d, expectations) for d in args.score]
@@ -250,6 +268,8 @@ def main(argv: list[str] | None = None) -> int:
     ev.add_argument("--fast-model", help="fast model id")
     ev.add_argument("--no-cache", action="store_true", help="bypass the local LLM response cache")
     ev.add_argument("--update-baseline", action="store_true", help="write this run's gated metrics as the suite's baseline")
+    ev.add_argument("--baseline-from", metavar="EVAL_JSON",
+                    help="write the suite's baseline from a reviewed, passing eval.json instead of running the suite")
     ev.set_defaults(func=cmd_eval)
 
     kb = sub.add_parser("kb", help="Query the local knowledge base")
