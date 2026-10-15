@@ -109,6 +109,7 @@ def test_lab_watch_only_records_a_change_that_happened():
     script = (ROOT / "deploy" / "gitops" / "lab" / "watch.sh").read_text()
     gate = script.index("until ready")
     assert gate < script.index('before=$(field')
-    assert 'no new revision within ${WAIT_HOURS}h' in script and "exit 1" in script
-    assert script.index('if [ "$rev" = "$before" ]') < script.index("Argo CD moved to")
+    assert 'no new image for dev within ${WAIT_HOURS}h' in script and "exit 1" in script
+    # done means dev's image changed (a deploy pull request merged), not merely a new commit on main
+    assert script.index('if [ "$now" = "$before_image" ]') < script.index("changed dev's image")
 
