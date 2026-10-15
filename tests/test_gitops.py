@@ -66,3 +66,40 @@ def test_e2e_render_targets_one_environment_and_the_local_image():
     params = {p["name"]: p["value"] for p in source["helm"]["parameters"]}
     assert source["targetRevision"] == "abc123"
     assert params == {"image.repository": "podcast-agent", "image.tag": "e2e", "image.digest": "", "image.pullPolicy": "Never"}
+
+
+def _renderer():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("render_appset", ROOT / "e2e" / "render_appset.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_lab_render_keeps_the_image_from_git_and_tracks_main():
+    """The standing lab deploys whatever digest Git names for dev; it only adds how the lab reaches the API."""
+    doc = _renderer().render("main", "dev", params={"api.service.type": "NodePort", "api.service.nodePort": "30080"})
+    source = doc["spec"]["template"]["spec"]["source"]
+    params = {p["name"]: p["value"] for p in source["helm"]["parameters"]}
+    assert source["targetRevision"] == "main"
+    assert params == {"api.service.type": "NodePort", "api.service.nodePort": "30080"}
+    assert "../../gitops/envs/{{ .env }}/values.yaml" in source["helm"]["valueFiles"]
+    assert "automated" in doc["spec"]["templatePatch"]
+
+
+def test_lab_render_refuses_to_override_the_image():
+    import pytest
+
+    with pytest.raises(SystemExit):
+        _renderer().render("main", "dev", params={"image.digest": "sha256:" + "0" * 64})
+
+
+def test_lab_bootstrap_keeps_to_its_own_kubeconfig_and_the_tailnet():
+    """The lab must not change the machine's current kubectl context or listen beyond localhost by default."""
+    script = (ROOT / "deploy" / "gitops" / "lab" / "bootstrap.sh").read_text()
+    assert 'export KUBECONFIG="${LAB_KUBECONFIG:-$HOME/.kube/$CLUSTER}"' in script
+    assert 'LISTEN=${LISTEN:-127.0.0.1}' in script
+    assert "ARGOCD_SHA256=" in (ROOT / "e2e" / "gitops-kind.sh").read_text()
+    assert "sed -n '/^ARGOCD_VERSION=/p; /^ARGOCD_SHA256=/p' e2e/gitops-kind.sh" in script
+

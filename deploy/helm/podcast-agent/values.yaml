@@ -63,6 +63,9 @@ api:
   enabled: true
   replicaCount: 2
   port: 8080
+  service:
+    type: ClusterIP          # NodePort only for a local lab cluster (deploy/gitops/lab)
+    nodePort: null           # 30000-32767 when type is NodePort
   resources:
     requests: { cpu: 100m, memory: 256Mi }
     limits: { cpu: "1", memory: 512Mi }

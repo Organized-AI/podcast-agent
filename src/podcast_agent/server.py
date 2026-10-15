@@ -25,7 +25,7 @@ from podcast_agent.agent.pipeline import process_episode
 from podcast_agent.config import Settings
 from podcast_agent.models import Episode, EpisodeReport
 from podcast_agent.report import render_markdown
-from podcast_agent.runtime import build_context, new_run_id
+from podcast_agent.runtime import build_context, git_commit, new_run_id
 from podcast_agent.trace import Tracer
 from podcast_agent.transcript import TranscriptError, parse_json_transcript, parse_txt_transcript
 from podcast_agent.worker import make_queue
@@ -64,10 +64,17 @@ def _shared() -> RunContext:
     return build_context(Settings(), Tracer("server", console=Console(stderr=True)))
 
 
+@lru_cache(maxsize=1)
+def _commit() -> str:
+    # The image's GIT_COMMIT (sha-<commit> from the publish workflow), read once: a rollout shows up here.
+    return git_commit()
+
+
 @app.get("/healthz")
 def healthz() -> dict[str, Any]:
     ctx = _shared()
-    return {"status": "ok", "version": __version__, "provider": ctx.llm.describe(), "kb_entries": len(ctx.kb)}
+    return {"status": "ok", "version": __version__, "commit": _commit(), "provider": ctx.llm.describe(),
+            "kb_entries": len(ctx.kb)}
 
 
 def _parse(req: ProcessRequest) -> Episode:
