@@ -1,5 +1,5 @@
 # Written by the release workflow's pull request: the digest that was tested in dev, re-tagged vX.Y.Z.
 # Merging the PR changes Git; prod changes when someone presses Sync in Argo CD.
 image:
-  tag: "0.1.0"
-  digest: ""
+  tag: "v0.2.0"
+  digest: "sha256:67a18fc8560ecc619f37a8888b2f0e22f4082f6433e6c92797150f427f211f28"
