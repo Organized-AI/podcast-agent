@@ -40,6 +40,21 @@ make gitops-e2e          # or: e2e/gitops-kind.sh <commit>   (the commit must be
 
 [e2e/gitops-kind.sh](../e2e/gitops-kind.sh) creates a throwaway kind cluster and installs a checksum-verified Argo CD v3.5.4. It applies the project and an ApplicationSet rendered for dev at the given commit, using a locally built image, because an unmerged commit has no published image. It then waits for `podcast-agent-dev` to be Synced and Healthy and calls `/healthz` inside the API pod. The `gitops-e2e` workflow runs the same script on every pull request that touches `deploy/`.
 
+## The automation
+
+| Workflow | Trigger | What it does |
+|---|---|---|
+| [publish.yml](../.github/workflows/publish.yml) | push to `main` (not docs or environment bumps) | Builds `linux/amd64` and `linux/arm64` once, pushes `sha-<commit>` and `main` with an SBOM and `mode=max` provenance, attests the digest, then opens **Deploy sha-… to dev** (`gitops/dev`) with [tools/ci/set_image.py](../tools/ci/set_image.py) |
+| [release.yml](../.github/workflows/release.yml) | tag `vX.Y.Z` on `main` | `check_version.py --tag`; re-tags `sha-<commit>` as `vX.Y.Z` and `X.Y.Z` with `imagetools create` (same digest); GitHub Release from the `CHANGELOG.md` section; opens **Deploy vX.Y.Z to prod** (`gitops/prod`) |
+
+Pull requests opened with `GITHUB_TOKEN` trigger no workflows, so both bump jobs dispatch `ci.yml` and `security.yml` on the bump branch. That runs the same required checks the `main` ruleset asks of a person's pull request. The repository must allow GitHub Actions to create pull requests (Settings → Actions → General).
+
+Verify any image before trusting it:
+
+```bash
+gh attestation verify oci://ghcr.io/organized-ai/podcast-agent:v0.2.0 --repo Organized-AI/podcast-agent
+```
+
 ## Checks on every pull request
 
 - `make helm`: `helm lint --strict` for every environment against the values schema; the rendered manifests and the Argo CD manifests validated with kubeconform, including the CRDs (Argo CD, KEDA, External Secrets, Prometheus Operator)

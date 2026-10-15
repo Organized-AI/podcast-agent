@@ -640,6 +640,7 @@
       "rows": [
         {
           "episode": "ep001",
+          "judge": null,
           "summary_words": 282,
           "summary_in_range": true,
           "summary_coverage": 1.0,
@@ -670,6 +671,7 @@
         },
         {
           "episode": "ep002",
+          "judge": null,
           "summary_words": 262,
           "summary_in_range": true,
           "summary_coverage": 1.0,
@@ -708,6 +710,7 @@
         },
         {
           "episode": "ep003",
+          "judge": null,
           "summary_words": 268,
           "summary_in_range": true,
           "summary_coverage": 1.0,
@@ -737,6 +740,7 @@
         },
         {
           "episode": "ep004",
+          "judge": null,
           "summary_words": 280,
           "summary_in_range": true,
           "summary_coverage": 1.0,
@@ -862,6 +866,7 @@
       "rows": [
         {
           "episode": "ep001",
+          "judge": null,
           "summary_words": 212,
           "summary_in_range": true,
           "summary_coverage": 1.0,
@@ -892,6 +897,7 @@
         },
         {
           "episode": "ep002",
+          "judge": null,
           "summary_words": 208,
           "summary_in_range": true,
           "summary_coverage": 1.0,
@@ -930,6 +936,7 @@
         },
         {
           "episode": "ep003",
+          "judge": null,
           "summary_words": 201,
           "summary_in_range": true,
           "summary_coverage": 1.0,
@@ -959,6 +966,7 @@
         },
         {
           "episode": "ep004",
+          "judge": null,
           "summary_words": 150,
           "summary_in_range": true,
           "summary_coverage": 1.0,
