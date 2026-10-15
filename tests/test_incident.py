@@ -218,3 +218,35 @@ def test_without_a_token_the_webhook_runs_dry():
                                                (-30, "-30s")])
 def test_durations_read_like_a_person_wrote_them(seconds, text):
     assert incident.duration(seconds) == text
+
+
+def test_episodes_come_from_jaegers_v3_search_and_are_matched_here(cfg):
+    """Jaeger's v3 search ignores attribute filters, so the bridge reads invoke_agent spans and matches them itself."""
+    def span(trace: str, minute: int, over: bool) -> dict[str, Any]:
+        start = int(at(minute).timestamp() * 1e9)
+        return {"traceId": trace, "name": "invoke_agent podcast-agent", "startTimeUnixNano": str(start),
+                "endTimeUnixNano": str(start + 4_000_000_000), "attributes": [
+                    {"key": "podcast_agent.cost.over_budget", "value": {"boolValue": over}},
+                    {"key": "podcast_agent.cost.usd", "value": {"doubleValue": 0.213 if over else 0.072}},
+                    {"key": "podcast_agent.claims", "value": {"intValue": "35" if over else "8"}},
+                    {"key": "podcast_agent.traffic", "value": {"stringValue": "canary"}},
+                    {"key": "podcast_agent.episode.id", "value": {"stringValue": "canary-roundtable"}}]}
+
+    seen: list[httpx.Request] = []
+
+    def jaeger(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        if request.url.params["query.start_time_min"] > "2026-10-15T13":
+            return httpx.Response(404, json={"error": {"httpCode": 404, "message": "No traces found"}})
+        chat = {"traceId": "t2", "name": "chat claude-sonnet-5-5", "startTimeUnixNano": "0", "endTimeUnixNano": "0"}
+        return httpx.Response(200, json={"result": {"resourceSpans": [{"scopeSpans": [
+            {"spans": [span("t2", 2, True), chat]}, {"spans": [span("t1", 1, False)]}]}]}})
+
+    src = Sources(cfg, httpx.Client(transport=httpx.MockTransport(jaeger)))
+    (bad,) = src.episodes({"podcast_agent.cost.over_budget": "true"}, at(0), at(10))
+    assert (bad.trace_id, bad.cost, bad.claims, bad.start, bad.traffic) == ("t2", 0.213, 35, at(2), "canary")
+    assert bad.end - bad.start == timedelta(seconds=4)
+    assert [e.trace_id for e in src.episodes({}, at(0), at(10))] == ["t1", "t2"]  # oldest first
+    assert seen[0].url.path == "/api/v3/traces"
+    assert seen[0].url.params["query.operation_name"] == "invoke_agent podcast-agent"
+    assert src.episodes({}, at(90), at(100)) == []  # Jaeger's 404 "No traces found" is an empty result

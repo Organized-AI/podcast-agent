@@ -177,13 +177,27 @@ class Sources:
         return [(r["metric"], float(r["value"][1])) for r in data if r["value"][1] not in ("NaN", "+Inf", "-Inf")]
 
     def episodes(self, tags: dict[str, str], start: datetime, end: datetime, limit: int = 40) -> list[EpisodeTrace]:
-        """invoke_agent spans in [start, end] whose attributes match `tags`, oldest first."""
+        """Episodes (invoke_agent spans) in [start, end] whose attributes match `tags`, oldest first.
+
+        Jaeger's API v3 search; attributes are matched here, because its search does not filter on them.
+        """
         if not self.cfg.jaeger:
             raise RuntimeError("JAEGER_URL is not set")
-        data = self._get(f"{self.cfg.jaeger}/api/traces", service="podcast-agent", operation=EPISODE_OP,
-                         tags=json.dumps(tags), start=int(start.timestamp() * 1e6), end=int(end.timestamp() * 1e6),
-                         limit=limit)["data"] or []
-        found = [ep for trace in data for ep in _episode_spans(trace)]
+        resp = self.http.get(f"{self.cfg.jaeger}/api/v3/traces", params={
+            "query.service_name": "podcast-agent", "query.operation_name": EPISODE_OP,
+            "query.start_time_min": iso(start), "query.start_time_max": iso(end), "query.search_depth": limit})
+        if resp.status_code == 404:  # "No traces found"
+            return []
+        resp.raise_for_status()
+        spans = [span for rs in resp.json().get("result", {}).get("resourceSpans", [])
+                 for ss in rs.get("scopeSpans", []) for span in ss.get("spans", [])]
+        found = []
+        for span in spans:
+            if span.get("name") != EPISODE_OP:
+                continue
+            attrs = {a["key"]: _otlp_value(a.get("value", {})) for a in span.get("attributes", [])}
+            if all(str(attrs.get(k)).lower() == v for k, v in tags.items()):
+                found.append(_episode(span, attrs))
         return sorted(found, key=lambda e: e.start)
 
     def argocd_history(self) -> list[Deploy]:
@@ -200,20 +214,22 @@ class Sources:
         return result
 
 
-def _episode_spans(trace: dict[str, Any]) -> list[EpisodeTrace]:
-    out = []
-    for span in trace.get("spans", []):
-        if span.get("operationName") != EPISODE_OP:
-            continue
-        tags = {t["key"]: t["value"] for t in span.get("tags", [])}
-        start = datetime.fromtimestamp(span["startTime"] / 1e6, UTC)
-        out.append(EpisodeTrace(
-            trace_id=span["traceID"], start=start, end=start + timedelta(microseconds=span.get("duration", 0)),
-            episode=str(tags.get("podcast_agent.episode.id", "?")), traffic=str(tags.get("podcast_agent.traffic", "?")),
-            cost=_num(tags.get("podcast_agent.cost.usd")), claims=_int(tags.get("podcast_agent.claims")),
-            llm_calls=_int(tags.get("podcast_agent.llm.calls")),
-        ))
-    return out
+def _otlp_value(value: dict[str, Any]) -> Any:
+    for kind in ("stringValue", "boolValue", "intValue", "doubleValue"):
+        if kind in value:
+            return value[kind]
+    return None
+
+
+def _episode(span: dict[str, Any], attrs: dict[str, Any]) -> EpisodeTrace:
+    return EpisodeTrace(
+        trace_id=span["traceId"],
+        start=datetime.fromtimestamp(int(span["startTimeUnixNano"]) / 1e9, UTC),
+        end=datetime.fromtimestamp(int(span["endTimeUnixNano"]) / 1e9, UTC),
+        episode=str(attrs.get("podcast_agent.episode.id", "?")), traffic=str(attrs.get("podcast_agent.traffic", "?")),
+        cost=_num(attrs.get("podcast_agent.cost.usd")), claims=_int(attrs.get("podcast_agent.claims")),
+        llm_calls=_int(attrs.get("podcast_agent.llm.calls")),
+    )
 
 
 def _num(value: Any) -> float | None:
@@ -588,7 +604,7 @@ def build_timeline(state: dict[str, Any], issue: dict[str, Any], payload: dict[s
     t.impact_source = f"Argo CD synced {str(deploy.get('revision', ''))[:7]}" if t.impact_start else ""
     look_from = (t.impact_start or t.detected or now) - timedelta(minutes=5)
     bad = _attempt(ev, "Jaeger", lambda: src.episodes({"podcast_agent.cost.over_budget": "true"}, look_from, now,
-                                                       limit=200)) or []
+                                                       limit=100)) or []
     if bad:
         t.first_bad, t.last_bad = bad[0], bad[-1]
         if not t.impact_start:
