@@ -73,6 +73,7 @@ settings:
   - env: LLM_CACHE_DIR
     field: cache_dir
     default: ".cache/llm"
+    help: "Where it lives. Leave this unset: the default is .cache/llm locally and /cache/llm in the Docker image, whose working directory isn't writable by the container's user."
   - env: SEARCH_PROVIDER
     field: search_provider
     default: "mock"

@@ -21,6 +21,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - The Collector's OTLP exporters use their current names, `otlp_grpc` and `otlp_http`; Collector 0.161 logs the old `otlp` and `otlphttp` names as deprecated.
 
 ### Fixed
+- Following the Docker quickstart with an API key (`cp .env.example .env`, then `docker run --env-file .env`) failed at the first model call: `.env.example` set `LLM_CACHE_DIR=.cache/llm`, which overrode the image's `/cache/llm` with a directory under `/app`, where the container's user can't write. It is now commented out, and CI checks that the cache directory `.env.example` gives the image can be created. Offline runs never touched the cache, so they hid it.
 - Malformed JSON transcripts (an utterance that is not an object, `guests` or `host` of the wrong type, a nested value where text belongs) raised `AttributeError` or `TypeError`, so the API answered 500. They now raise `TranscriptError`, a 422 naming the field. A string `guests` value is split on commas instead of into characters, and negative timestamps count as 0 seconds (#49, found by the new JSON fuzzer).
 
 ### Security
