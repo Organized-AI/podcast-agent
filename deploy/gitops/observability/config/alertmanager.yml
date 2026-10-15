@@ -1,0 +1,14 @@
+# Every alert goes to the incident bridge, which opens one GitHub issue per group and closes it on resolve.
+route:
+  receiver: incident-bridge
+  group_by: [alertname, deployment_environment_name]
+  group_wait: 10s        # gather the group's first alerts, then notify
+  group_interval: 1m     # also how soon a resolved group is reported
+  repeat_interval: 4h
+
+receivers:
+  - name: incident-bridge
+    webhook_configs:
+      - url: http://podcast-agent-incident-bridge.podcast-agent-dev.svc.cluster.local:8080/alertmanager
+        send_resolved: true
+        max_alerts: 20

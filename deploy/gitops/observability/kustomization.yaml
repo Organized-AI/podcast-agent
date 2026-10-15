@@ -1,0 +1,36 @@
+# The lab's observability stack, deployed by Argo CD (deploy/gitops/argocd/observability.yaml):
+#   agent ─OTLP─▶ Collector ─▶ Jaeger and MLflow (traces), Prometheus (metrics)
+#   Prometheus ─alerts.yml─▶ Alertmanager ─webhook─▶ incident bridge (podcast-agent-dev) ─▶ GitHub issue
+# MLflow comes from its official Helm chart (mlflow-values.yaml); its Postgres, its auth bootstrap Job and the
+# tailnet ports live here. Secrets are created by deploy/gitops/lab/bootstrap.sh and never committed.
+#
+# The alert rules are deploy/observability/prometheus/alerts.yml itself, outside this directory, so Argo CD builds
+# this with --load-restrictor LoadRestrictionsNone (bootstrap.sh sets it).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: observability
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: podcast-agent-observability
+resources:
+  - otel-collector.yaml
+  - jaeger.yaml
+  - prometheus.yaml
+  - alertmanager.yaml
+  - postgres.yaml
+  - mlflow-extras.yaml
+configMapGenerator:
+  - name: otel-collector
+    files: [config.yaml=config/collector.yaml]
+  - name: jaeger
+    files: [config.yaml=config/jaeger.yaml]
+  - name: prometheus
+    files:
+      - prometheus.yml=config/prometheus.yml
+      - alerts.yml=../../observability/prometheus/alerts.yml
+  - name: alertmanager
+    files: [alertmanager.yml=config/alertmanager.yml]
+  - name: postgres-init
+    files: [init.sql=config/postgres-init.sql]
+  - name: mlflow-bootstrap
+    files: [bootstrap.py=config/mlflow_bootstrap.py]
