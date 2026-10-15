@@ -1,0 +1,27 @@
+# command: git show origin/main:deploy/gitops/envs/{dev,prod}/values.yaml && gh api repos/Organized-AI/podcast-agent/attestations/<digest>
+# machine: MacBook Pro · Apple M1 Pro · gh 2.92.0
+# commit: a9562f6
+# captured: 2026-10-15T03:19:39Z
+
+$ gh run view 38670627116   # publish.yml on the 0.2.0 commit: build once, attest, open the dev PR
+✓ main publish · 38670627116
+JOBS
+✓ Open the dev deployment pull request in 11s
+✓ Build, push and attest the image in 1m57s
+
+$ git show origin/main:deploy/gitops/envs/dev/values.yaml
+image:
+  tag: "sha-2c99d2f"
+  digest: "sha256:67a18fc8560ecc619f37a8888b2f0e22f4082f6433e6c92797150f427f211f28"
+$ git show origin/main:deploy/gitops/envs/prod/values.yaml
+image:
+  tag: "v0.2.0"
+  digest: "sha256:67a18fc8560ecc619f37a8888b2f0e22f4082f6433e6c92797150f427f211f28"
+same digest in dev and prod: sha256:67a18fc8560ecc619f37a8888b2f0e22f4082f6433e6c92797150f427f211f28
+$ gh api repos/Organized-AI/podcast-agent/attestations/sha256:67a18fc8560ecc619f37a8888b2f0e22f4082f6433e6c92797150f427f211f28   # signed build provenance, DSSE payload decoded
+predicate type : https://slsa.dev/provenance/v1
+subject        : ghcr.io/organized-ai/podcast-agent@sha256:67a18fc8560ecc619f37a8888b2f0e22f4082f6433e6c92797150f427f211f28
+builder        : https://github.com/Organized-AI/podcast-agent/.github/workflows/publish.yml@refs/heads/main
+invocation     : https://github.com/Organized-AI/podcast-agent/actions/runs/38670627116/attempts/1
+source commit  : 2c99d2fa14e7c72633a53c5a923e87e04979608b
+exit: 0
