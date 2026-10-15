@@ -14,6 +14,9 @@ server:
     app_name: basic-auth
     # MLflow rejects Host headers it doesn't know (a DNS-rebinding guard).
     allowed_hosts: "mlflow:5000,mlflow.observability.svc.cluster.local:5000,claws-mac-mini:30500,claws-mac-mini.tailb35295.ts.net:30500,localhost:*,127.0.0.1:*"
+    # The UI's own POSTs (trace search, for one) carry an Origin header, and MLflow blocks state-changing requests from
+    # origins it doesn't know: the page loads, then "You do not have permission to access this resource".
+    cors_allowed_origins: "http://claws-mac-mini:30500,http://claws-mac-mini.tailb35295.ts.net:30500,https://claws-mac-mini.tailb35295.ts.net:30500"
 
 mlflow:
   backendStoreUriFrom:
