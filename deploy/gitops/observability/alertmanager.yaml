@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: alertmanager }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: alertmanager }
+    spec:
+      automountServiceAccountToken: false
+      securityContext: { runAsNonRoot: true, runAsUser: 65534, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: alertmanager
+          image: prom/alertmanager:v0.34.1@sha256:e9733bafb1bdef9b00e25a21f8f99dc26a22224bf16641ad754d1649f4c3357a
+          args:
+            - --config.file=/etc/alertmanager/alertmanager.yml
+            - --storage.path=/alertmanager
+            - --web.external-url=http://claws-mac-mini:30903
+          ports:
+            - { name: http, containerPort: 9093 }
+          readinessProbe:
+            httpGet: { path: /-/ready, port: http }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits: { cpu: 250m, memory: 256Mi }
+          volumeMounts:
+            - { name: config, mountPath: /etc/alertmanager }
+            - { name: data, mountPath: /alertmanager }
+      volumes:
+        - name: config
+          configMap: { name: alertmanager }
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+spec:
+  selector: { app.kubernetes.io/name: alertmanager }
+  ports:
+    - { name: http, port: 9093, targetPort: http }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager-ui
+spec:
+  type: NodePort
+  selector: { app.kubernetes.io/name: alertmanager }
+  ports:
+    - { name: http, port: 9093, targetPort: http, nodePort: 30903 }

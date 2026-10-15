@@ -250,3 +250,12 @@ def test_episodes_come_from_jaegers_v3_search_and_are_matched_here(cfg):
     assert seen[0].url.path == "/api/v3/traces"
     assert seen[0].url.params["query.operation_name"] == "invoke_agent podcast-agent"
     assert src.episodes({}, at(90), at(100)) == []  # Jaeger's 404 "No traces found" is an empty result
+
+
+def test_a_suspect_without_a_pull_request_is_named_by_its_commit_and_long_lists_are_cut(cfg):
+    changes = [incident.Change(sha=f"{n:040d}", pr=None, title=f"commit {n}", author="jordan", url="u", merged_at=None,
+                               labels=[], files=[{"filename": "deploy/x.yaml", "patch": "+x"}]) for n in range(5)]
+    ev = incident.Evidence(deploy=Deploy(BAD_SHA, T0), previous_deploy=Deploy(GOOD_SHA, at(-30)), changes=changes)
+    _, body, _ = incident.render_issue(payload(), ev, cfg)
+    assert body.count("**Suspect:") == 3 and "…and 2 earlier commit(s)" in body
+    assert "revert `0000000` (`git revert 0000000` in a pull request)" in body and "#None" not in body

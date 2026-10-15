@@ -1,0 +1,48 @@
+# Values for MLflow's official chart (oci://ghcr.io/mlflow/charts/mlflow 3.17.1), deployed by Argo CD as the "mlflow"
+# Application. Private by construction: basic auth on, reachable only inside the cluster and through the tailnet port
+# (mlflow-extras.yaml), tracking data in Postgres, artifacts on a volume.
+fullnameOverride: mlflow    # the Collector writes to mlflow:5000
+
+image:
+  tag: v3.17.1-full@sha256:190306b1739b9646d6d39333594334b69ba14ab843db927712c790b50892f262   # -full has psycopg2 and the auth extra
+
+server:
+  value_options:
+    host: 0.0.0.0
+    port: 5000
+    workers: 1     # two workers of the -full image went past 1.5 GiB and were OOMKilled in the lab
+    app_name: basic-auth
+    # MLflow rejects Host headers it doesn't know (a DNS-rebinding guard).
+    allowed_hosts: "mlflow:5000,mlflow.observability.svc.cluster.local:5000,claws-mac-mini:30500,claws-mac-mini.tailb35295.ts.net:30500,localhost:*,127.0.0.1:*"
+
+mlflow:
+  backendStoreUriFrom:
+    secretKeyRef: { name: mlflow-secrets, key: MLFLOW_BACKEND_STORE_URI }
+  artifactsDestination: /mlflow/artifacts
+
+env:
+  - name: MLFLOW_AUTH_CONFIG_PATH
+    value: /etc/mlflow-auth/basic_auth.ini
+  - name: MLFLOW_FLASK_SERVER_SECRET_KEY
+    valueFrom:
+      secretKeyRef: { name: mlflow-secrets, key: MLFLOW_FLASK_SERVER_SECRET_KEY }
+  - name: MLFLOW_DISABLE_AGENT_HINT
+    value: "1"
+
+extraVolumes:
+  - name: auth
+    secret:
+      secretName: mlflow-secrets
+      items:
+        - { key: basic_auth.ini, path: basic_auth.ini }
+extraVolumeMounts:
+  - { name: auth, mountPath: /etc/mlflow-auth, readOnly: true }
+
+storage:
+  enabled: true
+  size: 4Gi
+  mountPath: /mlflow
+
+resources:
+  requests: { cpu: 100m, memory: 768Mi }
+  limits: { cpu: "1", memory: 2Gi }

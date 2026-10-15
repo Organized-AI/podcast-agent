@@ -5,6 +5,11 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- The lab runs the observability stack through Argo CD (`deploy/gitops/argocd/observability.yaml`). It has:
+  - the Collector, Jaeger (in memory, capped at 3,000 traces), Prometheus (the repository's `alerts.yml`) and Alertmanager (which posts to the incident bridge), all as a kustomization;
+  - a private MLflow from its official Helm chart, with Postgres, basic auth, and a Collector user that may only edit experiment 0.
+
+  `bootstrap.sh` generates the passwords and publishes the dashboards to the tailnet only. `make drill-cost` runs the cost drill: a real pull request breaks the budget, then the drill times the alert, the issue and the revert, writes the postmortem and files the follow-ups.
 - **Cost budget per episode, with detection and an enriched ticket** (#68):
   - **Pricing.** Every model call is priced at list prices (`src/podcast_agent/cost.py`). A model with no price of its own, such as the offline heuristics, is priced as the tier's Claude model. Reports and manifests carry the cost per episode and per step.
   - **Metrics.** The new metrics are `podcast_agent.cost.usd`, `podcast_agent.episode.cost.usd` and `podcast_agent.budget.violations`.

@@ -1,0 +1,90 @@
+# The lab's observability stack as two Argo CD Applications in their own project, applied by
+# deploy/gitops/lab/bootstrap.sh. "observability" is deploy/gitops/observability (Collector, Jaeger, Prometheus,
+# Alertmanager, Postgres); "mlflow" is MLflow's official Helm chart with values from this repository.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: observability
+  namespace: argocd
+spec:
+  description: Telemetry backends and alerting for the lab
+  sourceRepos:
+    - https://github.com/Organized-AI/podcast-agent.git
+    - ghcr.io/mlflow/charts
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: observability
+  clusterResourceWhitelist:
+    - { group: "", kind: Namespace }
+  namespaceResourceWhitelist:
+    - { group: "", kind: ConfigMap }
+    - { group: "", kind: Service }
+    - { group: "", kind: ServiceAccount }
+    - { group: "", kind: PersistentVolumeClaim }
+    - { group: apps, kind: Deployment }
+    - { group: apps, kind: StatefulSet }
+    - { group: batch, kind: Job }
+  orphanedResources:
+    warn: true
+---
+# MLflow's chart is published as an OCI artifact; Argo CD needs the registry declared as a Helm repository.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: repo-mlflow-charts
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  type: helm
+  name: mlflow-charts
+  url: ghcr.io/mlflow/charts
+  enableOCI: "true"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: observability
+  namespace: argocd
+spec:
+  project: observability
+  source:
+    repoURL: https://github.com/Organized-AI/podcast-agent.git
+    targetRevision: main
+    path: deploy/gitops/observability
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  # The API server keeps a status in each StatefulSet volumeClaimTemplate; it is not part of the desired state.
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      jqPathExpressions: [".spec.volumeClaimTemplates[]?.status"]
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mlflow
+  namespace: argocd
+spec:
+  project: observability
+  sources:
+    - repoURL: ghcr.io/mlflow/charts
+      chart: mlflow
+      targetRevision: 3.17.1
+      helm:
+        releaseName: mlflow
+        valueFiles:
+          - $values/deploy/gitops/observability/mlflow-values.yaml
+    - repoURL: https://github.com/Organized-AI/podcast-agent.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]
