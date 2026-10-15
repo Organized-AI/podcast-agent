@@ -1,0 +1,27 @@
+# dev: a small cluster (kind works) with no cloud dependencies. The API runs the offline provider, so it
+# needs no API key; the worker is off because dev has no SQS or KEDA. Image digests come from
+# deploy/gitops/envs/dev/values.yaml, which CI updates after every merge to main.
+config:
+  LLM_PROVIDER: offline
+  SEARCH_PROVIDER: mock
+
+secrets:
+  optional: true
+
+api:
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  resources:
+    requests: { cpu: 50m, memory: 192Mi }
+    limits: { cpu: "500m", memory: 512Mi }
+
+worker:
+  enabled: false
+
+podDisruptionBudget:
+  enabled: false
+
+otel:
+  enabled: false
+  environment: dev

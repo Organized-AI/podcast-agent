@@ -32,9 +32,18 @@ app.kubernetes.io/component: {{ .component }}
 {{- end -}}
 {{- end -}}
 
+{{/* The image by digest when one is set (GitOps environments pin digests), otherwise by tag */}}
+{{- define "podcast-agent.image" -}}
+{{- if .Values.image.digest -}}
+{{- printf "%s@%s" .Values.image.repository .Values.image.digest -}}
+{{- else -}}
+{{- printf "%s:%s" .Values.image.repository .Values.image.tag -}}
+{{- end -}}
+{{- end -}}
+
 {{/* Shared container settings: env, security, writable scratch volumes for a read-only root fs */}}
 {{- define "podcast-agent.containerCommon" -}}
-image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+image: {{ include "podcast-agent.image" . | quote }}
 imagePullPolicy: {{ .Values.image.pullPolicy }}
 securityContext:
   {{- toYaml .Values.securityContext | nindent 2 }}
@@ -43,6 +52,7 @@ envFrom:
       name: {{ include "podcast-agent.fullname" . }}
   - secretRef:
       name: {{ .Values.secrets.name }}
+      optional: {{ .Values.secrets.optional }}
 volumeMounts:
   - name: tmp
     mountPath: /tmp
