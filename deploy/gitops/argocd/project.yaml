@@ -1,0 +1,32 @@
+# Argo CD project: what the podcast-agent Applications may deploy, and where.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: podcast-agent
+  namespace: argocd
+spec:
+  description: Podcast Agent API and workers, one Application per environment
+  sourceRepos:
+    - https://github.com/Organized-AI/podcast-agent.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: podcast-agent-dev
+    - server: https://kubernetes.default.svc
+      namespace: podcast-agent-prod
+  # Only the namespaced kinds the chart renders; no cluster-scoped resources at all
+  # (Argo CD creates the namespace itself through CreateNamespace=true).
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - { group: "", kind: ConfigMap }
+    - { group: "", kind: Service }
+    - { group: "", kind: ServiceAccount }
+    - { group: apps, kind: Deployment }
+    - { group: autoscaling, kind: HorizontalPodAutoscaler }
+    - { group: policy, kind: PodDisruptionBudget }
+    - { group: networking.k8s.io, kind: NetworkPolicy }
+    - { group: keda.sh, kind: ScaledObject }
+    - { group: keda.sh, kind: TriggerAuthentication }
+    - { group: external-secrets.io, kind: ExternalSecret }
+    - { group: monitoring.coreos.com, kind: PrometheusRule }
+  orphanedResources:
+    warn: true

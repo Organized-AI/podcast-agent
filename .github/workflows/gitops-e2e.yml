@@ -1,0 +1,40 @@
+# GitOps end to end on a throwaway kind cluster: Argo CD installs the ApplicationSet's dev Application
+# from this commit and the API comes up healthy. Runs when deployment files change, and on demand.
+name: gitops-e2e
+on:
+  pull_request:
+    paths:
+      - "deploy/**"
+      - "Dockerfile"
+      - "e2e/gitops-kind.sh"
+      - "e2e/render_appset.py"
+      - ".github/workflows/gitops-e2e.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: gitops-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  kind:
+    name: Argo CD on kind
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884  # v10.3.0
+      - uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa  # v1.15.1
+        with:
+          cluster_name: podcast-agent-e2e
+          install_only: true
+      - name: Argo CD deploys dev from this commit
+        env:
+          # the PR's head commit (Argo CD fetches it from GitHub), not the merge commit
+          REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: KEEP=1 e2e/gitops-kind.sh "$REVISION"

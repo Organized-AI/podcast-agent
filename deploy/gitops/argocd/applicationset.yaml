@@ -1,0 +1,53 @@
+# One Application per environment, rendered from the Helm chart with three layers of values:
+#   values.yaml (defaults) → values-<env>.yaml (environment shape) → gitops/envs/<env>/values.yaml (image digest)
+# dev syncs itself (prune + self-heal); prod changes only when someone presses Sync after its bump PR merges.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: podcast-agent
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - env: dev
+            autoSync: true
+          - env: prod
+            autoSync: false
+  template:
+    metadata:
+      name: "podcast-agent-{{ .env }}"
+      labels:
+        app.kubernetes.io/part-of: podcast-agent
+        environment: "{{ .env }}"
+    spec:
+      project: podcast-agent
+      source:
+        repoURL: https://github.com/Organized-AI/podcast-agent.git
+        targetRevision: main
+        path: deploy/helm/podcast-agent
+        helm:
+          releaseName: podcast-agent
+          valueFiles:
+            - "values-{{ .env }}.yaml"
+            - "../../gitops/envs/{{ .env }}/values.yaml"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "podcast-agent-{{ .env }}"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+        retry:
+          limit: 3
+          backoff: { duration: 10s, factor: 2, maxDuration: 2m }
+  templatePatch: |
+    {{- if .autoSync }}
+    spec:
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+    {{- end }}
