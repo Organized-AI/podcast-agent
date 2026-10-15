@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from conftest import ScriptedProvider, make_ctx
@@ -111,6 +112,24 @@ def test_judge_score_weights_and_penalty():
     assert score(JudgeVerdict.model_validate(_judge(1, 1, 1))) == 0.0
     assert score(JudgeVerdict.model_validate(_judge(5, 3, 1))) == pytest.approx(0.5 + 0.15)
     assert score(JudgeVerdict.model_validate(_judge(5, 5, 5, ["made-up stat"]))) == pytest.approx(0.85)
+
+
+def test_judge_sees_the_speaker_roles_the_agent_saw(monkeypatch):
+    """#51: the judge got names without roles, so it flagged "Chris Bell is the host" as invented."""
+    from podcast_agent.evals import judge
+    from podcast_agent.transcript import load_episode
+
+    seen = {}
+
+    def fake_call(ctx, *, prompt, **kwargs):
+        seen["prompt"] = prompt
+        return SimpleNamespace(value=judge.JudgeVerdict.model_validate(_judge(5, 5, 5)))
+
+    monkeypatch.setattr(judge, "call_structured", fake_call)
+    episode = load_episode(ROOT / "data" / "transcripts" / "ep004_pdf_example.txt")
+    judge.judge_summary(None, episode, "Chris Bell hosts Nina Alvarez.")
+    assert "Chris Bell (host)" in seen["prompt"] and "Nina Alvarez (guest)" in seen["prompt"]
+    assert episode.render() in seen["prompt"]
 
 
 def test_live_style_suite_runs_fresh_judges_and_compares_to_a_baseline(tmp_path):

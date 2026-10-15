@@ -23,6 +23,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ### Fixed
 - Following the Docker quickstart with an API key (`cp .env.example .env`, then `docker run --env-file .env`) failed at the first model call: `.env.example` set `LLM_CACHE_DIR=.cache/llm`, which overrode the image's `/cache/llm` with a directory under `/app`, where the container's user can't write. It is now commented out, and CI checks that the cache directory `.env.example` gives the image can be created. Offline runs never touched the cache, so they hid it.
 - With telemetry on (prod's values), the chart's NetworkPolicy blocked the pods' OTLP export: it allowed egress on 53 and 443 only, and the Collector listens on 4318. The policy now also allows the port in `otel.endpoint` whenever `otel.enabled` is true, and `make helm` checks prod's policy for it.
+- The rubric judge now sees the transcript the way the agent's steps do, with each speaker's role. It was given names only, so it flagged roles the transcript states ("Chris Bell (host)") as invented: the root cause of #51, which the agent's summary did not cause.
 - Malformed JSON transcripts (an utterance that is not an object, `guests` or `host` of the wrong type, a nested value where text belongs) raised `AttributeError` or `TypeError`, so the API answered 500. They now raise `TranscriptError`, a 422 naming the field. A string `guests` value is split on commas instead of into characters, and negative timestamps count as 0 seconds (#49, found by the new JSON fuzzer).
 
 ### Security
