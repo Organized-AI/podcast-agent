@@ -35,6 +35,7 @@ from typing import Any, TypeVar
 import anyio
 import httpx
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 log = logging.getLogger("incident-bridge")
 T = TypeVar("T")
@@ -52,7 +53,8 @@ def _env(name: str, default: str | None = None) -> str | None:
 @dataclass
 class Config:
     repository: str = field(default_factory=lambda: _env("GITHUB_REPOSITORY", "Organized-AI/podcast-agent") or "")
-    token: str | None = field(default_factory=lambda: _env("GITHUB_TOKEN"), repr=False)
+    # Stripped: a token read from a file or `gh auth token` often ends in a newline, which no HTTP header may contain.
+    token: str | None = field(default_factory=lambda: (_env("GITHUB_TOKEN") or "").strip() or None, repr=False)
     github_api: str = field(default_factory=lambda: _env("GITHUB_API_URL", "https://api.github.com") or "")
     labels: list[str] = field(default_factory=lambda: (_env("INCIDENT_LABELS", "incident") or "").split(","))
     window: str = field(default_factory=lambda: _env("INCIDENT_WINDOW", "15m") or "15m")
@@ -251,6 +253,7 @@ class GitHub:
     def __init__(self, cfg: Config, client: httpx.Client):
         self.cfg, self.http = cfg, client
         self.base = f"{cfg.github_api}/repos/{cfg.repository}"
+        self.opened: dict[str, int] = {}  # group key → issue this process opened
         self.headers = {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"}
         if cfg.token:
             self.headers["Authorization"] = f"Bearer {cfg.token}"
@@ -263,6 +266,10 @@ class GitHub:
     def find_open_issue(self, key: str) -> dict[str, Any] | None:
         if self.cfg.dry_run:
             return None
+        if key in self.opened:  # GitHub's issue list can lag a just-created issue by seconds
+            issue: dict[str, Any] = self._call("GET", f"/issues/{self.opened[key]}")
+            if issue.get("state") == "open":
+                return issue
         label = self.cfg.labels[0]
         for issue in self._call("GET", "/issues", params={"state": "open", "labels": label, "per_page": 100}):
             state = read_marker(issue.get("body") or "")
@@ -275,6 +282,9 @@ class GitHub:
             log.warning("dry run (no GITHUB_TOKEN): would open %r with labels %s\n%s", title, labels, body)
             return {"number": 0, "html_url": "", "created_at": iso(datetime.now(UTC))}
         issue: dict[str, Any] = self._call("POST", "/issues", json={"title": title, "body": body, "labels": labels})
+        state = read_marker(body)
+        if state:
+            self.opened[state["key"]] = issue["number"]
         return issue
 
     def comment(self, number: int, body: str) -> None:
@@ -665,6 +675,15 @@ def render_resolution(t: Timeline) -> str:
 
 
 _lock = threading.Lock()
+SECRETS = re.compile(r"(gh[opsru]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|Bearer\s+\S+)")
+
+
+def redact(text: str, *secrets: str | None) -> str:
+    """Remove tokens from text bound for a log: the configured ones, and anything shaped like a GitHub token."""
+    for secret in secrets:
+        if secret:
+            text = text.replace(secret, "***")
+    return SECRETS.sub("***", text)
 
 
 def handle(payload: dict[str, Any], cfg: Config, src: Sources, gh: GitHub, now: datetime | None = None) -> dict[str, Any]:
@@ -690,20 +709,26 @@ def handle(payload: dict[str, Any], cfg: Config, src: Sources, gh: GitHub, now: 
         return {"action": "closed", "issue": existing["number"], "mttd_s": timeline.mttd_s, "mttr_s": timeline.mttr_s}
 
 
-def create_app(cfg: Config | None = None) -> FastAPI:
+def create_app(cfg: Config | None = None, src: Sources | None = None, gh: GitHub | None = None) -> FastAPI:
     cfg = cfg or Config()
     client = httpx.Client(timeout=httpx.Timeout(5.0))
-    src, gh = Sources(cfg, client), GitHub(cfg, client)
+    src, gh = src or Sources(cfg, client), gh or GitHub(cfg, client)
     app = FastAPI(title="Podcast Agent incident bridge")
 
     @app.get("/healthz")
     def healthz() -> dict[str, Any]:
         return {"status": "ok", "repository": cfg.repository, "dry_run": cfg.dry_run}
 
-    @app.post("/alertmanager")
-    async def alertmanager(request: Request) -> dict[str, Any]:
+    @app.post("/alertmanager", response_model=None)
+    async def alertmanager(request: Request) -> dict[str, Any] | JSONResponse:
         payload = await request.json()
-        return await anyio.to_thread.run_sync(handle, payload, cfg, src, gh)
+        try:
+            result: dict[str, Any] = await anyio.to_thread.run_sync(handle, payload, cfg, src, gh)
+            return result
+        except Exception as exc:  # log without a traceback: HTTP client errors can echo request headers
+            message = redact(f"{type(exc).__name__}: {exc}", cfg.token)
+            log.error("webhook failed: %s", message)
+            return JSONResponse({"action": "error", "error": message}, status_code=500)  # Alertmanager retries
 
     return app
 
