@@ -3,9 +3,9 @@
 #   docker compose -f deploy/compose/docker-compose.yml --profile api up api              → HTTP API on 127.0.0.1:8080
 #   docker compose -f deploy/compose/docker-compose.yml --profile worker up worker        → drain ./queue/inbox
 #   docker compose -f deploy/compose/docker-compose.yml --profile local-llm up -d ollama  → local model
-#   docker compose -f deploy/compose/docker-compose.yml --profile observability up -d otel-collector jaeger prometheus grafana
+#   docker compose -f deploy/compose/docker-compose.yml --profile observability up -d otel-collector jaeger mlflow prometheus grafana
 #     then: OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318 docker compose -f deploy/compose/docker-compose.yml run --rm agent
-#     (or `make observe`; UIs: Jaeger 127.0.0.1:16686 · Prometheus 127.0.0.1:9090 · Grafana 127.0.0.1:3000)
+#     (or `make observe`; UIs: Jaeger 127.0.0.1:16686 · MLflow 127.0.0.1:5050 · Prometheus 127.0.0.1:9090 · Grafana 127.0.0.1:3000)
 name: podcast-agent
 x-agent: &agent
   build:
@@ -68,13 +68,40 @@ services:
     ports:
       - "127.0.0.1:4317:4317"   # OTLP gRPC
       - "127.0.0.1:4318:4318"   # OTLP HTTP
-    depends_on: [jaeger]
+    depends_on: [jaeger, mlflow]
 
   jaeger:
     profiles: ["observability"]
     image: jaegertracing/jaeger:2.21.0@sha256:3d0ac795ff98aa04d1be04311d2dac6c25b4bfc8322dc02e53bc5b170c5018c3
     ports:
       - "127.0.0.1:16686:16686" # UI and query API
+
+  # Second trace backend: the Collector fans every span out to Jaeger and to MLflow's OTLP endpoint.
+  # SQLite is the SQL store MLflow needs for OTLP ingest. --allowed-hosts adds the Compose hostname the
+  # Collector uses to MLflow's DNS-rebinding guard. Host port 5050: macOS AirPlay Receiver holds 5000.
+  mlflow:
+    profiles: ["observability"]
+    image: ghcr.io/mlflow/mlflow:v3.17.1@sha256:65aa7a75fe37554bd7dd9e539b58e1ec130dac99f27fef9756df316a272dfee2
+    command:
+      - mlflow
+      - server
+      - --host=0.0.0.0
+      - --port=5000
+      - --workers=1
+      - --backend-store-uri=sqlite:////mlflow/mlflow.db
+      - --artifacts-destination=/mlflow/artifacts
+      - --allowed-hosts=mlflow:5000,localhost:*,127.0.0.1:*
+    environment:
+      MLFLOW_DISABLE_AGENT_HINT: "1"
+    volumes:
+      - mlflow:/mlflow
+    ports:
+      - "127.0.0.1:5050:5000"   # UI and REST API
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
 
   prometheus:
     profiles: ["observability"]
@@ -102,3 +129,4 @@ services:
 volumes:
   agent-cache: {}
   ollama: {}
+  mlflow: {}

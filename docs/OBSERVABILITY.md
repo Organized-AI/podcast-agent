@@ -24,7 +24,8 @@ OTEL_TRACES_EXPORTER=console podcast-agent run data/transcripts/ep004_pdf_exampl
 ## Local stack
 
 ```bash
-make observe        # Collector, Jaeger, Prometheus and Grafana; runs every transcript with telemetry; checks it arrived
+make observe        # Collector, Jaeger, MLflow, Prometheus and Grafana; runs every transcript with telemetry; checks it arrived
+make observe-outage # then: stop MLflow, check runs still reach Jaeger, restart it, check the queued spans arrive
 make observe-down   # stop it and drop its data
 ```
 
@@ -32,12 +33,31 @@ make observe-down   # stop it and drop its data
 |---|---|---|
 | OpenTelemetry Collector | OTLP on 127.0.0.1:4317 (gRPC) and :4318 (HTTP) | [deploy/observability/otel-collector.yaml](../deploy/observability/otel-collector.yaml) |
 | Jaeger (traces) | [127.0.0.1:16686](http://127.0.0.1:16686/search?service=podcast-agent) | in-memory storage |
+| MLflow (the same traces, as agent runs) | [127.0.0.1:5050](http://127.0.0.1:5050/#/experiments/0/traces) | SQLite in the `mlflow` volume; OTLP in at `/v1/traces` |
 | Prometheus (metrics, alerts) | [127.0.0.1:9090](http://127.0.0.1:9090) | [prometheus.yml](../deploy/observability/prometheus/prometheus.yml), [alerts.yml](../deploy/observability/prometheus/alerts.yml) |
 | Grafana (dashboard) | [127.0.0.1:3000](http://127.0.0.1:3000) | provisioned data sources and the [Podcast Agent dashboard](../deploy/observability/grafana/dashboards/podcast-agent.json) |
 
-The Compose profile `observability` binds every port to 127.0.0.1 and pins each image by digest. `make observe` runs the offline provider by default; `make observe OBSERVE_PROVIDER=anthropic` uses the key in `.env`. [e2e/check_telemetry.py](../e2e/check_telemetry.py) then confirms that the run's trace is in Jaeger (one root span, an `invoke_agent` span per episode, a `verify_claim` span per fact-check, no content attributes) and its metrics and alert rules are in Prometheus. CI runs the same target on every pull request.
+The Compose profile `observability` binds every port to 127.0.0.1 and pins each image by digest. `make observe` runs the offline provider by default; `make observe OBSERVE_PROVIDER=anthropic` uses the key in `.env`. [e2e/check_telemetry.py](../e2e/check_telemetry.py) then confirms that the run's trace is in Jaeger (one root span, an `invoke_agent` span per episode, a `verify_claim` span per fact-check, no content attributes), that MLflow holds the same trace with every span Jaeger has, and that its metrics and alert rules are in Prometheus. CI runs the same target on every pull request.
 
-In Kubernetes, set `otel.enabled=true` and `otel.endpoint` in the Helm values to point pods at a Collector; sampling and `deployment.environment.name` come from the same values. Where transcripts must never reach the tracing backend, add the Collector's `attributes/drop-content` processor to the traces pipeline as a second guard behind the client default.
+### Two trace backends from one export
+
+The agent exports OTLP once, to the Collector. The Collector's traces pipeline has two exporters, so every span goes to both backends and the agent knows about neither:
+
+```
+agent ──OTLP/HTTP──▶ Collector ─┬─ otlp_grpc/jaeger ──▶ Jaeger    latency, span tree, which step was slow
+                                ├─ otlp_http/mlflow ──▶ MLflow    the run as an agent trace: AGENT, CHAT_MODEL and TOOL spans, token totals
+                                └─ prometheus (metrics) ─▶ Prometheus ─▶ Grafana, alerts
+```
+
+MLflow reads the `gen_ai.*` attributes: `invoke_agent` spans become AGENT spans, `chat` spans CHAT_MODEL, `execute_tool` spans TOOL, and it adds up `gen_ai.usage.*` into the trace's token usage. With content capture on (`OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true`, local debugging only), it shows each model call's messages as the span's inputs and outputs. With it off, the default, it shows the same ids, counts and verdicts as Jaeger and no text.
+
+Each exporter has its own queue and retries, so one backend being down does not hold up the other. `make observe-outage` (after `make observe`; CI runs both) stops MLflow, checks that a new run still reaches Jaeger and Prometheus in full, starts MLflow again and checks that the Collector's retry delivers every span it queued ([samples/proof/mlflow-fanout.txt](../samples/proof/mlflow-fanout.txt) has the same test with the binaries). Retries give up after five minutes, the Collector's default, so a longer outage loses MLflow's copy of those traces but never Jaeger's.
+
+MLflow needs a SQL backend store for OTLP ingest (3.6 or later); Compose uses SQLite. It rejects Host headers it doesn't recognize, to guard against DNS rebinding, so `--allowed-hosts` lists `mlflow:5000`, the name the Collector calls it by. Traces land in experiment `0` (Default); set `MLFLOW_EXPERIMENT_ID` for the Collector to file them elsewhere. Its port on the host is 5050 because macOS's AirPlay Receiver holds 5000.
+
+The idea came from Joseph Fluckiger's [AIMUG talk](https://www.youtube.com/watch?v=YPJd-RXsWI0) (October 2026), which showed MLflow tracing LangGraph agent runs alongside a Jev decision model.
+
+In Kubernetes, set `otel.enabled=true` and `otel.endpoint` in the Helm values to point pods at a Collector; sampling and `deployment.environment.name` come from the same values. The fan-out lives in that Collector, not in the chart: add the `otlp_http/mlflow` exporter with your MLflow service's URL and experiment id, and the pods don't change. Where transcripts must never reach a tracing backend, add the Collector's `attributes/drop-content` processor to the traces pipeline as a second guard behind the client default; it then applies to every exporter in that pipeline.
 
 ## Alerts
 

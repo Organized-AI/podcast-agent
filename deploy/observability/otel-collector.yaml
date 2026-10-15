@@ -1,5 +1,6 @@
-# OpenTelemetry Collector for local development: OTLP in, traces to Jaeger, metrics to Prometheus.
-# The agent sends OTLP/HTTP to :4318 (OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318).
+# OpenTelemetry Collector for local development: OTLP in, traces to Jaeger and MLflow, metrics to Prometheus.
+# The agent sends OTLP/HTTP to :4318 (OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318) and knows
+# nothing about the backends: the traces pipeline below fans each span out to both exporters.
 extensions:
   health_check:
     endpoint: 0.0.0.0:13133
@@ -27,10 +28,19 @@ processors:
       - { key: gen_ai.tool.call.arguments, action: delete }
 
 exporters:
-  otlp/jaeger:
+  otlp_grpc/jaeger:
     endpoint: jaeger:4317
     tls:
       insecure: true
+  # MLflow's tracking server takes OTLP/HTTP traces at /v1/traces (MLflow 3.6+, SQL backend store) and files
+  # them under the experiment named in the header. Jaeger answers "where did the time go"; MLflow shows the
+  # same spans as an agent run (tool calls, verdicts, token usage). Each exporter keeps its own retry queue,
+  # so MLflow being down never holds up Jaeger.
+  otlp_http/mlflow:
+    endpoint: ${env:MLFLOW_OTLP_ENDPOINT:-http://mlflow:5000}
+    headers:
+      x-mlflow-experiment-id: ${env:MLFLOW_EXPERIMENT_ID:-0}
+    compression: gzip
   prometheus:
     endpoint: 0.0.0.0:8889
     resource_to_telemetry_conversion:
@@ -42,7 +52,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlp/jaeger]
+      exporters: [otlp_grpc/jaeger, otlp_http/mlflow]
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, batch]

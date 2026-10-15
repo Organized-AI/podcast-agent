@@ -1,6 +1,7 @@
-"""End-to-end check: a run's trace reached Jaeger and its metrics reached Prometheus.
+"""End-to-end check: a run's trace reached Jaeger and MLflow, and its metrics reached Prometheus.
 
-    python e2e/check_telemetry.py output/observe --jaeger http://jaeger:16686 --prometheus http://prometheus:9090
+    python e2e/check_telemetry.py output/observe --jaeger http://jaeger:16686 --mlflow http://mlflow:5000 \
+        --prometheus http://prometheus:9090
 
 Reads the run folder (run_manifest.json, report.json), then polls the backends until everything the run
 produced is there or the timeout passes. Exits non-zero, with a line per failed check, if anything is missing.
@@ -32,8 +33,13 @@ def prom_value(base: str, query: str) -> float:
     return float(data[0]["value"][1]) if data else 0.0
 
 
+def jaeger_spans(jaeger: str, trace_id: str) -> list[dict[str, Any]]:
+    spans: list[dict[str, Any]] = get_json(f"{jaeger}/api/traces/{trace_id}")["data"][0]["spans"]
+    return spans
+
+
 def check_trace(jaeger: str, trace_id: str, episodes: int, claims: int, capture: bool) -> list[tuple[bool, str]]:
-    spans = get_json(f"{jaeger}/api/traces/{trace_id}")["data"][0]["spans"]
+    spans = jaeger_spans(jaeger, trace_id)
     kinds = Counter(s["operationName"].split()[0] for s in spans)
     tags = {t["key"] for s in spans for t in s.get("tags", [])}
     leaked = sorted(tags & CONTENT_ATTRIBUTES)
@@ -46,6 +52,32 @@ def check_trace(jaeger: str, trace_id: str, episodes: int, claims: int, capture:
         ("gen_ai.usage.input_tokens" in tags and "gen_ai.request.model" in tags, "GenAI attributes on model spans"),
         (capture or not leaked, "no prompt, completion or query text in spans" + (f" (found {leaked})" if leaked else "")),
     ]
+
+
+def mlflow_results(trace: dict[str, Any], expected_spans: int, episodes: int, capture: bool) -> list[tuple[bool, str]]:
+    """Check one trace as MLflow's REST API returns it (GET /api/3.0/mlflow/traces/get) against the Jaeger copy."""
+    info, spans = trace["trace_info"], trace["spans"]
+    attrs = [{a["key"]: a["value"] for a in s.get("attributes", [])} for s in spans]
+    types = Counter(a.get("mlflow.spanType", {}).get("string_value") for a in attrs)
+    keys = {k for a in attrs for k in a}
+    leaked = sorted(keys & (CONTENT_ATTRIBUTES | {"mlflow.spanInputs", "mlflow.spanOutputs"}))
+    usage = json.loads(info.get("trace_metadata", {}).get("mlflow.trace.tokenUsage", "{}"))
+    location = info["trace_location"]["mlflow_experiment"]["experiment_id"]
+    return [
+        (info.get("state") == "OK", f"MLflow has trace {info['trace_id']} in experiment {location}, state {info.get('state')}"),
+        (len(spans) == expected_spans, f"MLflow got every span Jaeger got ({len(spans)}/{expected_spans})"),
+        (types["AGENT"] == episodes and types["CHAT_MODEL"] > 0 and types["TOOL"] > 0,
+         f"GenAI spans mapped to MLflow span types ({types['AGENT']} AGENT, {types['CHAT_MODEL']} CHAT_MODEL, "
+         f"{types['TOOL']} TOOL)"),
+        (usage.get("total_tokens", 0) > 0, f"token usage rolled up on the trace ({usage.get('total_tokens', 0)} tokens)"),
+        (capture or not leaked, "no prompt, completion or query text in MLflow" + (f" (found {leaked})" if leaked else "")),
+    ]
+
+
+def check_mlflow(mlflow: str, jaeger: str, trace_id: str, episodes: int, capture: bool) -> list[tuple[bool, str]]:
+    query = urllib.parse.urlencode({"trace_id": f"tr-{trace_id}", "allow_partial": "False"})
+    trace = get_json(f"{mlflow}/api/3.0/mlflow/traces/get?{query}")["trace"]
+    return mlflow_results(trace, len(jaeger_spans(jaeger, trace_id)), episodes, capture)
 
 
 def check_metrics(prom: str, episodes: int, claims: int) -> list[tuple[bool, str]]:
@@ -75,6 +107,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("run_dir", type=Path)
     ap.add_argument("--jaeger", default="http://jaeger:16686")
+    ap.add_argument("--mlflow", default="http://mlflow:5000", help="empty to skip")
     ap.add_argument("--prometheus", default="http://prometheus:9090")
     ap.add_argument("--grafana", default="http://grafana:3000", help="empty to skip")
     ap.add_argument("--timeout", type=float, default=90.0, help="seconds to wait for the data to arrive")
@@ -96,6 +129,8 @@ def main() -> int:
     while True:
         try:
             results = check_trace(args.jaeger, trace_id, episodes, claims, args.capture_content)
+            if args.mlflow:
+                results += check_mlflow(args.mlflow, args.jaeger, trace_id, episodes, args.capture_content)
             results += check_metrics(args.prometheus, episodes, claims)
             if args.grafana:
                 results += check_grafana(args.grafana)
@@ -107,6 +142,8 @@ def main() -> int:
     for ok, line in results:
         print(f"{'PASS' if ok else 'FAIL'} {line}")
     print(f"Jaeger: /trace/{trace_id}")
+    if args.mlflow:
+        print(f"MLflow: trace tr-{trace_id}")
     return 0 if all(ok for ok, _ in results) else 1
 
 
