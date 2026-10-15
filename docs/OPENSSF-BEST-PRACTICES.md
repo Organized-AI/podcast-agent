@@ -2,7 +2,7 @@
 
 This maps every criterion of the [OpenSSF Best Practices](https://www.bestpractices.dev/en/criteria/0) **passing** level to where this repository meets it. It is the source for the project's entry on bestpractices.dev; when a practice changes, update the row here in the same pull request.
 
-Reference entry: [colinmcnamara/gh-upstream-watch](https://www.bestpractices.dev/en/projects/15235/passing), which meets all 67 criteria.
+**Badge: passing, 67 of 67 criteria met.** The project's entry is [bestpractices.dev/projects/15516](https://www.bestpractices.dev/en/projects/15516/passing); the answers there are the rows below. For comparison, see the reference entry [colinmcnamara/gh-upstream-watch](https://www.bestpractices.dev/en/projects/15235/passing).
 
 Status: **Met** unless marked N/A. 67 criteria: 13 basics, 9 change control, 8 reporting, 13 quality, 16 security, 8 analysis.
 
@@ -13,7 +13,7 @@ Status: **Met** unless marked N/A. 67 criteria: 13 basics, 9 change control, 8 r
 | `description_good` | The [README](../README.md) opens with what the system does (show notes and an audited fact-check from podcast transcripts) and who it is for (ad agencies and producers publishing show notes). |
 | `interact` | The README links the issue tracker, issue forms for bugs and features ([.github/ISSUE_TEMPLATE](../.github/ISSUE_TEMPLATE)), private vulnerability reporting and the interactive guide. |
 | `contribution` | [CONTRIBUTING.md](../CONTRIBUTING.md) covers setup, quality gates, the test policy, pull requests and releases. |
-| `contribution_requirements` | CONTRIBUTING.md lists the requirements: `make check` and the PR Gate pass, a test that fails before the change and passes after, a CHANGELOG line, one concern per pull request. |
+| `contribution_requirements` | [CONTRIBUTING.md](../CONTRIBUTING.md) lists the requirements: `make check` and the PR Gate pass, a test that fails before the change and passes after, a CHANGELOG line, one concern per pull request. |
 | `floss_license` | MIT ([LICENSE](../LICENSE)). |
 | `floss_license_osi` | MIT is approved by the Open Source Initiative. |
 | `license_location` | [LICENSE](../LICENSE) at the repository root. |
@@ -46,9 +46,9 @@ Status: **Met** unless marked N/A. 67 criteria: 13 basics, 9 change control, 8 r
 | `report_tracker` | GitHub Issues with labels, a milestone and issue forms. |
 | `report_responses` | The README and CONTRIBUTING.md commit to a response to every issue and pull request within 7 days. |
 | `enhancement_responses` | Feature requests have their own issue form and the same 7-day response commitment. |
-| `report_archive` | GitHub Issues and pull requests keep every report and response public and searchable, open and closed. |
-| `vulnerability_report_process` | SECURITY.md publishes the process: report privately through GitHub private vulnerability reporting. |
-| `vulnerability_report_private` | Private vulnerability reporting is enabled on the repository, so reports reach only the maintainers. |
+| `report_archive` | [GitHub Issues](https://github.com/Organized-AI/podcast-agent/issues?q=is%3Aissue) and [pull requests](https://github.com/Organized-AI/podcast-agent/pulls?q=is%3Apr) keep every report and response public and searchable, open and closed. |
+| `vulnerability_report_process` | [SECURITY.md](../SECURITY.md#reporting-a-vulnerability) publishes the process: report privately through GitHub private vulnerability reporting. |
+| `vulnerability_report_private` | [GitHub private vulnerability reporting](https://github.com/Organized-AI/podcast-agent/security/advisories/new) is enabled on the repository, so reports reach only the maintainers; [SECURITY.md](../SECURITY.md#reporting-a-vulnerability) explains how to use it. |
 | `vulnerability_report_response` | SECURITY.md commits to acknowledging a report within 7 days, inside the 14-day limit. |
 
 ## Quality
