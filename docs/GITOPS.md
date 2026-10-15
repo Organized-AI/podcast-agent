@@ -72,6 +72,46 @@ What a merge looks like:
 
 At no point does anyone run `kubectl` or `helm` against the cluster.
 
+### Observability in the lab, and the cost drill
+
+By default the lab also runs the observability stack ([deploy/gitops/argocd/observability.yaml](../deploy/gitops/argocd/observability.yaml)): two more Argo CD Applications in their own project, synced from `main` like dev. They are:
+
+- **observability**: the Collector, Jaeger, Prometheus, Alertmanager and Postgres, from [deploy/gitops/observability](../deploy/gitops/observability).
+- **mlflow**: MLflow's official Helm chart, with this repository's values.
+
+dev sends telemetry to the Collector. The Collector fans traces out to Jaeger and MLflow, and Prometheus evaluates [alerts.yml](../deploy/observability/prometheus/alerts.yml), the same file Compose and the chart use. Alertmanager posts every alert to the incident bridge in dev.
+
+MLflow is private in three ways:
+
+- **Basic auth.** The Collector writes as its own user, which may edit experiment 0 and nothing else.
+- **Storage.** Tracking data is in Postgres and artifacts are on a volume.
+- **Reach.** It can be reached only inside the cluster and on the tailnet.
+
+`bootstrap.sh` generates the passwords into the `mlflow-secrets` Secret, and they never leave the cluster.
+
+| | Node port (127.0.0.1, and the tailnet with `TAILSCALE_SERVE=1`) |
+|---|---|
+| Jaeger | 30686 |
+| MLflow | 30500 (user `admin`; the password is in `mlflow-secrets`) |
+| Prometheus | 30909 |
+| Alertmanager | 30903 |
+
+For the bridge to open real GitHub issues, give it a token that can write them:
+
+```bash
+INCIDENT_TOKEN_FROM_GH=1 make lab        # or INCIDENT_GITHUB_TOKEN=<token> make lab
+```
+
+Without a token it runs dry and only logs the issues it would open.
+
+`make drill-cost` runs the cost drill against the lab. It breaks the per-episode budget with a real pull request, then:
+
+1. Times the alert, the issue and the revert.
+2. Writes the postmortem to `docs/postmortems/`.
+3. Files the follow-ups as issues.
+
+The provider stays offline, so the drill spends no API credits. [docs/runbooks/cost-budget.md](runbooks/cost-budget.md) is the runbook it exercises. `make drill-preflight` only checks that the lab is ready.
+
 ## The automation
 
 | Workflow | Trigger | What it does |

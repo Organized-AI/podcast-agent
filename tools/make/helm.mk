@@ -37,6 +37,12 @@ lab-status: ## What the lab runs: Argo CD's view of dev, then the API's /healthz
 lab-watch: ## Record dev syncing itself: run, merge the dev pull request, read samples/proof/lab-sync.txt
 	deploy/gitops/lab/watch.sh samples/proof/lab-sync.txt
 
+drill-preflight: ## Check that the lab is ready for the cost drill (synced, rule loaded, canary running, nothing firing)
+	$(UV) run python tools/drill/cost_drill.py --preflight
+
+drill-cost: ## Cost drill: break the episode budget with a real PR, time the alert and the fix, write the postmortem
+	$(UV) run python tools/drill/cost_drill.py
+
 lab-down: ## Delete the lab cluster (other kind clusters are untouched)
 	kind delete cluster --name $(LAB) --kubeconfig $(LAB_KUBECONFIG)
-.PHONY: helm gitops-e2e lab lab-status lab-watch lab-down
+.PHONY: helm gitops-e2e lab lab-status lab-watch lab-down drill-preflight drill-cost
