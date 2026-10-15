@@ -1,5 +1,5 @@
 # Written by CI (.github/workflows/publish.yml): the image built from the latest commit on main.
 # Edit by hand only to pin dev to a specific build.
 image:
-  tag: "sha-e272ed1"
-  digest: "sha256:ee2f8a387d7bde31bec098299e267559b611ace90c25271533083206ffc1266e"
+  tag: "sha-9148194"
+  digest: "sha256:3b8a787ebbe16a7a00293321d4a1f051cc7fce0c1868bb9bc3418d6039edfb3a"
