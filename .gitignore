@@ -18,3 +18,4 @@ node_modules/
 coverage.xml
 htmlcov/
 .mypy_cache/
+evals/reports/

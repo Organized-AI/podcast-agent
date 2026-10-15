@@ -66,7 +66,7 @@ patch = ["subprocess"]  # measure child processes too (the telemetry setup test 
 
 [tool.coverage.report]
 # A ratchet: raise it when coverage goes up, never lower it.
-fail_under = 80
+fail_under = 83
 show_missing = false
 skip_covered = true
 exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError", "pragma: no cover"]

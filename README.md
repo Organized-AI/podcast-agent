@@ -81,6 +81,15 @@ docker compose -f deploy/compose/docker-compose.yml exec ollama ollama pull llam
 LLM_PROVIDER=ollama docker compose -f deploy/compose/docker-compose.yml run --rm agent
 ```
 
+### Evals
+
+```bash
+make evals                        # labeled fact-check cases + committed runs, gated by thresholds
+podcast-agent eval --score output  # score any run folder against the expectations, no model calls
+```
+
+See [evals/README.md](evals/README.md) for the datasets, metrics and thresholds.
+
 ### Traces, metrics and dashboards
 
 ```bash

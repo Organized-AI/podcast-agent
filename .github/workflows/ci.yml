@@ -37,6 +37,10 @@ jobs:
           uv run python tools/ci/gen_config.py --check
           uv run python tools/ci/check_version.py
           uv lock --check
+      - name: Evals (offline suite; thresholds gate the job)
+        run: |
+          uv run podcast-agent eval --suite evals/suites/offline.yaml --out evals/reports/offline
+          cat evals/reports/offline/eval.md >> "$GITHUB_STEP_SUMMARY"
       - name: End-to-end run (offline provider) and audit
         run: |
           uv run podcast-agent run data/transcripts --out output --provider offline --quiet --today 2026-10-13
