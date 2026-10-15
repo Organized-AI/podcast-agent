@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "podcast-agent"
-version = "0.1.0"
+version = "0.2.0"
 description = "Agentic podcast show-notes generator: summaries, key notes and fact-checking with a reasoning trace."
 readme = "README.md"
 requires-python = ">=3.11"

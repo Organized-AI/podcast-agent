@@ -4,7 +4,9 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
-Work toward v0.2.0, tracked in the [v0.2.0 milestone](https://github.com/Organized-AI/podcast-agent/milestone/1).
+## [0.2.0] - 2026-10-15
+
+The production revamp: OpenTelemetry tracing and metrics with a local observability stack, an eval suite that gates every pull request, Argo CD GitOps with dev and prod Helm environments, images built once and promoted by digest with signed provenance, and supply-chain checks mapped to the OpenSSF Best Practices criteria. Tracked in the [v0.2.0 milestone](https://github.com/Organized-AI/podcast-agent/milestone/1).
 
 ### Added
 - Phase 0, foundation: `uv.lock` with strict gates (ruff with bandit rules, mypy, warnings as errors, a coverage floor), hermetic tests that block the network, `config/settings.yaml` generated from the code with a drift check, a version agreement check, `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue forms, a PR template, CODEOWNERS and pre-commit hooks.
@@ -51,5 +53,6 @@ The take-home as submitted.
 - Docker image, FastAPI server, queue worker, Helm chart and the deployment strategy.
 - The interactive guide with an Audit trail tab, and a committed Claude run in `samples/claude-run/`.
 
-[Unreleased]: https://github.com/Organized-AI/podcast-agent/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Organized-AI/podcast-agent/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Organized-AI/podcast-agent/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Organized-AI/podcast-agent/releases/tag/v0.1.0
