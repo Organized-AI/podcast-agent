@@ -63,6 +63,8 @@ kubectl -n argocd patch configmap argocd-rbac-cm --type merge -p '{"data":{"poli
 kubectl -n argocd patch configmap argocd-cmd-params-cm --type merge -p '{"data":{"server.insecure":"true"}}' >/dev/null
 kubectl -n argocd patch service argocd-server -p "{\"spec\":{\"type\":\"NodePort\",
   \"ports\":[{\"port\":80,\"nodePort\":$ARGOCD_PORT}]}}" >/dev/null
+# The lab uses neither SSO nor notifications; turning them off keeps it light next to other workloads.
+kubectl -n argocd scale deploy/argocd-dex-server deploy/argocd-notifications-controller --replicas=0 >/dev/null
 kubectl -n argocd rollout restart deploy/argocd-server statefulset/argocd-application-controller >/dev/null
 kubectl -n argocd rollout status deploy/argocd-repo-server --timeout=300s
 kubectl -n argocd rollout status deploy/argocd-applicationset-controller --timeout=300s
