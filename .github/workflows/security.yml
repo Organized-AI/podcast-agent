@@ -147,7 +147,9 @@ jobs:
 
   dependency-review:
     name: Dependency review
-    if: github.event_name == 'pull_request'
+    # Also on dispatch: the deployment pull requests that publish.yml and release.yml open with
+    # GITHUB_TOKEN trigger no workflows, so they dispatch this one against main instead.
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -156,3 +158,5 @@ jobs:
         with:
           fail-on-severity: high
           deny-licenses: GPL-3.0-only, AGPL-3.0-only
+          base-ref: ${{ github.event_name == 'workflow_dispatch' && 'main' || '' }}
+          head-ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || '' }}

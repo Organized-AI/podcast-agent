@@ -1,0 +1,129 @@
+# Release on tag vX.Y.Z: check the version agrees everywhere, promote the image main already built and
+# tested (re-tag the same digest, no rebuild), publish the GitHub Release from CHANGELOG.md, and open the
+# prod deployment pull request. Prod changes only when that PR merges and someone syncs it in Argo CD.
+name: release
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/organized-ai/podcast-agent
+
+jobs:
+  verify:
+    name: Version, changelog and branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: The tag is on main
+        run: git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+      - name: pyproject, __version__, Chart appVersion, tag and CHANGELOG agree
+        env:
+          TAG: ${{ github.ref_name }}
+        run: python3 tools/ci/check_version.py --tag "$TAG"
+
+  promote:
+    name: Re-tag the tested image
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest: ${{ steps.tag.outputs.digest }}
+    steps:
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: tag
+        name: Copy sha-<commit> to the version tags (same digest)
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          source="${IMAGE}:sha-${GITHUB_SHA::7}"
+          if ! docker buildx imagetools inspect "$source" > /dev/null; then
+            echo "::error::$source does not exist: the publish workflow builds every commit on main; was it skipped?"
+            exit 1
+          fi
+          docker buildx imagetools create -t "${IMAGE}:${TAG}" -t "${IMAGE}:${TAG#v}" "$source"
+          digest=$(docker buildx imagetools inspect "${IMAGE}:${TAG}" --format '{{json .Manifest.Digest}}' | tr -d '"')
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "Promoted \`$source\` → \`${IMAGE}:${TAG}\` (\`$digest\`)" >> "$GITHUB_STEP_SUMMARY"
+
+  github-release:
+    name: GitHub Release from CHANGELOG.md
+    needs: promote
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Release notes
+        env:
+          TAG: ${{ github.ref_name }}
+          DIGEST: ${{ needs.promote.outputs.digest }}
+        run: |
+          python3 tools/ci/changelog_section.py "$TAG" > notes.md
+          printf '\n**Image:** `%s:%s` (`%s`), verify with `gh attestation verify oci://%s@%s --repo %s`\n' \
+            "$IMAGE" "$TAG" "$DIGEST" "$IMAGE" "$DIGEST" "$GITHUB_REPOSITORY" >> notes.md
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --notes-file notes.md --verify-tag --latest
+
+  bump-prod:
+    name: Open the prod deployment pull request
+    needs: [promote, github-release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Point prod at the released digest
+        env:
+          TAG: ${{ github.ref_name }}
+          DIGEST: ${{ needs.promote.outputs.digest }}
+        run: python3 tools/ci/set_image.py prod --tag "$TAG" --digest "$DIGEST"
+      - id: pr
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
+        with:
+          base: main
+          branch: gitops/prod
+          delete-branch: true
+          add-paths: deploy/gitops/envs/prod/values.yaml
+          commit-message: "Deploy ${{ github.ref_name }} to prod"
+          title: "Deploy ${{ github.ref_name }} to prod"
+          labels: area/gitops
+          body: |
+            Points prod at `${{ env.IMAGE }}:${{ github.ref_name }}` (`${{ needs.promote.outputs.digest }}`), the digest dev has been running.
+
+            After merging, sync `podcast-agent-prod` in Argo CD.
+      - name: Run the required checks on the pull request branch
+        if: steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref gitops/prod
+          gh workflow run security.yml --repo "$GITHUB_REPOSITORY" --ref gitops/prod

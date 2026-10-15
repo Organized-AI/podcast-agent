@@ -71,12 +71,12 @@ Provider: provider=offline · main=offline-heuristic · fast=offline-heuristic �
 | `llm_calls_per_episode` | 17.5 |  |  |
 | `tokens_per_episode` | 23984.8 |  |  |
 
-| Episode | Summary words | Coverage | Quotes verbatim | Claims found / right |
-|---|---|---|---|---|
-| ep001 | 282 | 1.00 | 5/5 | 2/2 found, 2 right |
-| ep002 | 262 | 1.00 | 5/5 | 3/3 found, 3 right |
-| ep003 | 268 | 1.00 | 5/5 | 2/2 found, 2 right |
-| ep004 | 280 | 1.00 | 4/4 | 5/5 found, 4 right |
+| Episode | Summary words | Coverage | Quotes verbatim | Claims found / right | Judge |
+|---|---|---|---|---|---|
+| ep001 | 282 | 1.00 | 5/5 | 2/2 found, 2 right | — |
+| ep002 | 262 | 1.00 | 5/5 | 3/3 found, 3 right | — |
+| ep003 | 268 | 1.00 | 5/5 | 2/2 found, 2 right | — |
+| ep004 | 280 | 1.00 | 4/4 | 5/5 found, 4 right | — |
 
 Claims that missed:
 - ep004: Mars + 2040 → possibly_outdated_or_inaccurate
@@ -95,12 +95,12 @@ Claims that missed:
 | `llm_calls_per_episode` | 15 |  |  |
 | `tokens_per_episode` | 13314.2 |  |  |
 
-| Episode | Summary words | Coverage | Quotes verbatim | Claims found / right |
-|---|---|---|---|---|
-| ep001 | 212 | 1.00 | 4/4 | 2/2 found, 2 right |
-| ep002 | 208 | 1.00 | 4/4 | 3/3 found, 2 right |
-| ep003 | 201 | 1.00 | 4/4 | 1/2 found, 1 right |
-| ep004 | 150 | 1.00 | 4/4 | 4/5 found, 4 right |
+| Episode | Summary words | Coverage | Quotes verbatim | Claims found / right | Judge |
+|---|---|---|---|---|---|
+| ep001 | 212 | 1.00 | 4/4 | 2/2 found, 2 right | — |
+| ep002 | 208 | 1.00 | 4/4 | 3/3 found, 2 right | — |
+| ep003 | 201 | 1.00 | 4/4 | 1/2 found, 1 right | — |
+| ep004 | 150 | 1.00 | 4/4 | 4/5 found, 4 right | — |
 
 Claims that missed:
 - ep002: FDA + autonom → unverifiable

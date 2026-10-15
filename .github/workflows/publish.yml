@@ -1,0 +1,115 @@
+# Build once on main: every merge produces one multi-arch image in GHCR, with an SBOM and signed build
+# provenance, then a pull request points dev at its digest. Argo CD deploys dev when that PR merges.
+# Releases (release.yml) re-tag this same digest; nothing is rebuilt between dev and prod.
+name: publish
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "deploy/gitops/envs/**"   # an environment bump is not a new build
+      - "**/*.md"
+      - "docs/**"
+      - "samples/**"
+      - "website/**"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/organized-ai/podcast-agent
+
+jobs:
+  image:
+    name: Build, push and attest the image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write        # push to GHCR
+      id-token: write        # sign the provenance attestation
+      attestations: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+      tag: ${{ steps.short.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Short commit tag
+        id: short
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1  # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302  # v6.2.0
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=main
+      - id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: GIT_COMMIT=${{ steps.short.outputs.tag }}
+          sbom: true
+          provenance: mode=max
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+  bump-dev:
+    name: Open the dev deployment pull request
+    needs: image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write        # push the bump branch
+      pull-requests: write   # open the pull request
+      actions: write         # dispatch the required checks on it
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Point dev at the new digest
+        env:
+          TAG: ${{ needs.image.outputs.tag }}
+          DIGEST: ${{ needs.image.outputs.digest }}
+        run: python3 tools/ci/set_image.py dev --tag "$TAG" --digest "$DIGEST"
+      - id: pr
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
+        with:
+          branch: gitops/dev
+          delete-branch: true
+          add-paths: deploy/gitops/envs/dev/values.yaml
+          commit-message: "Deploy ${{ needs.image.outputs.tag }} to dev"
+          title: "Deploy ${{ needs.image.outputs.tag }} to dev"
+          labels: area/gitops
+          body: |
+            Points dev at the image built from ${{ github.sha }}:
+
+            `${{ env.IMAGE }}@${{ needs.image.outputs.digest }}` (`${{ needs.image.outputs.tag }}`)
+
+            Argo CD syncs dev when this merges. Verify the build provenance with
+            `gh attestation verify oci://${{ env.IMAGE }}@${{ needs.image.outputs.digest }} --repo ${{ github.repository }}`.
+      # Pull requests opened with GITHUB_TOKEN do not trigger workflows, so dispatch the required checks.
+      - name: Run the required checks on the pull request branch
+        if: steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref gitops/dev
+          gh workflow run security.yml --repo "$GITHUB_REPOSITORY" --ref gitops/dev
