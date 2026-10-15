@@ -1,4 +1,6 @@
-# make observe on an M1 MacBook Pro (Docker via Colima), 2026-10-14
+# command: make observe, then python e2e/check_telemetry.py output/observe
+# machine: MacBook Pro · Apple M1 Pro · Docker via Colima
+# captured: 2026-10-14
 # Stack: otel-collector-contrib 0.161.0 · jaeger 2.21.0 · prometheus v3.14.0 · grafana 13.2.3 (pinned by digest)
 # Run: LLM_PROVIDER=offline podcast-agent run data/transcripts with OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
 $ python e2e/check_telemetry.py output/observe

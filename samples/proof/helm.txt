@@ -1,21 +1,14 @@
-# command: helm lint deploy/helm/podcast-agent && helm template … | kubeconform -strict -kubernetes-version 1.30.0
-# machine: Linux workspace · x86_64 · Python 3.13.16
-# commit: 07366cb
-# captured: 2026-10-14T17:07:19Z
+# command: make helm
+# machine: GitHub Actions · ubuntu-latest · ci.yml "Helm chart" job 116209463414 · kubeconform 0.8.0
+# commit: 1748622
+# captured: 2026-10-15T02:11:13Z
 
-==> Linting deploy/helm/podcast-agent
-[INFO] Chart.yaml: icon is recommended
-
-1 chart(s) linted, 0 chart(s) failed
-
-      1 kind: ConfigMap
-      2 kind: Deployment
-      1 kind: HorizontalPodAutoscaler
-      1 kind: NetworkPolicy
-      1 kind: PodDisruptionBudget
-      1 kind: ScaledObject
-      1 kind: Service
-      1 kind: ServiceAccount
-      1 kind: TriggerAuthentication
-
-Summary: 10 resources found in 1 file - Valid: 8, Invalid: 0, Errors: 0, Skipped: 2
+== default
+Summary: 10 resources found parsing stdin - Valid: 10, Invalid: 0, Errors: 0, Skipped: 0
+== dev
+Summary: 5 resources found parsing stdin - Valid: 5, Invalid: 0, Errors: 0, Skipped: 0
+== prod
+Summary: 12 resources found parsing stdin - Valid: 12, Invalid: 0, Errors: 0, Skipped: 0
+== Argo CD manifests
+Summary: 2 resources found in 2 files - Valid: 2, Invalid: 0, Errors: 0, Skipped: 0
+exit: 0
