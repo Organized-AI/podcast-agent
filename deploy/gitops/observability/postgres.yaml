@@ -29,7 +29,7 @@ spec:
           readinessProbe:
             exec: { command: ["pg_isready", "-U", "mlflow", "-d", "mlflow"] }
             periodSeconds: 10
-          securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: [ALL] } }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
           resources:
             requests: { cpu: 50m, memory: 128Mi }
             limits: { cpu: "1", memory: 512Mi }
@@ -37,10 +37,13 @@ spec:
             - { name: data, mountPath: /var/lib/postgresql/data }
             - { name: init, mountPath: /docker-entrypoint-initdb.d }
             - { name: run, mountPath: /var/run/postgresql }
+            - { name: tmp, mountPath: /tmp }
       volumes:
         - name: init
           configMap: { name: postgres-init }
         - name: run
+          emptyDir: {}
+        - name: tmp
           emptyDir: {}
   volumeClaimTemplates:
     - apiVersion: v1          # written out as the API server stores them, so Argo CD sees no drift
