@@ -49,13 +49,25 @@ def record(**overrides) -> DrillRecord:
     return r
 
 
+DEV_VALUES = """# dev: a small cluster
+config:
+  LLM_PROVIDER: offline
+  SEARCH_PROVIDER: mock
+  # the canary normally costs about half of this
+  COST_BUDGET_USD: "0.15"
+
+secrets:
+  optional: true
+"""
+
+
 def test_the_fault_adds_the_budgets_to_devs_config_block():
-    values = (ROOT / "deploy" / "helm" / "podcast-agent" / "values-dev.yaml").read_text()
-    changed = _drill().raise_claim_budget(values, "40", "12")
-    assert yaml.safe_load(changed)["config"] == {**yaml.safe_load(values)["config"], "MAX_CLAIMS": "40",
+    # A fixture, not the live values-dev.yaml: on the drill's own pull request that file already has the fault.
+    changed = _drill().raise_claim_budget(DEV_VALUES, "40", "12")
+    assert yaml.safe_load(changed)["config"] == {**yaml.safe_load(DEV_VALUES)["config"], "MAX_CLAIMS": "40",
                                                  "MAX_STEPS_PER_CLAIM": "12"}
     assert changed.replace('  # Check every claim in long episodes, not just the first eight.\n  MAX_CLAIMS: "40"\n'
-                           '  MAX_STEPS_PER_CLAIM: "12"\n', "") == values
+                           '  MAX_STEPS_PER_CLAIM: "12"\n', "") == DEV_VALUES
 
 
 def test_a_drill_cannot_start_while_another_ones_change_is_live():
