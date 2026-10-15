@@ -58,7 +58,9 @@ def score(verdict: JudgeVerdict) -> float:
 
 
 def judge_summary(ctx: RunContext, episode: Episode, summary: str) -> tuple[JudgeVerdict, float]:
-    transcript = "\n".join(f"[{u.timestamp}] {u.speaker_name}: {u.text}" for u in episode.utterances)
+    # The same rendering the agent's steps see, roles included ("Chris Bell (host)"): a judge that sees less than the
+    # agent flags what the agent was told as invented (#51).
+    transcript = episode.render()
     prompt = f"Transcript of {episode.title!r}:\n{transcript}\n\nSummary to grade:\n{summary}"
     result = call_structured(ctx, step=f"judge {episode.episode_id}", schema=JudgeVerdict, system=judge_system(),
                              prompt=prompt, tier="main", max_tokens=900, task="judge_summary")
