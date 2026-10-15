@@ -42,9 +42,9 @@ The issue's **Episodes over budget** line says who is affected:
 
 `tools/drill/cost_drill.py` runs this incident on purpose against the lab, with the offline provider, so it spends no API credits. It:
 
-1. Opens and merges a pull request that raises dev's claim budget.
+1. Opens a pull request that raises dev's claim budget. Once CI passes it waits for you to merge it, and that wait counts toward MTTR. `--auto-merge` merges on green instead.
 2. Waits for the alert and for the issue.
-3. Reverts the pull request.
+3. Opens the revert and waits for it to be merged the same way.
 4. Waits for recovery and for the issue to close.
 5. Writes the postmortem.
 

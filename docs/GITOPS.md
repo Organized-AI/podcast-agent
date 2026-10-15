@@ -104,7 +104,7 @@ INCIDENT_TOKEN_FROM_GH=1 make lab        # or INCIDENT_GITHUB_TOKEN=<token> make
 
 Without a token it runs dry and only logs the issues it would open.
 
-`make drill-cost` runs the cost drill against the lab. It breaks the per-episode budget with a real pull request, then:
+`make drill-cost` runs the cost drill against the lab. It breaks the per-episode budget with a real pull request that you merge, then:
 
 1. Times the alert, the issue and the revert.
 2. Writes the postmortem to `docs/postmortems/`.
