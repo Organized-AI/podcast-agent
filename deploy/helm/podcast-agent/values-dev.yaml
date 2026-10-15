@@ -11,9 +11,6 @@ config:
   # Offline token counts are estimates that run well under Claude's measured usage, so dev's budget is set against
   # the canary: it normally costs about $0.07 here, half this budget.
   COST_BUDGET_USD: "0.15"
-  # Check every claim in long episodes, not just the first eight.
-  MAX_CLAIMS: "40"
-  MAX_STEPS_PER_CLAIM: "12"
 
 secrets:
   optional: true
