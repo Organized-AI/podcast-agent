@@ -1,0 +1,10 @@
+# LaTeX build output (make paper)
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+paper.pdf
