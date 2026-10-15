@@ -1,0 +1,46 @@
+21:43:38 cost drill against Organized-AI/podcast-agent, lab at claws-mac-mini
+21:43:38 0. preflight
+21:43:38   Argo CD podcast-agent-dev: Synced Healthy
+21:43:38   Argo CD observability: Synced Healthy
+21:43:38   Argo CD mlflow: Synced Healthy
+21:43:38   Prometheus has the PodcastAgentCostBudgetExceeded rule
+21:43:38   canary episodes in Jaeger from the last 5 minutes: 5
+21:43:38   nothing firing
+21:43:39 1. baseline
+21:43:39   canary under budget: $0.07 (8 claims, 28 calls) against $0.15
+21:43:39 2. inject: raise dev's claim budget to 40 (12 tool calls per claim)
+21:43:45   opened #77 https://github.com/Organized-AI/podcast-agent/pull/77
+21:43:45   waiting for PR Gate on #77
+21:46:22   PR Gate passed on #77 after 2m 41s
+21:46:22   ready for review: merge #77 to continue (https://github.com/Organized-AI/podcast-agent/pull/77)
+21:57:49   #77 merged as f476dfb, 11m 21s after CI
+21:57:49 3. detect
+21:58:34   Argo CD synced f476dfb at 2026-10-15T21:58:30Z: impact starts
+21:59:31   PodcastAgentCostBudgetExceeded firing since 2026-10-15T21:59:30Z: MTTD 1m 1s
+21:59:31 4. notify
+22:01:59   #78 opened 2m 11s after the alert: https://github.com/Organized-AI/podcast-agent/issues/78
+22:01:59   ok   says who is affected: the canary only, no live episode
+22:01:59   ok   cost per episode now and an hour earlier
+22:01:59   ok   spend by step, with verification on top
+22:01:59   ok   the most expensive episode, linked in Jaeger and MLflow
+22:01:59   ok   the suspect pull request, #77, and its diff
+22:01:59   ok   the setting that changed, in the diff
+22:01:59   ok   the mitigation: revert the suspect
+22:01:59   ok   the runbook
+22:01:59 5. mitigate: revert the suspect pull request
+22:02:07   opened #80 https://github.com/Organized-AI/podcast-agent/pull/80
+22:02:07   waiting for PR Gate on #80
+22:05:15   PR Gate passed on #80 after 3m 11s
+22:05:15   ready for review: merge #80 to continue (https://github.com/Organized-AI/podcast-agent/pull/80)
+22:08:01   #80 merged as 52a8bcd, 2m 33s after CI
+22:08:01   Argo CD synced 52a8bcd at 2026-10-15T22:08:00Z: mitigated 8m 29s after detection
+22:08:01 6. recover
+22:09:13   canary back under budget at 2026-10-15T22:09:03Z ($0.07): MTTR 10m 33s
+22:13:24   PodcastAgentCostBudgetExceeded resolved by 2026-10-15T22:13:24Z
+22:13:46   #78 closed by the bridge: its MTTD 1m 0s, MTTR 10m 33s
+22:13:46 7. learn: postmortem and follow-ups
+22:13:46   follow-up #82: Check a config change's cost in CI before it merges
+22:13:47   follow-up #83: Resolve the cost alert when the canary recovers, not five minutes later
+22:13:48   follow-up #84: Page when live episodes go over budget; keep the canary at ticket
+22:13:48   MTTD 1m 1s · MTTR 10m 33s · ticket 2m 11s after the alert · 8/8 evidence checks
+22:13:48   wrote docs/postmortems/2026-10-15-cost-budget-drill.md
