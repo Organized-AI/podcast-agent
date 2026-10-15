@@ -10,7 +10,7 @@ server:
   value_options:
     host: 0.0.0.0
     port: 5000
-    workers: 2
+    workers: 1     # two workers of the -full image went past 1.5 GiB and were OOMKilled in the lab
     app_name: basic-auth
     # MLflow rejects Host headers it doesn't know (a DNS-rebinding guard).
     allowed_hosts: "mlflow:5000,mlflow.observability.svc.cluster.local:5000,claws-mac-mini:30500,claws-mac-mini.tailb35295.ts.net:30500,localhost:*,127.0.0.1:*"
@@ -44,5 +44,5 @@ storage:
   mountPath: /mlflow
 
 resources:
-  requests: { cpu: 100m, memory: 512Mi }
-  limits: { cpu: "1", memory: 1536Mi }
+  requests: { cpu: 100m, memory: 768Mi }
+  limits: { cpu: "1", memory: 2Gi }
