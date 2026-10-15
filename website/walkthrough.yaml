@@ -34,7 +34,7 @@ stops:
       of v0.2.0 is operations, not features, and that is the part of the job a forward deployed engineer owns.'
   say:
   - 'It''s for producers who publish show notes and need every factual claim checked: a 200–300 word summary, five takeaways,
-    quotes checked word for word, a fact-check table marked ✅ ⚠️ ❓, and a readable reasoning log.'
+    quotes matched to the line they come from, a fact-check table marked ✅ ⚠️ ❓, and a readable reasoning log.'
   - I built it to the spec first, as v0.1.0. Then I made it operable, as v0.2.0.
   - 'This guide is the evidence: the Audit trail is a real Claude run, and every card links to a CI job, a pull request
     or a captured run.'
@@ -78,8 +78,8 @@ stops:
   - Haiku writes the plan. In the Claude run it skipped normalization on the three clean JSON transcripts, and set a budget
     of 2–6 tool calls per claim. Sonnet writes the summary and notes and verifies the claims; Haiku extracts them.
   - The summary writes the transcript to Sonnet's prompt cache, and the notes read it back at 5% of the input price.
-  - '`podcast-agent audit` re-checks a finished run from its files: hashes, quotes verbatim at their timestamp, every claim
-    grounded in its transcript line, confidence within the evidence cap.'
+  - '`podcast-agent audit` re-checks a finished run from its files: hashes, every quote re-matched to its line (90% or
+    closer), every claim grounded in its transcript line, confidence within the evidence cap.'
   show:
   - label: Audit trail › Episodes
     view: audit
@@ -324,15 +324,15 @@ stops:
       service account ready for IRSA (the role is set per customer), so pods reach AWS without static keys.
 - title: 'Operate: one trace, two backends'
   live: true
-  claim: Every run is one OpenTelemetry trace. The Collector sends it to Jaeger and MLflow, and CI proves that an MLflow
-    outage doesn't cost Jaeger a span.
+  claim: With telemetry on, every run is one OpenTelemetry trace. The Collector sends it to Jaeger and MLflow, and CI
+    proves that during an MLflow outage Jaeger still gets every span.
   facts:
   - value: 128 / 128
     label: spans in both Jaeger and MLflow for a full (offline) run
   - value: '37'
     label: queued spans delivered after an MLflow outage
-  - value: '6'
-    label: alert rules, unit-tested
+  - value: '7'
+    label: alert rules, each unit-tested with promtool
   - value: '0'
     label: transcript text in spans, by default
   learned:
