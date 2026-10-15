@@ -55,6 +55,11 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: observability
+  # The API server keeps a status in each StatefulSet volumeClaimTemplate; it is not part of the desired state.
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      jqPathExpressions: [".spec.volumeClaimTemplates[]?.status"]
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: [CreateNamespace=true, ServerSideApply=true]

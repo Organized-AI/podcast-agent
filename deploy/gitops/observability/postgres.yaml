@@ -43,10 +43,13 @@ spec:
         - name: run
           emptyDir: {}
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1          # written out as the API server stores them, so Argo CD sees no drift
+      kind: PersistentVolumeClaim
+      metadata:
         name: data
       spec:
         accessModes: [ReadWriteOnce]
+        volumeMode: Filesystem
         resources:
           requests: { storage: 4Gi }
 ---
