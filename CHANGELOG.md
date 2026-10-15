@@ -29,6 +29,7 @@ Work toward v0.2.0, tracked in the [v0.2.0 milestone](https://github.com/Organiz
 - An `episode_id` inside a transcript could name output files outside the output folder (`../../x` wrote `x.md` two levels up). Ids are now reduced to `[A-Za-z0-9._-]`, at most 64 characters, before they name a file.
 
 ### Fixed
+- A prediction whose deadline has not passed is now always ❓ unverifiable, enforced in code after the model's verdict and logged as a self-correction. `samples/claude-run` had "Humans will walk on Mars before 2040" as ⚠️ 0.60 because only the prompt stated the rule.
 - `.env.example` documents `ANTHROPIC_THINKING_SUMMARIES` and `LLM_CACHE_DIR`, which the code read but the example never listed.
 
 ## [0.1.0] - 2026-10-14

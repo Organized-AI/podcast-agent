@@ -15,6 +15,7 @@ from pydantic import AliasChoices, BaseModel, Field, ValidationError
 
 from podcast_agent import telemetry
 from podcast_agent.agent.pipeline import EpisodeState, register
+from podcast_agent.agent.policy import prediction_is_checkable
 from podcast_agent.llm.base import LLMRefusal
 from podcast_agent.llm.structured import extract_json
 from podcast_agent.models import Claim, Evidence, FactCheck, Verdict
@@ -279,6 +280,15 @@ def _verify_claim(
         ctx.trace.warn(step, "no valid verdict — defaulting to ❓ unverifiable (0.20) for human review", indent=1)
         return fc
 
+    if final.verdict != Verdict.UNVERIFIABLE and not prediction_is_checkable(claim.type, claim.claim, s.today):
+        # The prompt states this rule, but models still grade far-off predictions by today's outlook (#13).
+        ctx.trace.event("self_correct", step,
+                        f"policy: a prediction whose deadline has not passed is unverifiable (model said {final.verdict.label})",
+                        indent=1)
+        final = final.model_copy(update={
+            "verdict": Verdict.UNVERIFIABLE,
+            "rationale": final.rationale + " Reclassified as unverifiable: the prediction's deadline has not passed yet.",
+        })
     cited = [evidence[i] for i in final.evidence_ids]
     if final.verdict != Verdict.UNVERIFIABLE and not cited:
         cited = [Evidence(id="M1", source="model_knowledge", title="Model background knowledge (no tool evidence)",
