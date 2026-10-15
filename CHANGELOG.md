@@ -5,6 +5,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- Guide: the v0.2.0 page now shows what has closed since release and what is still open, each with its evidence. The Audit trail adds the live Claude run (gates and per-episode judge scores), the lab's recorded sync on merge, and the public verification of v0.2.0's provenance.
 - The OpenSSF Best Practices **passing** badge: [project 15516](https://www.bestpractices.dev/projects/15516), with all 67 criteria met. The badge is in the README, and `docs/OPENSSF-BEST-PRACTICES.md` holds the same answers, with a URL where the criterion requires one.
 - Fuzzing: Atheris fuzzers for the TXT and JSON transcript parsers and the episode-id sanitizer (`fuzz/`), built and run by ClusterFuzzLite on every pull request that touches the code (5 minutes) and weekly (30 minutes). Base images are pinned by digest and dependencies are installed from `uv.lock` with hashes.
 - The first live eval run with Claude (Sonnet 5.5 + Haiku 5.5) met all 14 gates: 25 of 25 fact-check verdicts, every citation valid, Brier 0.033, every quote verbatim, every expected claim found, judge 0.83. It is the baseline in `evals/baselines/live.json`, and its report is in `samples/proof/evals-live/`. The judge's two invented facts, both in ep004's summary, are #51.
