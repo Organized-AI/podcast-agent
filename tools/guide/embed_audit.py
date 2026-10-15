@@ -30,8 +30,13 @@ PROOF = [
     ("pytest.txt", "Test suite", "tests", r"=+ (\d+ passed[^=]*?) in", "pass"),
     ("mac-pytest.txt", "Test suite on the MacBook (Python 3.12 container)", "tests", r"=+ (\d+ passed[^=]*?) in", "pass"),
     ("ruff.txt", "Lint", "lint", r"(All checks passed!)", "pass"),
-    ("helm.txt", "Helm chart: lint and Kubernetes schema check", "deploy",
+    ("mypy.txt", "Types", "types", r"(Success: no issues found in \d+ source files)", "pass"),
+    ("helm.txt", "Helm chart: every environment linted and schema-checked, plus the Argo CD manifests", "deploy",
      r"(Valid: \d+, Invalid: \d+, Errors: \d+, Skipped: \d+)", "pass"),
+    ("evals.txt", "Offline eval suite: 25 labeled claims and both committed runs", "evals",
+     r"((?:PASS|FAIL)\*\* \(\d+/\d+ thresholds met\))", "pass"),
+    ("otel-e2e-mac.txt", "OpenTelemetry end to end on the MacBook: Collector, Jaeger, Prometheus, Grafana", "telemetry",
+     r"(run \S+ · trace \w+)", "pass"),
     ("mac-docker-build.txt", "Docker build on the MacBook", "docker", r"os/arch (\S+)", "pass"),
     ("mac-docker-run-claude.txt", "Claude run on the MacBook (Sonnet 5.5 + Haiku 5.5), all four episodes", "docker",
      r"(exit: \d+)", "pass"),
@@ -45,7 +50,7 @@ PROOF = [
     ("audit-tampered.txt", "Tamper test: the audit catches edited output", "audit",
      r"(\d+ passed · \d+ warnings? · \d+ failed)", "fail"),
 ]
-FAILED = re.compile(r"\b[1-9]\d* failed|Invalid: [1-9]|exit: [1-9]|\bERROR\b")
+FAILED = re.compile(r"\b[1-9]\d* failed|Invalid: [1-9]|exit: [1-9]|\bERROR\b|^FAIL\b|\*\*FAIL\*\*", re.M)
 
 
 def read_header(text: str) -> tuple[dict[str, str], str]:
@@ -69,7 +74,16 @@ def proof_items(proof_dir: Path) -> list[dict]:
             continue
         meta, body = read_header(ANSI.sub("", path.read_text(encoding="utf-8")))
         m = re.search(pattern, body)
-        headline = m.group(1) if m else ""
+        headline = (m.group(1) if m else "").replace("**", "")
+        if fname == "helm.txt":
+            counts = [tuple(map(int, t)) for t in re.findall(r"Valid: (\d+), Invalid: (\d+), Errors: (\d+)", body)]
+            envs = re.findall(r"^== (.+)$", body, re.M)
+            if counts:
+                headline = (f"Valid: {sum(c[0] for c in counts)}, Invalid: {sum(c[1] for c in counts)}, "
+                            f"Errors: {sum(c[2] for c in counts)} · {', '.join(envs)}")
+        if fname == "otel-e2e-mac.txt":
+            checks = re.findall(r"^(PASS|FAIL) ", body, re.M)
+            headline = f"{checks.count('PASS')} of {len(checks)} checks passed" + (f" · {headline}" if headline else "")
         if fname == "mac-docker-build.txt":
             commit = re.search(r"GIT_COMMIT=(\S+)", body)
             headline = f"built · {headline}" + (f" · GIT_COMMIT={commit.group(1)}" if commit else "")
@@ -81,6 +95,31 @@ def proof_items(proof_dir: Path) -> list[dict]:
         items.append({"id": fname.removesuffix(".txt"), "file": f"samples/proof/{fname}", "title": title, "kind": kind,
                       "status": status, "headline": headline, **meta, "output": "\n".join(lines)})
     return items
+
+
+def eval_summary(proof_dir: Path) -> dict:
+    """The offline eval report (podcast-agent eval --out samples/proof/evals-offline), trimmed for the page."""
+    path = proof_dir / "evals-offline" / "eval.json"
+    if not path.exists():
+        return {}
+    report = json.loads(path.read_text(encoding="utf-8"))
+    sections = []
+    for sec in report["sections"]:
+        item = {"name": sec["name"], "kind": sec["kind"], "metrics": sec["metrics"], "checks": sec["checks"]}
+        if sec["kind"] == "factcheck":
+            item["rows"] = [{k: r.get(k) for k in ("id", "tags", "expected", "verdict", "correct", "confidence",
+                                                    "cited_kb", "kb_expected")} for r in sec["rows"]]
+        else:
+            item["rows"] = [{"episode": r["episode"], "summary_words": r["summary_words"],
+                             "summary_coverage": r["summary_coverage"], "quotes": r["quotes"],
+                             "quotes_verbatim": r["quotes_verbatim"],
+                             "claims": len(r["claims"]), "found": sum(1 for c in r["claims"] if c["found"]),
+                             "right": sum(1 for c in r["claims"] if c["correct"])} for r in sec["rows"]]
+        sections.append(item)
+    checks = [c for sec in sections for c in sec["checks"]]
+    return {"suite": report["suite"], "description": report["description"], "provider": report["provider"],
+            "passed": report["passed"], "gates": len(checks), "gates_met": sum(1 for c in checks if c["passed"]),
+            "file": "samples/proof/evals-offline/eval.json", "sections": sections}
 
 
 def publish_files(run: Path, manifest: dict, dest: Path) -> list[dict]:
@@ -166,7 +205,7 @@ def main(run_dir: str, proof_dir: str, html_path: str) -> None:
                                               "prompt_version", "provider", "search", "today", "settings",
                                               "knowledge_base", "trace_events")},
         "episodes": episodes, "claims": claims, "audit": audit, "trace": trace,
-        "proof": proof_items(proof), "mac_run": mac,
+        "proof": proof_items(proof), "mac_run": mac, "evals": eval_summary(proof),
         "files": publish_files(run, manifest, html.parent / "run"),
     }
     blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")

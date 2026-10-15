@@ -1,0 +1,1071 @@
+{
+  "suite": "offline",
+  "description": "Fact-check cases through the offline heuristics, plus the committed runs scored without a model.",
+  "provider": "provider=offline · main=offline-heuristic · fast=offline-heuristic",
+  "passed": true,
+  "sections": [
+    {
+      "name": "factcheck",
+      "kind": "factcheck",
+      "metrics": {
+        "cases": 25.0,
+        "verdict_accuracy": 0.96,
+        "macro_f1": 0.9158,
+        "citation_validity": 1.0,
+        "kb_recall": 0.8824,
+        "brier": 0.0273,
+        "ece": 0.1507,
+        "tool_calls_per_case": 1.08,
+        "llm_calls": 52.0,
+        "input_tokens": 39698.0,
+        "output_tokens": 2877.0,
+        "accuracy.ambiguous": 1.0,
+        "accuracy.anecdote": 1.0,
+        "accuracy.contradicted": 0.0,
+        "accuracy.future-deadline": 1.0,
+        "accuracy.issue-13": 1.0,
+        "accuracy.no-deadline": 1.0,
+        "accuracy.passed-deadline": 1.0,
+        "accuracy.stale-fact": 1.0,
+        "accuracy.verified-fact": 1.0
+      },
+      "rows": [
+        {
+          "id": "nasa-msr-2026",
+          "tags": [
+            "stale-fact"
+          ],
+          "expected": "possibly_outdated_or_inaccurate",
+          "acceptable": [
+            "possibly_outdated_or_inaccurate"
+          ],
+          "verdict": "possibly_outdated_or_inaccurate",
+          "correct": true,
+          "confidence": 0.74,
+          "raw_confidence": 0.74,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-030"
+          ],
+          "kb_expected": [
+            "KB-030"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "bitcoin-200k-2025",
+          "tags": [
+            "passed-deadline"
+          ],
+          "expected": "possibly_outdated_or_inaccurate",
+          "acceptable": [
+            "possibly_outdated_or_inaccurate"
+          ],
+          "verdict": "possibly_outdated_or_inaccurate",
+          "correct": true,
+          "confidence": 0.85,
+          "raw_confidence": 0.85,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-032"
+          ],
+          "kb_expected": [
+            "KB-032"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "mars-humans-2040",
+          "tags": [
+            "future-deadline",
+            "issue-13"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.35,
+          "raw_confidence": 0.35,
+          "tool_evidence": 0,
+          "cited_kb": [],
+          "kb_expected": [
+            "KB-034"
+          ],
+          "tool_calls": 0
+        },
+        {
+          "id": "bitcoin-500k-2030",
+          "tags": [
+            "future-deadline",
+            "issue-13"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.35,
+          "raw_confidence": 0.35,
+          "tool_evidence": 0,
+          "cited_kb": [],
+          "kb_expected": [],
+          "tool_calls": 0
+        },
+        {
+          "id": "nvidia-10t-2028",
+          "tags": [
+            "future-deadline",
+            "issue-13"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.35,
+          "raw_confidence": 0.35,
+          "tool_evidence": 0,
+          "cited_kb": [],
+          "kb_expected": [
+            "KB-033"
+          ],
+          "tool_calls": 0
+        },
+        {
+          "id": "async-standard",
+          "tags": [
+            "no-deadline"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.35,
+          "raw_confidence": 0.35,
+          "tool_evidence": 0,
+          "cited_kb": [],
+          "kb_expected": [],
+          "tool_calls": 0
+        },
+        {
+          "id": "offices-optional-hubs",
+          "tags": [
+            "no-deadline"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.35,
+          "raw_confidence": 0.35,
+          "tool_evidence": 0,
+          "cited_kb": [],
+          "kb_expected": [],
+          "tool_calls": 0
+        },
+        {
+          "id": "remote-first-dominate-2025",
+          "tags": [
+            "passed-deadline",
+            "ambiguous"
+          ],
+          "expected": "possibly_outdated_or_inaccurate",
+          "acceptable": [
+            "possibly_outdated_or_inaccurate",
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.3,
+          "raw_confidence": 0.3,
+          "tool_evidence": 0,
+          "cited_kb": [],
+          "kb_expected": [
+            "KB-004"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "perseverance-landing",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-031"
+          ],
+          "kb_expected": [
+            "KB-031"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "perseverance-samples",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-031"
+          ],
+          "kb_expected": [
+            "KB-031"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "nvidia-5t-first",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.78,
+          "raw_confidence": 0.78,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-033"
+          ],
+          "kb_expected": [
+            "KB-033"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "fda-autonomy-not-soon",
+          "tags": [
+            "contradicted"
+          ],
+          "expected": "possibly_outdated_or_inaccurate",
+          "acceptable": [
+            "possibly_outdated_or_inaccurate"
+          ],
+          "verdict": "unverifiable",
+          "correct": false,
+          "confidence": 0.3,
+          "raw_confidence": 0.3,
+          "tool_evidence": 0,
+          "cited_kb": [],
+          "kb_expected": [
+            "KB-012"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "fda-reviews-ai",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.78,
+          "raw_confidence": 0.78,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-010"
+          ],
+          "kb_expected": [
+            "KB-010"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "hospitals-ai-xrays",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-011"
+          ],
+          "kb_expected": [
+            "KB-011"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "triage-chatbots",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.78,
+          "raw_confidence": 0.78,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-013"
+          ],
+          "kb_expected": [
+            "KB-013"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "pandemic-digital-health",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-015"
+          ],
+          "kb_expected": [
+            "KB-015"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "ai-bias-clinical-data",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-014"
+          ],
+          "kb_expected": [
+            "KB-014"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "gitlab-handbook",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-001"
+          ],
+          "kb_expected": [
+            "KB-001"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "automattic-distributed",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-002"
+          ],
+          "kb_expected": [
+            "KB-002"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "hybrid-most-common",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-004"
+          ],
+          "kb_expected": [
+            "KB-004"
+          ],
+          "tool_calls": 2
+        },
+        {
+          "id": "vc-dilutes-control",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.71,
+          "raw_confidence": 0.71,
+          "tool_evidence": 2,
+          "cited_kb": [
+            "KB-021",
+            "KB-020"
+          ],
+          "kb_expected": [
+            "KB-020",
+            "KB-021"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "bootstrapping-tradeoff",
+          "tags": [
+            "verified-fact"
+          ],
+          "expected": "verified",
+          "acceptable": [
+            "verified"
+          ],
+          "verdict": "verified",
+          "correct": true,
+          "confidence": 0.9,
+          "raw_confidence": 0.9,
+          "tool_evidence": 1,
+          "cited_kb": [
+            "KB-022"
+          ],
+          "kb_expected": [
+            "KB-022"
+          ],
+          "tool_calls": 1
+        },
+        {
+          "id": "samir-saas-breakeven",
+          "tags": [
+            "anecdote"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.3,
+          "raw_confidence": 0.3,
+          "tool_evidence": 0,
+          "cited_kb": [],
+          "kb_expected": [],
+          "tool_calls": 0
+        },
+        {
+          "id": "emily-fintech-seed",
+          "tags": [
+            "anecdote"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.3,
+          "raw_confidence": 0.3,
+          "tool_evidence": 0,
+          "cited_kb": [],
+          "kb_expected": [],
+          "tool_calls": 0
+        },
+        {
+          "id": "emily-raised-rounds",
+          "tags": [
+            "anecdote"
+          ],
+          "expected": "unverifiable",
+          "acceptable": [
+            "unverifiable"
+          ],
+          "verdict": "unverifiable",
+          "correct": true,
+          "confidence": 0.3,
+          "raw_confidence": 0.3,
+          "tool_evidence": 0,
+          "cited_kb": [],
+          "kb_expected": [],
+          "tool_calls": 0
+        }
+      ],
+      "checks": [
+        {
+          "section": "factcheck",
+          "metric": "verdict_accuracy",
+          "value": 0.96,
+          "threshold": 0.96,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "macro_f1",
+          "value": 0.9158,
+          "threshold": 0.91,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "citation_validity",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "kb_recall",
+          "value": 0.8824,
+          "threshold": 0.88,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "brier",
+          "value": 0.0273,
+          "threshold": 0.05,
+          "direction": "max",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "accuracy.future-deadline",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "accuracy.passed-deadline",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "factcheck",
+          "metric": "accuracy.anecdote",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "claude-run",
+      "kind": "run",
+      "metrics": {
+        "episodes": 4.0,
+        "summary_in_range": 1.0,
+        "summary_coverage": 1.0,
+        "notes_shape_ok": 1.0,
+        "quote_fidelity": 1.0,
+        "claim_recall": 1.0,
+        "claim_verdict_accuracy": 0.9167,
+        "llm_calls_per_episode": 17.5,
+        "tokens_per_episode": 23984.75
+      },
+      "rows": [
+        {
+          "episode": "ep001",
+          "judge": null,
+          "summary_words": 282,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 5,
+          "quotes_verbatim": 5,
+          "claims": [
+            {
+              "match": [
+                "GitLab"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            },
+            {
+              "match": [
+                "remote-first",
+                "talent"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            }
+          ],
+          "llm_calls": 26,
+          "tokens": 38179
+        },
+        {
+          "episode": "ep002",
+          "judge": null,
+          "summary_words": 262,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 5,
+          "quotes_verbatim": 5,
+          "claims": [
+            {
+              "match": [
+                "FDA",
+                "autonom"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            },
+            {
+              "match": [
+                "X-ray"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            },
+            {
+              "match": [
+                "pandemic"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            }
+          ],
+          "llm_calls": 13,
+          "tokens": 16768
+        },
+        {
+          "episode": "ep003",
+          "judge": null,
+          "summary_words": 268,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 5,
+          "quotes_verbatim": 5,
+          "claims": [
+            {
+              "match": [
+                "break-even"
+              ],
+              "found": true,
+              "verdict": "unverifiable",
+              "correct": true
+            },
+            {
+              "match": [
+                "fintech"
+              ],
+              "found": true,
+              "verdict": "unverifiable",
+              "correct": true
+            }
+          ],
+          "llm_calls": 15,
+          "tokens": 19270
+        },
+        {
+          "episode": "ep004",
+          "judge": null,
+          "summary_words": 280,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 4,
+          "quotes_verbatim": 4,
+          "claims": [
+            {
+              "match": [
+                "Mars",
+                "sample"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            },
+            {
+              "match": [
+                "Perseverance",
+                "landed"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            },
+            {
+              "match": [
+                "Bitcoin",
+                "200"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            },
+            {
+              "match": [
+                "Nvidia",
+                "trillion"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            },
+            {
+              "match": [
+                "Mars",
+                "2040"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": false
+            }
+          ],
+          "llm_calls": 16,
+          "tokens": 21722
+        }
+      ],
+      "checks": [
+        {
+          "section": "claude-run",
+          "metric": "summary_in_range",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "claude-run",
+          "metric": "summary_coverage",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "claude-run",
+          "metric": "notes_shape_ok",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "claude-run",
+          "metric": "quote_fidelity",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "claude-run",
+          "metric": "claim_recall",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "claude-run",
+          "metric": "claim_verdict_accuracy",
+          "value": 0.9167,
+          "threshold": 0.9,
+          "direction": "min",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "offline-mode",
+      "kind": "run",
+      "metrics": {
+        "episodes": 4.0,
+        "summary_in_range": 1.0,
+        "summary_coverage": 1.0,
+        "notes_shape_ok": 1.0,
+        "quote_fidelity": 1.0,
+        "claim_recall": 0.8333,
+        "claim_verdict_accuracy": 0.9,
+        "llm_calls_per_episode": 15.0,
+        "tokens_per_episode": 13314.25
+      },
+      "rows": [
+        {
+          "episode": "ep001",
+          "judge": null,
+          "summary_words": 212,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 4,
+          "quotes_verbatim": 4,
+          "claims": [
+            {
+              "match": [
+                "GitLab"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            },
+            {
+              "match": [
+                "remote-first",
+                "talent"
+              ],
+              "found": true,
+              "verdict": "unverifiable",
+              "correct": true
+            }
+          ],
+          "llm_calls": 10,
+          "tokens": 9368
+        },
+        {
+          "episode": "ep002",
+          "judge": null,
+          "summary_words": 208,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 4,
+          "quotes_verbatim": 4,
+          "claims": [
+            {
+              "match": [
+                "FDA",
+                "autonom"
+              ],
+              "found": true,
+              "verdict": "unverifiable",
+              "correct": false
+            },
+            {
+              "match": [
+                "X-ray"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            },
+            {
+              "match": [
+                "pandemic"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            }
+          ],
+          "llm_calls": 17,
+          "tokens": 14464
+        },
+        {
+          "episode": "ep003",
+          "judge": null,
+          "summary_words": 201,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 4,
+          "quotes_verbatim": 4,
+          "claims": [
+            {
+              "match": [
+                "break-even"
+              ],
+              "found": false,
+              "verdict": null,
+              "correct": false
+            },
+            {
+              "match": [
+                "fintech"
+              ],
+              "found": true,
+              "verdict": "unverifiable",
+              "correct": true
+            }
+          ],
+          "llm_calls": 17,
+          "tokens": 14420
+        },
+        {
+          "episode": "ep004",
+          "judge": null,
+          "summary_words": 150,
+          "summary_in_range": true,
+          "summary_coverage": 1.0,
+          "notes_shape_ok": true,
+          "quotes": 4,
+          "quotes_verbatim": 4,
+          "claims": [
+            {
+              "match": [
+                "Mars",
+                "sample"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            },
+            {
+              "match": [
+                "Perseverance",
+                "landed"
+              ],
+              "found": true,
+              "verdict": "verified",
+              "correct": true
+            },
+            {
+              "match": [
+                "Bitcoin",
+                "200"
+              ],
+              "found": true,
+              "verdict": "possibly_outdated_or_inaccurate",
+              "correct": true
+            },
+            {
+              "match": [
+                "Nvidia",
+                "trillion"
+              ],
+              "found": false,
+              "verdict": null,
+              "correct": false
+            },
+            {
+              "match": [
+                "Mars",
+                "2040"
+              ],
+              "found": true,
+              "verdict": "unverifiable",
+              "correct": true
+            }
+          ],
+          "llm_calls": 16,
+          "tokens": 15005
+        }
+      ],
+      "checks": [
+        {
+          "section": "offline-mode",
+          "metric": "summary_in_range",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "offline-mode",
+          "metric": "notes_shape_ok",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "offline-mode",
+          "metric": "quote_fidelity",
+          "value": 1.0,
+          "threshold": 1.0,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "offline-mode",
+          "metric": "claim_recall",
+          "value": 0.8333,
+          "threshold": 0.8,
+          "direction": "min",
+          "passed": true
+        },
+        {
+          "section": "offline-mode",
+          "metric": "claim_verdict_accuracy",
+          "value": 0.9,
+          "threshold": 0.9,
+          "direction": "min",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}
