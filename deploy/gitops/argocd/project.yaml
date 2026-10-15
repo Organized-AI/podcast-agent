@@ -13,9 +13,10 @@ spec:
       namespace: podcast-agent-dev
     - server: https://kubernetes.default.svc
       namespace: podcast-agent-prod
-  # Only the namespaced kinds the chart renders; no cluster-scoped resources at all
-  # (Argo CD creates the namespace itself through CreateNamespace=true).
-  clusterResourceWhitelist: []
+  # The only cluster-scoped kind is the Namespace that CreateNamespace=true creates; Argo CD checks
+  # that against this list too. Destinations above still limit it to the two environment namespaces.
+  clusterResourceWhitelist:
+    - { group: "", kind: Namespace }
   namespaceResourceWhitelist:
     - { group: "", kind: ConfigMap }
     - { group: "", kind: Service }

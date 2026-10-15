@@ -39,6 +39,14 @@ def test_only_dev_syncs_itself():
     assert "automated" not in _appset()["spec"]["template"]["spec"]["syncPolicy"]
 
 
+def test_the_project_permits_the_namespace_argo_cd_creates_and_nothing_else_cluster_wide():
+    """CreateNamespace=true is checked against clusterResourceWhitelist; an empty list fails every sync."""
+    project = yaml.safe_load((ARGO / "project.yaml").read_text())
+    options = _appset()["spec"]["template"]["spec"]["syncPolicy"]["syncOptions"]
+    assert "CreateNamespace=true" in options
+    assert project["spec"]["clusterResourceWhitelist"] == [{"group": "", "kind": "Namespace"}]
+
+
 def test_environment_values_only_pin_the_image():
     """Environment shape lives in the chart's values-<env>.yaml; gitops/envs holds only what CI writes."""
     for env in ("dev", "prod"):

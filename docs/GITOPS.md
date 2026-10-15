@@ -13,7 +13,7 @@ Git is the only way anything reaches a cluster. Argo CD watches `main` and rende
 
 | Path | What it is |
 |---|---|
-| [deploy/gitops/argocd/project.yaml](../deploy/gitops/argocd/project.yaml) | AppProject: this repository only; the `podcast-agent-dev` and `podcast-agent-prod` namespaces only; only the namespaced kinds the chart renders; no cluster-scoped resources |
+| [deploy/gitops/argocd/project.yaml](../deploy/gitops/argocd/project.yaml) | AppProject: this repository only; the `podcast-agent-dev` and `podcast-agent-prod` namespaces only; only the namespaced kinds the chart renders; the only cluster-scoped kind is the environment's Namespace, which `CreateNamespace=true` needs |
 | [deploy/gitops/argocd/applicationset.yaml](../deploy/gitops/argocd/applicationset.yaml) | One Application per environment from a list generator; dev gets automated sync with prune and self-heal through `templatePatch`, prod syncs by hand |
 | `deploy/helm/podcast-agent/values-<env>.yaml` | The environment's shape: provider, replicas, KEDA, External Secrets, telemetry, alerts |
 | [deploy/gitops/envs/&lt;env&gt;/values.yaml](../deploy/gitops/envs) | Only the image tag and digest, the one thing automation writes |
