@@ -1,0 +1,24 @@
+# command: gh attestation verify oci://ghcr.io/organized-ai/podcast-agent:v0.2.0 --repo Organized-AI/podcast-agent  (online, then offline with the release's bundle)
+# machine: MacBook Pro · Apple M1 Pro · gh 2.92.0 · no registry login (the package is public)
+# commit: 2c99d2f
+# captured: 2026-10-15T12:50:12Z
+
+$ gh attestation verify oci://ghcr.io/organized-ai/podcast-agent:v0.2.0 --repo Organized-AI/podcast-agent
+verified      : 1 attestation(s)
+predicate     : https://slsa.dev/provenance/v1
+subject       : ghcr.io/organized-ai/podcast-agent@sha256:67a18fc8560ecc619f37a8888b2f0e22f4082f6433e6c92797150f427f211f28
+signed by     : https://github.com/Organized-AI/podcast-agent/.github/workflows/publish.yml@refs/heads/main
+source commit : 2c99d2fa14e7c72633a53c5a923e87e04979608b
+issuer        : https://token.actions.githubusercontent.com
+
+$ gh release download v0.2.0 --repo Organized-AI/podcast-agent --pattern 'podcast-agent-v0.2.0.*'
+podcast-agent-v0.2.0.intoto.jsonl
+podcast-agent-v0.2.0.sigstore.json
+$ gh attestation verify oci://ghcr.io/organized-ai/podcast-agent:v0.2.0 --bundle podcast-agent-v0.2.0.sigstore.json --repo Organized-AI/podcast-agent
+verified      : 1 attestation(s)
+predicate     : https://slsa.dev/provenance/v1
+subject       : ghcr.io/organized-ai/podcast-agent@sha256:67a18fc8560ecc619f37a8888b2f0e22f4082f6433e6c92797150f427f211f28
+signed by     : https://github.com/Organized-AI/podcast-agent/.github/workflows/publish.yml@refs/heads/main
+source commit : 2c99d2fa14e7c72633a53c5a923e87e04979608b
+issuer        : https://token.actions.githubusercontent.com
+exit: 0

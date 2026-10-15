@@ -27,6 +27,10 @@ MAX_OUTPUT_LINES = 140
 
 # file, title, kind, headline pattern, expected outcome ("pass", or "fail" for the tamper test)
 PROOF = [
+    ("lab-sync.txt", "Dev synced itself on merge: Argo CD on the Mac mini lab, before and after", "gitops",
+     r"(Argo CD applied main at \w+ and changed dev's image at \S+)", "pass"),
+    ("verify-v0.2.0.txt", "Anyone can verify v0.2.0: online, and offline from the release's bundle", "release",
+     r"(verified\s*: \d+ attestation\(s\))", "pass"),
     ("release-v0.2.0.txt", "Release v0.2.0: verify, re-tag the tested image, publish, open the prod PR", "release",
      r"(tag v\d+\.\d+\.\d+ · published \S+)", "pass"),
     ("promote-v0.2.0.txt", "Built once: dev and prod run the same digest, with signed SLSA provenance", "release",
@@ -38,6 +42,8 @@ PROOF = [
     ("mypy.txt", "Types", "types", r"(Success: no issues found in \d+ source files)", "pass"),
     ("helm.txt", "Helm chart: every environment linted and schema-checked, plus the Argo CD manifests", "deploy",
      r"(Valid: \d+, Invalid: \d+, Errors: \d+, Skipped: \d+)", "pass"),
+    ("evals-live.txt", "Live eval suite with Claude: 25 labeled claims, four fresh runs, rubric judge", "evals",
+     r"((?:PASS|FAIL)\*\* \(\d+/\d+ thresholds met\))", "pass"),
     ("evals.txt", "Offline eval suite: 25 labeled claims and both committed runs", "evals",
      r"((?:PASS|FAIL)\*\* \(\d+/\d+ thresholds met\))", "pass"),
     ("otel-e2e-mac.txt", "OpenTelemetry end to end on the MacBook: Collector, Jaeger, Prometheus, Grafana", "telemetry",
@@ -83,6 +89,12 @@ def proof_items(proof_dir: Path) -> list[dict]:
         jobs = re.findall(r"^([✓X]) (.+) in \S+$", body, re.M)
         if jobs:
             headline = f"{sum(1 for j in jobs if j[0] == '✓')} of {len(jobs)} jobs passed" + (f" · {headline}" if headline else "")
+        if fname == "lab-sync.txt":
+            commits = re.findall(r'"commit":"([^"]+)"', body)
+            if len(commits) >= 2:
+                headline = f"/healthz {commits[0]} → {commits[-1]}, initiated by Argo CD (automated)"
+        if fname == "verify-v0.2.0.txt":
+            headline = f"{len(re.findall(r'^verified', body, re.M))} of 2 verifications passed · signed by publish.yml on main"
         if fname == "scorecard.txt":
             fixed = len(re.findall(r"^  (?:CodeQL|Trivy|Scorecard) \S+ · ", body, re.M))
             headline = f"{headline} · {fixed} scanner findings fixed"
@@ -108,9 +120,9 @@ def proof_items(proof_dir: Path) -> list[dict]:
     return items
 
 
-def eval_summary(proof_dir: Path) -> dict:
-    """The offline eval report (podcast-agent eval --out samples/proof/evals-offline), trimmed for the page."""
-    path = proof_dir / "evals-offline" / "eval.json"
+def eval_summary(proof_dir: Path, folder: str = "evals-offline") -> dict:
+    """An eval report (podcast-agent eval --out samples/proof/<folder>), trimmed for the page."""
+    path = proof_dir / folder / "eval.json"
     if not path.exists():
         return {}
     report = json.loads(path.read_text(encoding="utf-8"))
@@ -125,12 +137,14 @@ def eval_summary(proof_dir: Path) -> dict:
                              "summary_coverage": r["summary_coverage"], "quotes": r["quotes"],
                              "quotes_verbatim": r["quotes_verbatim"],
                              "claims": len(r["claims"]), "found": sum(1 for c in r["claims"] if c["found"]),
-                             "right": sum(1 for c in r["claims"] if c["correct"])} for r in sec["rows"]]
+                             "right": sum(1 for c in r["claims"] if c["correct"]),
+                             "judge": (r.get("judge") or {}).get("score"),
+                             "invented": (r.get("judge") or {}).get("invented_facts") or []} for r in sec["rows"]]
         sections.append(item)
     checks = [c for sec in sections for c in sec["checks"]]
     return {"suite": report["suite"], "description": report["description"], "provider": report["provider"],
             "passed": report["passed"], "gates": len(checks), "gates_met": sum(1 for c in checks if c["passed"]),
-            "file": "samples/proof/evals-offline/eval.json", "sections": sections}
+            "file": f"samples/proof/{folder}/eval.json", "sections": sections}
 
 
 def publish_files(run: Path, manifest: dict, dest: Path) -> list[dict]:
@@ -217,6 +231,7 @@ def main(run_dir: str, proof_dir: str, html_path: str) -> None:
                                               "knowledge_base", "trace_events")},
         "episodes": episodes, "claims": claims, "audit": audit, "trace": trace,
         "proof": proof_items(proof), "mac_run": mac, "evals": eval_summary(proof),
+        "evals_live": eval_summary(proof, "evals-live"),
         "files": publish_files(run, manifest, html.parent / "run"),
     }
     blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")

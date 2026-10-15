@@ -1,0 +1,29 @@
+# command: deploy/gitops/lab/watch.sh   (merge the dev pull request on GitHub; nothing else touches the cluster)
+# machine: Mac · kind v0.33.0 · Argo CD v3.5.4
+# commit: 2f450cf
+# captured: 2026-10-15T12:45:56Z
+
+== before (12:45:56Z)
+argo cd   : Synced Healthy at 2f450cf38971
+image     : ghcr.io/organized-ai/podcast-agent@sha256:bda26647e39fdb7b3fce4844cc33cdc0707e768fe78f8c6ab52e1be444b1313d
+pods      : podcast-agent-api-6ddb97579c-nqxz5 1/1 Running
+/healthz  : {"status":"ok","version":"0.2.0","commit":"sha-dc251ca","provider":{"provider":"offline","main":"offline-heuristic","fast":"offline-heuristic"},"kb_entries":18}
+
+== waiting for Argo CD to roll dev to a new image (it checks Git on its own; nobody runs kubectl)
+Argo CD applied main at 5426e5f3e8c4 and changed dev's image at 12:47:22Z
+Waiting for deployment "podcast-agent-api" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "podcast-agent-api" rollout to finish: 1 old replicas are pending termination...
+deployment "podcast-agent-api" successfully rolled out
+
+== after (12:47:48Z)
+argo cd   : Synced Healthy at 5426e5f3e8c4
+image     : ghcr.io/organized-ai/podcast-agent@sha256:7e7c4d6ed0056daa3c09660efe98b536d769bfd2d8157e15d9e22ed347c6c3ee
+pods      : podcast-agent-api-66549f6684-2b9pl 1/1 Running
+/healthz  : {"status":"ok","version":"0.2.0","commit":"sha-2f450cf","provider":{"provider":"offline","main":"offline-heuristic","fast":"offline-heuristic"},"kb_entries":18}
+
+== Argo CD's record of the sync
+initiated by : {"automated":true}
+started      : 2026-10-15T12:47:18Z
+finished     : 2026-10-15T12:47:19Z
+result       : Succeeded, successfully synced (all tasks run)
+exit: 0
