@@ -78,7 +78,9 @@ At no point does anyone run `kubectl` or `helm` against the cluster.
 | [publish.yml](../.github/workflows/publish.yml) | push to `main` (not docs or environment bumps) | Builds `linux/amd64` and `linux/arm64` once, pushes `sha-<commit>` and `main` with an SBOM and `mode=max` provenance, attests the digest, then opens **Deploy sha-… to dev** (`gitops/dev`) with [tools/ci/set_image.py](../tools/ci/set_image.py) |
 | [release.yml](../.github/workflows/release.yml) | tag `vX.Y.Z` on `main` | `check_version.py --tag`; re-tags `sha-<commit>` as `vX.Y.Z` and `X.Y.Z` with `imagetools create` (same digest); GitHub Release from the `CHANGELOG.md` section; opens **Deploy vX.Y.Z to prod** (`gitops/prod`) |
 
-Pull requests opened with `GITHUB_TOKEN` trigger no workflows, so both bump jobs dispatch `ci.yml` and `security.yml` on the bump branch. That runs the same required checks the `main` ruleset asks of a person's pull request. The repository must allow GitHub Actions to create pull requests (Settings → Actions → General).
+Both bump jobs open their pull requests as the `organized-ai-gitops` GitHub App, using a short-lived token from `actions/create-github-app-token`. The App's pull requests trigger the normal `pull_request` checks, so they need no manual approval and code scanning analyzes them like any other pull request. The App can write contents and pull requests on this repository only. Its ID is the repository variable `DEPLOY_APP_ID`, and its key is the secret `DEPLOY_APP_PRIVATE_KEY`.
+
+Without the App (a fork, or `DEPLOY_APP_ID` unset), the jobs fall back to `GITHUB_TOKEN`. Pull requests opened that way trigger no workflows, so the jobs dispatch `ci.yml` and `security.yml` on the bump branch themselves, and the repository must allow GitHub Actions to create pull requests (Settings → Actions → General).
 
 Verify any image before trusting it:
 

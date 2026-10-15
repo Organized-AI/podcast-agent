@@ -56,3 +56,15 @@ def test_releases_attach_the_signed_provenance():
     assert '"https://slsa.dev/provenance/v1"' in script
     assert ".sigstore.json" in script and ".intoto.jsonl" in script
 
+
+@pytest.mark.parametrize(("workflow", "job"), [("publish.yml", "bump-dev"), ("release.yml", "bump-prod")])
+def test_deploy_pull_requests_are_opened_as_the_github_app(workflow, job):
+    """App-authored pull requests run their checks; the workflow token is only the fallback, with dispatch."""
+    steps = yaml.safe_load((ROOT / ".github" / "workflows" / workflow).read_text())["jobs"][job]["steps"]
+    app = next(s for s in steps if s.get("id") == "app")
+    assert app["uses"].startswith("actions/create-github-app-token@") and app["if"] == "vars.DEPLOY_APP_ID != ''"
+    pr = next(s for s in steps if s.get("id") == "pr")
+    assert pr["with"]["token"] == "${{ steps.app.outputs.token || github.token }}"
+    dispatch = next(s for s in steps if "gh workflow run" in s.get("run", ""))
+    assert dispatch["if"].startswith("steps.app.outputs.token == ''")
+
