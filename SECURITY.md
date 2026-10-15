@@ -100,3 +100,14 @@ Images are published to `ghcr.io/organized-ai/podcast-agent` with build provenan
 gh attestation verify oci://ghcr.io/organized-ai/podcast-agent:v0.2.0 --repo Organized-AI/podcast-agent
 docker buildx imagetools inspect ghcr.io/organized-ai/podcast-agent:v0.2.0 --format '{{ json .SBOM }}'   # the SBOM
 ```
+
+Each GitHub Release also carries the image's signed provenance as assets, so it can be checked without GitHub's attestations API, for example from inside an isolated network:
+
+- `podcast-agent-<tag>.sigstore.json` is the Sigstore bundle.
+- `podcast-agent-<tag>.intoto.jsonl` is the signed in-toto SLSA statement.
+
+```bash
+gh release download v0.2.0 --repo Organized-AI/podcast-agent --pattern 'podcast-agent-v0.2.0.*'
+gh attestation verify oci://ghcr.io/organized-ai/podcast-agent:v0.2.0 \
+  --bundle podcast-agent-v0.2.0.sigstore.json --repo Organized-AI/podcast-agent
+```

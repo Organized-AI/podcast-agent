@@ -43,3 +43,16 @@ def test_changelog_section_extracts_one_version():
     assert notes.startswith("The take-home as submitted.") and "## [" not in notes and "[0.1.0]:" not in notes
     with pytest.raises(LookupError):
         module.section("9.9.9", text)
+
+
+def test_releases_attach_the_signed_provenance():
+    """Each GitHub Release carries the image's SLSA provenance, so verification does not need the attestations API."""
+    jobs = yaml.safe_load((ROOT / ".github" / "workflows" / "release.yml").read_text())["jobs"]
+    job = jobs["github-release"]
+    assert job["permissions"] == {"contents": "write", "attestations": "read"}
+    runs = [s.get("run", "") for s in job["steps"]]
+    assert any("tools/ci/release_provenance.sh" in r for r in runs)
+    script = (ROOT / "tools" / "ci" / "release_provenance.sh").read_text()
+    assert '"https://slsa.dev/provenance/v1"' in script
+    assert ".sigstore.json" in script and ".intoto.jsonl" in script
+
