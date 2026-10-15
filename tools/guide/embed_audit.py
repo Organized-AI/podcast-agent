@@ -27,6 +27,11 @@ MAX_OUTPUT_LINES = 140
 
 # file, title, kind, headline pattern, expected outcome ("pass", or "fail" for the tamper test)
 PROOF = [
+    ("release-v0.2.0.txt", "Release v0.2.0: verify, re-tag the tested image, publish, open the prod PR", "release",
+     r"(tag v\d+\.\d+\.\d+ · published \S+)", "pass"),
+    ("promote-v0.2.0.txt", "Built once: dev and prod run the same digest, with signed SLSA provenance", "release",
+     r"(same digest in dev and prod: sha256:[0-9a-f]{12})", "pass"),
+    ("scorecard.txt", "OpenSSF Scorecard and code scanning", "security", r"(OpenSSF Scorecard [\d.]+ / 10)", "pass"),
     ("pytest.txt", "Test suite", "tests", r"=+ (\d+ passed[^=]*?) in", "pass"),
     ("mac-pytest.txt", "Test suite on the MacBook (Python 3.12 container)", "tests", r"=+ (\d+ passed[^=]*?) in", "pass"),
     ("ruff.txt", "Lint", "lint", r"(All checks passed!)", "pass"),
@@ -50,7 +55,7 @@ PROOF = [
     ("audit-tampered.txt", "Tamper test: the audit catches edited output", "audit",
      r"(\d+ passed · \d+ warnings? · \d+ failed)", "fail"),
 ]
-FAILED = re.compile(r"\b[1-9]\d* failed|Invalid: [1-9]|exit: [1-9]|\bERROR\b|^FAIL\b|\*\*FAIL\*\*", re.M)
+FAILED = re.compile(r"\b[1-9]\d* failed|Invalid: [1-9]|exit: [1-9]|\bERROR\b|^FAIL\b|\*\*FAIL\*\*|^X |DIGESTS DIFFER", re.M)
 
 
 def read_header(text: str) -> tuple[dict[str, str], str]:
@@ -75,6 +80,12 @@ def proof_items(proof_dir: Path) -> list[dict]:
         meta, body = read_header(ANSI.sub("", path.read_text(encoding="utf-8")))
         m = re.search(pattern, body)
         headline = (m.group(1) if m else "").replace("**", "")
+        jobs = re.findall(r"^([✓X]) (.+) in \S+$", body, re.M)
+        if jobs:
+            headline = f"{sum(1 for j in jobs if j[0] == '✓')} of {len(jobs)} jobs passed" + (f" · {headline}" if headline else "")
+        if fname == "scorecard.txt":
+            fixed = len(re.findall(r"^  (?:CodeQL|Trivy|Scorecard) \S+ · ", body, re.M))
+            headline = f"{headline} · {fixed} scanner findings fixed"
         if fname == "helm.txt":
             counts = [tuple(map(int, t)) for t in re.findall(r"Valid: (\d+), Invalid: (\d+), Errors: (\d+)", body)]
             envs = re.findall(r"^== (.+)$", body, re.M)

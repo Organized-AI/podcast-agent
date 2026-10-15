@@ -4,6 +4,9 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Added
+- Guide: a v0.2.0 view that answers the six review points on v0.1.0 with evidence, summarizes what the release added and measured, shows how it shipped (one digest from dev to prod) and lists what is not done yet. The Audit trail adds proof cards for the release run, the dev and prod digest with its SLSA provenance, and the OpenSSF Scorecard.
+
 ### Security
 - `SECURITY.md` adds guidance for government and regulated deployments: the secure-development practices mapped to NIST SP 800-218 (SSDF 1.1) with the evidence for each, and how to run inside an authorization boundary (provider choice, air-gapped operation, telemetry, egress, identity, FIPS and hardened base images, deploy-by-digest, audit retention).
 - `SECURITY.md` no longer overstates the NetworkPolicy: it limits egress to DNS and HTTPS, not to named hosts; pinning destinations needs an egress gateway or an FQDN-aware CNI policy.

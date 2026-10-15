@@ -1,0 +1,17 @@
+# command: gh run view 38672705249 && gh release view v0.2.0
+# machine: MacBook Pro · Apple M1 Pro · gh 2.92.0
+# commit: 2c99d2f
+# captured: 2026-10-15T03:19:39Z
+
+$ gh run view 38672705249   # release.yml, triggered by pushing tag v0.2.0
+✓ v0.2.0 release · 38672705249
+JOBS
+✓ Version, changelog and branch in 6s
+✓ Re-tag the tested image in 21s
+✓ GitHub Release from CHANGELOG.md in 7s
+✓ Open the prod deployment pull request in 13s
+
+$ gh release view v0.2.0
+tag v0.2.0 · published 2026-10-15T02:46:30Z · draft false · prerelease false
+https://github.com/Organized-AI/podcast-agent/releases/tag/v0.2.0
+exit: 0
