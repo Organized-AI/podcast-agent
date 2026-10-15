@@ -46,8 +46,8 @@ PROOF = [
      r"((?:PASS|FAIL)\*\* \(\d+/\d+ thresholds met\))", "pass"),
     ("evals.txt", "Offline eval suite: 25 labeled claims and both committed runs", "evals",
      r"((?:PASS|FAIL)\*\* \(\d+/\d+ thresholds met\))", "pass"),
-    ("otel-e2e-mac.txt", "OpenTelemetry end to end on the MacBook: Collector, Jaeger, Prometheus, Grafana", "telemetry",
-     r"(run \S+ · trace \w+)", "pass"),
+    ("otel-e2e-mac.txt", "OpenTelemetry end to end on the MacBook: Collector, Jaeger, MLflow, Prometheus, Grafana, then an MLflow outage",
+     "telemetry", r"(run \S+ · trace \w+)", "pass"),
     ("mac-docker-build.txt", "Docker build on the MacBook", "docker", r"os/arch (\S+)", "pass"),
     ("mac-docker-run-claude.txt", "Claude run on the MacBook (Sonnet 5.5 + Haiku 5.5), all four episodes", "docker",
      r"(exit: \d+)", "pass"),
@@ -107,6 +107,11 @@ def proof_items(proof_dir: Path) -> list[dict]:
         if fname == "otel-e2e-mac.txt":
             checks = re.findall(r"^(PASS|FAIL) ", body, re.M)
             headline = f"{checks.count('PASS')} of {len(checks)} checks passed" + (f" · {headline}" if headline else "")
+            copies = re.findall(r"MLflow got every span Jaeger got \((\d+)/(\d+)\)", body)
+            if copies:
+                headline += f" · MLflow has every span Jaeger has ({copies[0][0]}/{copies[0][1]})"
+            if len(copies) > 1 and "MLflow is down" in body:
+                headline += f" · outage: Jaeger unaffected, {copies[-1][0]} queued spans reached MLflow after restart"
         if fname == "mac-docker-build.txt":
             commit = re.search(r"GIT_COMMIT=(\S+)", body)
             headline = f"built · {headline}" + (f" · GIT_COMMIT={commit.group(1)}" if commit else "")

@@ -1,35 +1,36 @@
 # command: pytest --cov --cov-report=term
 # machine: Linux workspace · x86_64 · Python 3.13.16
-# commit: 1748622
-# captured: 2026-10-15T02:11:44Z
+# commit: 421cf57
+# captured: 2026-10-15T17:02:06Z
 
 ============================= test session starts ==============================
 platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0
-rootdir: /home/claude/main-wt
+rootdir: /home/claude/podcast-agent
 configfile: pyproject.toml
 testpaths: tests
 plugins: timeout-2.4.0, anyio-4.15.1, cov-7.1.0
 timeout: 60.0s
 timeout method: signal
 timeout func_only: False
-collected 105 items
+collected 137 items
 
 tests/test_audit.py ...                                                  [  2%]
-tests/test_config.py .                                                   [  3%]
-tests/test_eval_datasets.py ..                                           [  5%]
-tests/test_evals.py .............                                        [ 18%]
-tests/test_gitops.py .....                                               [ 22%]
+tests/test_config.py .                                                   [  2%]
+tests/test_eval_datasets.py ..                                           [  4%]
+tests/test_evals.py ................                                     [ 16%]
+tests/test_gitops.py .........                                           [ 22%]
 tests/test_hermetic.py ..                                                [ 24%]
-tests/test_notes.py ...                                                  [ 27%]
-tests/test_propagation.py .....                                          [ 32%]
-tests/test_providers_and_reports.py ..........                           [ 41%]
-tests/test_release_tools.py .....                                        [ 46%]
-tests/test_repo_drift.py ...                                             [ 49%]
-tests/test_safe_ids.py ...........                                       [ 60%]
-tests/test_server.py .                                                   [ 60%]
-tests/test_structured_and_summary.py .....                               [ 65%]
-tests/test_telemetry.py ...............                                  [ 80%]
-tests/test_transcript.py ........                                        [ 87%]
+tests/test_notes.py ...                                                  [ 26%]
+tests/test_propagation.py .....                                          [ 29%]
+tests/test_providers_and_reports.py ..........                           [ 37%]
+tests/test_release_tools.py ........                                     [ 43%]
+tests/test_repo_drift.py ...                                             [ 45%]
+tests/test_safe_ids.py ...........                                       [ 53%]
+tests/test_server.py ...                                                 [ 55%]
+tests/test_structured_and_summary.py .....                               [ 59%]
+tests/test_telemetry.py ...............                                  [ 70%]
+tests/test_trace_fanout.py ........                                      [ 75%]
+tests/test_transcript.py ....................                            [ 90%]
 tests/test_verifier.py ............                                      [ 99%]
 tests/test_worker.py .                                                   [100%]
 
@@ -45,10 +46,10 @@ src/podcast_agent/agent/planner.py               97      3     40      3    96%
 src/podcast_agent/agent/steps.py                199     37     80     14    80%
 src/podcast_agent/agent/verifier.py             204     13     70     11    91%
 src/podcast_agent/audit.py                      176     36     56     16    75%
-src/podcast_agent/cli.py                        212    113     54      4    42%
+src/podcast_agent/cli.py                        229    115     58      5    45%
 src/podcast_agent/config.py                      67      3     10      3    92%
 src/podcast_agent/evals/metrics.py               42      3     14      3    89%
-src/podcast_agent/evals/runner.py               193     12     52      5    91%
+src/podcast_agent/evals/runner.py               199     12     56      5    92%
 src/podcast_agent/heuristics.py                 250      7    102      4    97%
 src/podcast_agent/llm/__init__.py                29     14     16      5    49%
 src/podcast_agent/llm/anthropic_provider.py      56      6     18      3    88%
@@ -60,18 +61,18 @@ src/podcast_agent/llm/structured.py              90      8     36      5    90%
 src/podcast_agent/models.py                     214      4     34      2    98%
 src/podcast_agent/prompts.py                     36      3      4      1    90%
 src/podcast_agent/report.py                      94      6     40      7    90%
-src/podcast_agent/runtime.py                    109     16     22      6    82%
+src/podcast_agent/runtime.py                    109     15     22      5    83%
 src/podcast_agent/telemetry.py                  121      5     30      6    93%
 src/podcast_agent/text.py                        72      1     20      1    98%
 src/podcast_agent/tools/knowledge_base.py        36      2      4      2    90%
 src/podcast_agent/tools/web_search.py            60     11     12      3    78%
 src/podcast_agent/trace.py                       95      2     38      3    96%
-src/podcast_agent/transcript.py                 118      6     40      4    94%
+src/podcast_agent/transcript.py                 139      6     56      4    95%
 src/podcast_agent/worker.py                     158     20     28      6    84%
 -------------------------------------------------------------------------------
-TOTAL                                          3146    428    864    123    84%
+TOTAL                                          3193    429    888    123    84%
 
 8 files skipped due to complete coverage.
-Required test coverage of 83.0% reached. Total coverage: 84.16%
-============================= 105 passed in 8.98s ==============================
+Required test coverage of 83.0% reached. Total coverage: 84.42%
+============================= 137 passed in 10.18s =============================
 exit: 0
