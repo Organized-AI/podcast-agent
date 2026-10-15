@@ -103,7 +103,7 @@ Evidence: [Audit trail › Evals](https://podcast-agent-guide.jordan-691.workers
 A mentor reviewed v0.1.0 and found six gaps. Each one is closed in the repository, not in a plan.
 
 - **37** pull requests merged, this walkthrough's included
-- **29** issues tracked; all closed but
+- **29** issues tracked; all closed but #51, which waits on the next live run
 - **7** required checks on main
 - **145** tests, 84% coverage, 83% floor
 

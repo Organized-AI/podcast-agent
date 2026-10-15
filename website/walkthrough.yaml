@@ -194,7 +194,7 @@ stops:
   - value: '37'
     label: pull requests merged, this walkthrough's included
   - value: '29'
-    label: issues tracked; all closed but #51, which waits on the next live run
+    label: 'issues tracked; all closed but #51, which waits on the next live run'
   - value: '7'
     label: required checks on main
   - value: '{tests}'
