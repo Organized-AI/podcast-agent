@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import importlib.util
+import json
 import re
 from pathlib import Path
 
+import pytest
 import yaml
 from conftest import ROOT
 
@@ -21,6 +24,20 @@ def _docs(path: Path) -> list[dict]:
 def _manifests() -> list[dict]:
     kustomization = yaml.safe_load((OBS / "kustomization.yaml").read_text())
     return [d for f in kustomization["resources"] for d in _docs(OBS / f)]
+
+
+def _pod_spec(doc: dict) -> dict:
+    if doc["kind"] in ("Deployment", "StatefulSet", "Job"):
+        return doc["spec"]["template"]["spec"]
+    if doc["kind"] == "CronJob":
+        return doc["spec"]["jobTemplate"]["spec"]["template"]["spec"]
+    return {}
+
+
+def _pod_labels(doc: dict) -> dict:
+    template = (doc["spec"]["jobTemplate"]["spec"]["template"] if doc["kind"] == "CronJob"
+                else doc["spec"].get("template", {}))
+    return template.get("metadata", {}).get("labels", {})
 
 
 def _config(name: str) -> dict:
@@ -74,8 +91,7 @@ def test_the_tailnet_ports_line_up_from_the_node_to_the_issue_links():
 
 
 def test_every_image_is_pinned_by_digest():
-    images = [c["image"] for d in _manifests() if d["kind"] in ("Deployment", "StatefulSet", "Job")
-              for c in d["spec"]["template"]["spec"]["containers"]]
+    images = [c["image"] for d in _manifests() for c in _pod_spec(d).get("containers", [])]
     images.append("ghcr.io/mlflow/mlflow:" + yaml.safe_load((OBS / "mlflow-values.yaml").read_text())["image"]["tag"])
     assert images and all(re.search(r"@sha256:[0-9a-f]{64}$", i) for i in images), images
 
@@ -100,3 +116,88 @@ def test_argo_cd_may_deploy_everything_the_stack_contains():
     assert chart["helm"]["valueFiles"] == ["$values/deploy/gitops/observability/mlflow-values.yaml"]
     assert values["ref"] == "values" and chart["repoURL"] in project["spec"]["sourceRepos"]
     assert all(app["spec"]["destination"]["namespace"] == "observability" for app in (obs_app, mlflow_app))
+
+
+def test_ingress_is_denied_unless_a_policy_allows_it():
+    policies = {d["metadata"]["name"]: d for d in _manifests() if d["kind"] == "NetworkPolicy"}
+    deny = policies["default-deny-ingress"]["spec"]
+    assert deny["podSelector"] == {} and deny["policyTypes"] == ["Ingress"] and "ingress" not in deny
+    # Every workload has a policy of its own, and every pod label a policy admits belongs to a workload here.
+    workloads = {_pod_labels(d).get("app.kubernetes.io/name") for d in _manifests() if _pod_spec(d)}
+    workloads |= {"mlflow"}  # from its chart
+    selected = {p["spec"]["podSelector"].get("matchLabels", {}).get("app.kubernetes.io/name") for p in policies.values()}
+    assert workloads - {"postgres-backup", "mlflow-bootstrap"} <= selected
+    admitted = {peer["podSelector"]["matchLabels"]["app.kubernetes.io/name"]
+                for p in policies.values() for rule in p["spec"].get("ingress", []) for peer in rule.get("from", [])
+                if "podSelector" in peer and "namespaceSelector" not in peer}
+    assert admitted <= workloads, admitted - workloads
+
+
+def test_only_mlflow_and_its_backup_reach_postgres():
+    (policy,) = [d for d in _manifests() if d["kind"] == "NetworkPolicy" and d["metadata"]["name"] == "postgres"]
+    (rule,) = policy["spec"]["ingress"]
+    assert [peer["podSelector"]["matchLabels"]["app.kubernetes.io/name"] for peer in rule["from"]] == [
+        "mlflow", "postgres-backup"]
+    assert rule["ports"] == [{"port": 5432, "protocol": "TCP"}]
+
+
+def test_new_mlflow_users_start_with_no_permissions():
+    text = BOOTSTRAP.read_text()
+    assert "default_permission = NO_PERMISSIONS" in text and "default_permission = READ" not in text
+    assert "--from-literal=USER_NAME=" in text  # the personal account, so day to day nobody signs in as admin
+
+
+def test_argo_cd_reruns_the_mlflow_bootstrap_on_each_sync():
+    (job,) = [d for d in _manifests() if d["kind"] == "Job"]
+    # A Job's pod template is immutable: only delete-and-recreate picks up a new script or spec.
+    assert job["metadata"]["annotations"]["argocd.argoproj.io/sync-options"] == "Force=true,Replace=true"
+    # A Job that deletes itself is recreated by self-heal and runs again a day later.
+    assert "ttlSecondsAfterFinished" not in job["spec"]
+
+
+def _mlflow_bootstrap(monkeypatch):
+    monkeypatch.setenv("ADMIN_PASSWORD", "unused")
+    spec = importlib.util.spec_from_file_location("mlflow_bootstrap", OBS / "config" / "mlflow_bootstrap.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class FakeMlflow:
+    """Answers the bootstrap's permission calls as MLflow 3.17 does: a second grant is 400 RESOURCE_ALREADY_EXISTS."""
+
+    def __init__(self, grants):
+        self.grants, self.calls = dict(grants), []
+
+    def __call__(self, method, path, body=None, auth=None):
+        self.calls.append(path.split("?")[0].rsplit("/", 1)[-1])
+        if path.endswith("/grant"):
+            if body["username"] in self.grants:
+                return 400, '{"error_code": "RESOURCE_ALREADY_EXISTS"}'
+            self.grants[body["username"]] = body["permission"]
+            return 200, "{}"
+        if path.endswith("/revoke"):
+            del self.grants[body["username"]]
+            return 200, "{}"
+        user = path.split("username=")[1].split("&")[0]
+        return (200, json.dumps({"permission": self.grants[user]})) if user in self.grants else (404, "{}")
+
+
+@pytest.mark.parametrize(("before", "calls"), [
+    ({}, ["grant", "get"]),
+    ({"jordan": "READ"}, ["grant", "get", "get"]),
+    ({"jordan": "EDIT"}, ["grant", "get", "revoke", "grant", "get"]),
+], ids=["new", "same", "different"])
+def test_a_rerun_of_the_mlflow_bootstrap_leaves_exactly_the_grant_it_asks_for(monkeypatch, before, calls):
+    module = _mlflow_bootstrap(monkeypatch)
+    mlflow = FakeMlflow(before)
+    monkeypatch.setattr(module, "call", mlflow)
+    module.grant("jordan", "READ")
+    assert mlflow.grants == {"jordan": "READ"} and mlflow.calls == calls
+
+
+def test_the_mlflow_bootstrap_stops_on_any_other_error(monkeypatch):
+    module = _mlflow_bootstrap(monkeypatch)
+    monkeypatch.setattr(module, "call", lambda *args, **kwargs: (403, '{"error_code": "PERMISSION_DENIED"}'))
+    with pytest.raises(SystemExit, match="HTTP 403"):
+        module.grant("jordan", "READ")

@@ -1,4 +1,4 @@
-# What MLflow needs beyond its chart: a tailnet port and the Collector's user.
+# What MLflow needs beyond its chart: a tailnet port and its users.
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,17 +9,22 @@ spec:
   ports:
     - { name: http, port: 5000, targetPort: http, nodePort: 30500 }
 ---
-# Creates the "collector" user and lets it edit experiment 0 only; safe to run again (see the script).
+# Creates MLflow's users: "collector", which may edit experiment 0 and nothing else, and a personal account that
+# may read it. A Job's pod template can't be changed in place, so Argo CD deletes and recreates this Job on each sync
+# (Force=true,Replace=true), which re-runs it. That is safe: the script leaves existing users and grants as they are.
+# No ttlSecondsAfterFinished: a Job that deleted itself would be recreated by self-heal and run again a day later.
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: mlflow-bootstrap
   annotations:
     argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
 spec:
   backoffLimit: 6
-  ttlSecondsAfterFinished: 86400
   template:
+    metadata:
+      labels: { app.kubernetes.io/name: mlflow-bootstrap }    # the mlflow NetworkPolicy admits this label
     spec:
       restartPolicy: OnFailure
       automountServiceAccountToken: false
@@ -34,6 +39,10 @@ spec:
               valueFrom: { secretKeyRef: { name: mlflow-secrets, key: ADMIN_PASSWORD } }
             - name: COLLECTOR_PASSWORD
               valueFrom: { secretKeyRef: { name: mlflow-secrets, key: COLLECTOR_PASSWORD } }
+            - name: USER_NAME
+              valueFrom: { secretKeyRef: { name: mlflow-secrets, key: USER_NAME, optional: true } }
+            - name: USER_PASSWORD
+              valueFrom: { secretKeyRef: { name: mlflow-secrets, key: USER_PASSWORD, optional: true } }
           securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
           resources:
             requests: { cpu: 10m, memory: 64Mi }

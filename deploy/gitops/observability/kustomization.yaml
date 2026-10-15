@@ -19,6 +19,8 @@ resources:
   - alertmanager.yaml
   - postgres.yaml
   - mlflow-extras.yaml
+  - postgres-backup.yaml
+  - networkpolicies.yaml
 configMapGenerator:
   - name: otel-collector
     files: [config.yaml=config/collector.yaml]

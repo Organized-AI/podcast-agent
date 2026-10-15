@@ -40,6 +40,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - The Collector's OTLP exporters use their current names, `otlp_grpc` and `otlp_http`; Collector 0.161 logs the old `otlp` and `otlphttp` names as deprecated.
 
 ### Fixed
+- The lab's MLflow bootstrap Job failed whenever it ran a second time. MLflow 3.17 answers a grant the user already has with 400 `RESOURCE_ALREADY_EXISTS`, and the Job deleted itself after a day (`ttlSecondsAfterFinished`), so self-heal would have recreated it and left it failing. It now keeps a grant that matches, replaces one that doesn't (revoke, then grant: there is no update call), and Argo CD recreates the Job on each sync (`Force=true,Replace=true`) instead of on a timer.
 - Every alert rule now has a promtool unit test: `PodcastAgentModelLatencyHigh` and `PodcastAgentSelfCorrectionsHigh` had only a syntax check, though the guide and the write-up called them unit-tested. Their tests include the cases where they must stay quiet, and a drift test fails if a rule is added without one. The walkthrough also stops calling quotes "checked word for word": they are matched to their line at 90% or better (#72).
 - Following the Docker quickstart with an API key (`cp .env.example .env`, then `docker run --env-file .env`) failed at the first model call: `.env.example` set `LLM_CACHE_DIR=.cache/llm`, which overrode the image's `/cache/llm` with a directory under `/app`, where the container's user can't write. It is now commented out, and CI checks that the cache directory `.env.example` gives the image can be created. Offline runs never touched the cache, so they hid it.
 - With telemetry on (prod's values), the chart's NetworkPolicy blocked the pods' OTLP export: it allowed egress on 53 and 443 only, and the Collector listens on 4318. The policy now also allows the port in `otel.endpoint` whenever `otel.enabled` is true, and `make helm` checks prod's policy for it.
@@ -47,6 +48,12 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - Malformed JSON transcripts (an utterance that is not an object, `guests` or `host` of the wrong type, a nested value where text belongs) raised `AttributeError` or `TypeError`, so the API answered 500. They now raise `TranscriptError`, a 422 naming the field. A string `guests` value is split on commas instead of into characters, and negative timestamps count as 0 seconds (#49, found by the new JSON fuzzer).
 
 ### Security
+- The lab's MLflow is hardened (`deploy/gitops/observability`):
+  - **Accounts.** New accounts start with no access (`default_permission = NO_PERMISSIONS`; it was `READ`). A personal account (`MLFLOW_USER`, default `jordan`) can read experiment 0, so day to day nobody signs in as `admin`.
+  - **Network.** Every pod in `observability` refuses connections unless a NetworkPolicy admits them. Only MLflow and its backup reach Postgres; only the Collector and the bootstrap Job reach MLflow in the cluster; only dev sends OTLP to the Collector.
+  - **Backups.** Nightly `pg_dump` of the tracking and auth databases, kept seven days, with restore steps in `docs/GITOPS.md`.
+
+  `bootstrap.sh` moves an existing lab to `NO_PERMISSIONS` and adds the personal account. Verified on the lab: the personal account reads experiment 0 and searches traces but cannot delete it or read users (403), a new user gets 403 on experiment 0, the bridge can't reach MLflow or Postgres, and a dump restores into a scratch database.
 - `SECURITY.md` adds guidance for government and regulated deployments: the secure-development practices mapped to NIST SP 800-218 (SSDF 1.1) with the evidence for each, and how to run inside an authorization boundary (provider choice, air-gapped operation, telemetry, egress, identity, FIPS and hardened base images, deploy-by-digest, audit retention).
 - `SECURITY.md` no longer overstates the NetworkPolicy: it limits egress to DNS and HTTPS, not to named hosts; pinning destinations needs an egress gateway or an FQDN-aware CNI policy.
 

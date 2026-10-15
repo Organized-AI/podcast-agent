@@ -1,7 +1,11 @@
-"""Give the Collector its own MLflow user: it may edit experiment 0 (write traces there) and nothing else.
+"""Create MLflow's users and grant each one only what it needs on experiment 0.
 
-Runs as a Job in the MLflow image after MLflow is up. Idempotent: an existing user keeps its password, and granting a
-permission it already has is a no-op. Reads ADMIN_PASSWORD and COLLECTOR_PASSWORD from the mlflow-secrets Secret.
+* collector: EDIT, so the OpenTelemetry Collector can write traces there; nothing else.
+* a personal account (USER_NAME, when set): READ, for looking at traces without the admin account.
+
+New users get no access by default (basic_auth.ini sets default_permission = NO_PERMISSIONS), so these grants are the
+whole of what they can do. Runs as a Job in the MLflow image after MLflow is up. Idempotent: an existing user keeps its
+password, a grant it already has is kept, and a different one is replaced. Reads the passwords from the mlflow-secrets Secret.
 """
 
 import base64
@@ -44,28 +48,52 @@ def wait_for_mlflow(timeout_s=600):
     sys.exit(f"MLflow at {URL} did not become healthy in {timeout_s}s")
 
 
+def ensure_user(username, password):
+    status, text = call("POST", "/api/2.0/mlflow/users/create", {"username": username, "password": password})
+    if status == 200:
+        print(f"created user {username}")
+    elif "RESOURCE_ALREADY_EXISTS" in text or "already exists" in text:
+        print(f"user {username} exists")
+    else:
+        sys.exit(f"creating {username}: HTTP {status} {text[:300]}")
+
+
+def current_permission(username):
+    query = f"?username={username}&resource_type=experiment&resource_id={EXPERIMENT}"
+    status, text = call("GET", f"/api/3.0/mlflow/users/permissions/get{query}")
+    print(f"{username} on experiment {EXPERIMENT}: HTTP {status} {text[:200]}")
+    return json.loads(text).get("permission") if status == 200 else None
+
+
+def grant(username, permission):
+    """Leave username with exactly `permission` on the experiment.
+
+    MLflow 3.17 answers a grant the user already has with 400 RESOURCE_ALREADY_EXISTS and has no update call for
+    user permissions, so an existing grant is read back and, if it differs, revoked and granted again.
+    """
+    resource = {"username": username, "resource_type": "experiment", "resource_id": EXPERIMENT}
+    status, text = call("POST", "/api/3.0/mlflow/users/permissions/grant", {**resource, "permission": permission})
+    if status != 200 and "RESOURCE_ALREADY_EXISTS" not in text:
+        sys.exit(f"granting {permission} on experiment {EXPERIMENT} to {username}: HTTP {status} {text[:300]}")
+    if status != 200 and current_permission(username) != permission:
+        status, text = call("POST", "/api/3.0/mlflow/users/permissions/revoke", resource)
+        if status != 200:
+            sys.exit(f"revoking {username}'s permission on experiment {EXPERIMENT}: HTTP {status} {text[:300]}")
+        status, text = call("POST", "/api/3.0/mlflow/users/permissions/grant", {**resource, "permission": permission})
+        if status != 200:
+            sys.exit(f"granting {permission} on experiment {EXPERIMENT} to {username}: HTTP {status} {text[:300]}")
+    if current_permission(username) != permission:
+        sys.exit(f"{username} does not have {permission} on the experiment")
+
+
 def main():
     wait_for_mlflow()
-    status, text = call("POST", "/api/2.0/mlflow/users/create",
-                        {"username": COLLECTOR, "password": os.environ["COLLECTOR_PASSWORD"]})
-    if status == 200:
-        print(f"created user {COLLECTOR}")
-    elif "RESOURCE_ALREADY_EXISTS" in text or "already exists" in text:
-        print(f"user {COLLECTOR} exists")
-    else:
-        sys.exit(f"creating {COLLECTOR}: HTTP {status} {text[:300]}")
-
-    status, text = call("POST", "/api/3.0/mlflow/users/permissions/grant",
-                        {"username": COLLECTOR, "resource_type": "experiment", "resource_id": EXPERIMENT,
-                         "permission": "EDIT"})
-    if status != 200:
-        sys.exit(f"granting EDIT on experiment {EXPERIMENT}: HTTP {status} {text[:300]}")
-
-    query = f"?username={COLLECTOR}&resource_type=experiment&resource_id={EXPERIMENT}"
-    status, text = call("GET", f"/api/3.0/mlflow/users/permissions/get{query}")
-    print(f"{COLLECTOR} on experiment {EXPERIMENT}: HTTP {status} {text[:200]}")
-    if status != 200 or json.loads(text).get("permission") != "EDIT":
-        sys.exit("the collector does not have EDIT on the experiment")
+    ensure_user(COLLECTOR, os.environ["COLLECTOR_PASSWORD"])
+    grant(COLLECTOR, "EDIT")
+    person, password = os.environ.get("USER_NAME"), os.environ.get("USER_PASSWORD")
+    if person and password:
+        ensure_user(person, password)
+        grant(person, os.environ.get("USER_PERMISSION", "READ"))
 
 
 if __name__ == "__main__":
