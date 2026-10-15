@@ -275,9 +275,9 @@ def run(args: argparse.Namespace) -> int:
     if not lab.rule_loaded():
         raise SystemExit(f"Prometheus has no {ALERT} rule")
     say(f"  Prometheus has the {ALERT} rule")
-    canary_rate = lab.value('sum(increase(podcast_agent_episodes_total{podcast_agent_traffic="canary"}[5m]))')
-    say(f"  canary episodes in the last 5 minutes: {canary_rate:.0f}")
-    if canary_rate < 1:
+    canaries = lab.canaries(datetime.now(UTC) - timedelta(minutes=5), datetime.now(UTC))
+    say(f"  canary episodes in Jaeger from the last 5 minutes: {len(canaries)}")
+    if not canaries:
         raise SystemExit("the canary is not running")
     if lab.alert():
         raise SystemExit(f"{ALERT} is already firing; let it resolve first")
