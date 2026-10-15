@@ -95,10 +95,12 @@ jobs:
           persist-credentials: false
       - name: Validate the Collector and Prometheus configs and unit-test the alert rules
         run: make observability-check
-      - name: Run every transcript with telemetry on, then check Jaeger and Prometheus received it
+      - name: Run every transcript with telemetry on, then check Jaeger, MLflow and Prometheus received it
         run: |
           mkdir -p output && chmod 777 output   # the container writes as uid 10001
           make observe
+      - name: Stop MLflow, check a run still reaches Jaeger, restart it, check the queued spans reach MLflow
+        run: make observe-outage
       - name: Stack logs
         if: failure()
         run: docker compose -f deploy/compose/docker-compose.yml --profile observability logs --tail 80

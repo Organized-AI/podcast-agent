@@ -5,6 +5,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- Traces fan out to MLflow as well as Jaeger. The Collector's traces pipeline has a second exporter, `otlp_http/mlflow`, to MLflow's OTLP endpoint; the agent is unchanged. MLflow 3.17 joins the Compose `observability` profile (pinned by digest, SQLite store, 127.0.0.1:5050), and `make observe` now also checks that MLflow holds the run's trace with every span Jaeger has, the GenAI spans typed as AGENT, CHAT_MODEL and TOOL, the token usage rolled up, and no content. `make observe-outage`, which CI runs after it, stops MLflow, checks that a run still reaches Jaeger in full, restarts MLflow and checks that the Collector's retry delivers every queued span.
 - Guide: the v0.2.0 page now shows what has closed since release and what is still open, each with its evidence. The Audit trail adds the live Claude run (gates and per-episode judge scores), the lab's recorded sync on merge, and the public verification of v0.2.0's provenance.
 - The OpenSSF Best Practices **passing** badge: [project 15516](https://www.bestpractices.dev/projects/15516), with all 67 criteria met. The badge is in the README, and `docs/OPENSSF-BEST-PRACTICES.md` holds the same answers, with a URL where the criterion requires one.
 - Fuzzing: Atheris fuzzers for the TXT and JSON transcript parsers and the episode-id sanitizer (`fuzz/`), built and run by ClusterFuzzLite on every pull request that touches the code (5 minutes) and weekly (30 minutes). Base images are pinned by digest and dependencies are installed from `uv.lock` with hashes.
@@ -15,6 +16,9 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - A standing lab cluster (`make lab`): Argo CD on kind tracking `main`, with dev running the digest Git names, pulled from GHCR, so a merged deploy pull request rolls the pods without anyone touching the cluster. It uses its own kubeconfig, listens on localhost, and can be published to the tailnet only. The chart can expose the API as a NodePort for it (`api.service.type`, `api.service.nodePort`).
 - `/healthz` reports the commit the running image was built from, so a rollout is visible from outside the cluster.
 - Guide: a v0.2.0 view that answers the six review points on v0.1.0 with evidence, summarizes what the release added and measured, shows how it shipped (one digest from dev to prod) and lists what is not done yet. The Audit trail adds proof cards for the release run, the dev and prod digest with its SLSA provenance, and the OpenSSF Scorecard.
+
+### Changed
+- The Collector's OTLP exporters use their current names, `otlp_grpc` and `otlp_http`; Collector 0.161 logs the old `otlp` and `otlphttp` names as deprecated.
 
 ### Fixed
 - Malformed JSON transcripts (an utterance that is not an object, `guests` or `host` of the wrong type, a nested value where text belongs) raised `AttributeError` or `TypeError`, so the API answered 500. They now raise `TranscriptError`, a 422 naming the field. A string `guests` value is split on commas instead of into characters, and negative timestamps count as 0 seconds (#49, found by the new JSON fuzzer).

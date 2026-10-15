@@ -1,21 +1,70 @@
-# command: make observe, then python e2e/check_telemetry.py output/observe
+# command: make observe && make observe-outage
 # machine: MacBook Pro · Apple M1 Pro · Docker via Colima
-# captured: 2026-10-14
-# Stack: otel-collector-contrib 0.161.0 · jaeger 2.21.0 · prometheus v3.14.0 · grafana 13.2.3 (pinned by digest)
+# commit: 421cf57
+# captured: 2026-10-15T16:57:56Z
+# Stack: otel-collector-contrib 0.161.0 · jaeger 2.21.0 · mlflow 3.17.1 · prometheus v3.14.0 · grafana 13.2.3 (pinned by digest)
 # Run: LLM_PROVIDER=offline podcast-agent run data/transcripts with OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
-$ python e2e/check_telemetry.py output/observe
-run 20261014-233940-b83bf7 · trace b52c0eafb3ac0720d9226025d5b6fb8f · 4 episodes · 20 fact-checks
+$ make observe   # last step: python e2e/check_telemetry.py output/observe
+run 20261015-165842-96cc50 · trace 436a43985dc86e433e71621a1b71dbfc · 4 episodes · 20 fact-checks
 PASS one root span 'run podcast-agent' (found 1)
 PASS an invoke_agent span per episode (4/4)
 PASS a verify_claim span per fact-check (20/20)
 PASS model and tool spans present (60 chat, 22 execute_tool)
 PASS GenAI attributes on model spans
 PASS no prompt, completion or query text in spans
-PASS podcast_agent_episodes_total ≥ 4 (got 8)
-PASS podcast_agent_verdicts_total ≥ 20 (got 40)
-PASS gen_ai_client_token_usage recorded (240 model calls)
+PASS MLflow has trace tr-436a43985dc86e433e71621a1b71dbfc in experiment 0, state OK
+PASS MLflow got every span Jaeger got (128/128)
+PASS GenAI spans mapped to MLflow span types (4 AGENT, 60 CHAT_MODEL, 22 TOOL)
+PASS token usage rolled up on the trace (54064 tokens)
+PASS no prompt, completion or query text in MLflow
+PASS podcast_agent_episodes_total ≥ 4 (got 4)
+PASS podcast_agent_verdicts_total ≥ 20 (got 20)
+PASS gen_ai_client_token_usage recorded (120 model calls)
 PASS alert rules loaded (6)
 PASS Grafana dashboard 'Podcast Agent' provisioned
 PASS Grafana data sources provisioned (jaeger, prometheus)
-Jaeger: /trace/b52c0eafb3ac0720d9226025d5b6fb8f
-# Counters show two runs: Prometheus kept the series from an earlier run in the same session.
+Jaeger: /trace/436a43985dc86e433e71621a1b71dbfc
+MLflow: trace tr-436a43985dc86e433e71621a1b71dbfc
+Jaeger 127.0.0.1:16686 · MLflow 127.0.0.1:5050 · Prometheus 127.0.0.1:9090 · Grafana 127.0.0.1:3000
+observe exit: 0
+
+$ make observe-outage   # stop mlflow · run ep002 · check · start mlflow · check again
+ Container podcast-agent-mlflow-1 Stopped 
+--- MLflow is down: Jaeger and Prometheus must still have the run
+run 20261015-165900-72af20 · trace f0d800f60c988db4757544f2c71b7118 · 1 episodes · 7 fact-checks
+PASS one root span 'run podcast-agent' (found 1)
+PASS an invoke_agent span per episode (1/1)
+PASS a verify_claim span per fact-check (7/7)
+PASS model and tool spans present (17 chat, 6 execute_tool)
+PASS GenAI attributes on model spans
+PASS no prompt, completion or query text in spans
+PASS podcast_agent_episodes_total ≥ 1 (got 4)
+PASS podcast_agent_verdicts_total ≥ 7 (got 20)
+PASS gen_ai_client_token_usage recorded (120 model calls)
+PASS alert rules loaded (6)
+PASS Grafana dashboard 'Podcast Agent' provisioned
+PASS Grafana data sources provisioned (jaeger, prometheus)
+Jaeger: /trace/f0d800f60c988db4757544f2c71b7118
+ Container podcast-agent-mlflow-1 Healthy 
+--- MLflow is back: the Collector's retry must deliver every span it queued
+run 20261015-165900-72af20 · trace f0d800f60c988db4757544f2c71b7118 · 1 episodes · 7 fact-checks
+PASS one root span 'run podcast-agent' (found 1)
+PASS an invoke_agent span per episode (1/1)
+PASS a verify_claim span per fact-check (7/7)
+PASS model and tool spans present (17 chat, 6 execute_tool)
+PASS GenAI attributes on model spans
+PASS no prompt, completion or query text in spans
+PASS MLflow has trace tr-f0d800f60c988db4757544f2c71b7118 in experiment 0, state OK
+PASS MLflow got every span Jaeger got (37/37)
+PASS GenAI spans mapped to MLflow span types (1 AGENT, 17 CHAT_MODEL, 6 TOOL)
+PASS token usage rolled up on the trace (14714 tokens)
+PASS no prompt, completion or query text in MLflow
+PASS podcast_agent_episodes_total ≥ 1 (got 5)
+PASS podcast_agent_verdicts_total ≥ 7 (got 27)
+PASS gen_ai_client_token_usage recorded (154 model calls)
+PASS alert rules loaded (6)
+PASS Grafana dashboard 'Podcast Agent' provisioned
+PASS Grafana data sources provisioned (jaeger, prometheus)
+Jaeger: /trace/f0d800f60c988db4757544f2c71b7118
+MLflow: trace tr-f0d800f60c988db4757544f2c71b7118
+observe-outage exit: 0

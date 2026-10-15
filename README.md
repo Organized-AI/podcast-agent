@@ -94,7 +94,7 @@ See [evals/README.md](evals/README.md) for the datasets, metrics and thresholds.
 ### Traces, metrics and dashboards
 
 ```bash
-make observe    # Collector + Jaeger (127.0.0.1:16686) + Prometheus (:9090) + Grafana (:3000), then a traced run
+make observe    # Collector + Jaeger (127.0.0.1:16686) + MLflow (:5050) + Prometheus (:9090) + Grafana (:3000), then a traced run
 ```
 
 Every run is one OpenTelemetry trace (`run` → `invoke_agent` → `step` → `verify_claim` → `chat` / `execute_tool`) with GenAI token and latency metrics; see [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md).
