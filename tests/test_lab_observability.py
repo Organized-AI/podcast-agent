@@ -100,3 +100,11 @@ def test_argo_cd_may_deploy_everything_the_stack_contains():
     assert chart["helm"]["valueFiles"] == ["$values/deploy/gitops/observability/mlflow-values.yaml"]
     assert values["ref"] == "values" and chart["repoURL"] in project["spec"]["sourceRepos"]
     assert all(app["spec"]["destination"]["namespace"] == "observability" for app in (obs_app, mlflow_app))
+
+
+def test_the_mlflow_ui_may_post_from_every_tailnet_address_it_is_served_on():
+    """MLflow rejects POSTs whose Origin it doesn't know; without this the UI loads but cannot search traces."""
+    options = yaml.safe_load((OBS / "mlflow-values.yaml").read_text())["server"]["value_options"]
+    hosts = [h for h in options["allowed_hosts"].split(",") if h.endswith(":30500")]
+    origins = set(options["cors_allowed_origins"].split(","))
+    assert hosts and all(f"http://{h}" in origins for h in hosts)
