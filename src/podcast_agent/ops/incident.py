@@ -41,6 +41,7 @@ T = TypeVar("T")
 MARKER = re.compile(r"<!-- incident-bridge (\{.*?\}) -->", re.S)
 EPISODE_OP = "invoke_agent podcast-agent"
 DEPLOY_PATHS = ("deploy/", "config/")
+MAX_SUSPECTS = 3  # newest first; a long list buries the one that matters
 
 
 def _env(name: str, default: str | None = None) -> str | None:
@@ -511,10 +512,14 @@ def render_issue(payload: dict[str, Any], ev: Evidence, cfg: Config) -> tuple[st
             out[-1] += f" [Argo CD]({cfg.argocd_ui}/applications/argocd/{cfg.argocd_app})"
     else:
         out.append("No deploy found before the alert.")
-    for ch in ev.changes:
+    shown = ev.changes[:MAX_SUSPECTS]
+    for ch in shown:
         ref = f"#{ch.pr}" if ch.pr else f"`{ch.sha[:7]}`"
         out += ["", f"**Suspect: {ref} {ch.title}** by @{ch.author}"
                 + (f", merged {iso(ch.merged_at)}" if ch.merged_at else "") + f" ({ch.url})", "", _patch(ch.files)]
+    if len(ev.changes) > len(shown):
+        out += ["", f"…and {len(ev.changes) - len(shown)} earlier commit(s) that touched deploy/ or config/ "
+                    "between the two deploys."]
     if ev.deploy and ev.previous_deploy and not ev.changes and not any(n.startswith("GitHub") for n in ev.notes):
         out.append("No commit between the two deploys touched deploy/ or config/.")
     if ev.running:
@@ -527,7 +532,8 @@ def render_issue(payload: dict[str, Any], ev: Evidence, cfg: Config) -> tuple[st
     out += ["### Next steps", "",
             "1. Confirm the suspect: the cost moved with the deploy above, and the diff changes what drives it.",
             ("2. Mitigate: revert "
-             + (f"#{first.pr} (the Revert button on the pull request, or `git revert {first.sha[:7]}`)" if first
+             + ((f"#{first.pr} (the Revert button on the pull request, or `git revert {first.sha[:7]}`)" if first.pr
+                 else f"`{first.sha[:7]}` (`git revert {first.sha[:7]}` in a pull request)") if first
                 else "the last config change")
              + "; merge it after CI. Argo CD syncs dev within a minute."),
             "3. Watch the next canary come back under budget. The alert resolves after five minutes without an "
