@@ -28,6 +28,7 @@ LISTEN=${LISTEN:-127.0.0.1}
 API_PORT=${API_PORT:-30080}
 ARGOCD_PORT=${ARGOCD_PORT:-30090}
 OBSERVABILITY=${OBSERVABILITY:-1}
+MLFLOW_USER=${MLFLOW_USER:-jordan}    # a personal MLflow account that can read experiment 0, so day to day you're not admin
 OBS_PORTS="30686 30500 30909 30903"   # Jaeger, MLflow, Prometheus, Alertmanager (NodePorts in deploy/gitops/observability)
 REVISION=${REVISION:-main}
 RECONCILE=${RECONCILE:-30s}     # how often Argo CD checks Git; the default is 180s
@@ -94,11 +95,11 @@ if [ "$OBSERVABILITY" = 1 ]; then
   kubectl create namespace observability --dry-run=client -o yaml | kubectl apply -f - >/dev/null
   if ! kubectl -n observability get secret mlflow-secrets >/dev/null 2>&1; then
     rand() { openssl rand -hex 24; }
-    pg=$(rand); admin=$(rand); collector=$(rand)
+    pg=$(rand); admin=$(rand); collector=$(rand); person=$(rand)
     ini=$(mktemp); chmod 600 "$ini"
     cat > "$ini" <<INI
 [mlflow]
-default_permission = READ
+default_permission = NO_PERMISSIONS
 database_uri = postgresql://mlflow:$pg@postgres:5432/mlflow_auth
 admin_username = admin
 admin_password = $admin
@@ -111,11 +112,25 @@ INI
       --from-literal=ADMIN_PASSWORD="$admin" \
       --from-literal=COLLECTOR_PASSWORD="$collector" \
       --from-literal=COLLECTOR_BASIC_AUTH="$(printf 'collector:%s' "$collector" | base64 | tr -d '\n')" \
+      --from-literal=USER_NAME="$MLFLOW_USER" \
+      --from-literal=USER_PASSWORD="$person" \
       --from-file=basic_auth.ini="$ini" >/dev/null
     rm -f "$ini"
     echo "  created mlflow-secrets (MLflow admin password: kubectl -n observability get secret mlflow-secrets -o jsonpath='{.data.ADMIN_PASSWORD}' | base64 -d)"
   else
     echo "  mlflow-secrets exists; kept"
+    # Labs bootstrapped before the hardening: new users got READ on everything, and there was no personal account.
+    ini=$(kubectl -n observability get secret mlflow-secrets -o jsonpath='{.data.basic_auth\.ini}' | base64 -d)
+    if ! printf '%s\n' "$ini" | grep -q '^default_permission = NO_PERMISSIONS$'; then
+      new=$(printf '%s\n' "$ini" | sed 's/^default_permission = .*/default_permission = NO_PERMISSIONS/' | base64 | tr -d '\n')
+      kubectl -n observability patch secret mlflow-secrets -p "{\"data\":{\"basic_auth.ini\":\"$new\"}}" >/dev/null
+      kubectl -n observability rollout restart deploy/mlflow >/dev/null 2>&1 || true
+      echo "  MLflow: new users now start with no permissions (restarted to read it)"
+    fi
+    if [ -z "$(kubectl -n observability get secret mlflow-secrets -o jsonpath='{.data.USER_NAME}')" ]; then
+      kubectl -n observability patch secret mlflow-secrets -p "{\"stringData\":{\"USER_NAME\":\"$MLFLOW_USER\",\"USER_PASSWORD\":\"$(openssl rand -hex 24)\"}}" >/dev/null
+      echo "  MLflow: added the personal account $MLFLOW_USER (created when the bootstrap Job next runs)"
+    fi
   fi
   sed "s|targetRevision: main|targetRevision: $REVISION|" deploy/gitops/argocd/observability.yaml | kubectl apply -f - >/dev/null
   echo "  Applications observability and mlflow tracking $REVISION"
@@ -165,6 +180,7 @@ echo "  /healthz $(curl -sS "http://127.0.0.1:$API_PORT/healthz")"
 echo "  Argo CD  http://127.0.0.1:$ARGOCD_PORT  (read-only without login; admin password:"
 echo "           kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)"
 if [ "$OBSERVABILITY" = 1 ]; then
-  echo "  Jaeger   http://127.0.0.1:30686   MLflow http://127.0.0.1:30500 (user admin)"
+  echo "  Jaeger   http://127.0.0.1:30686   MLflow http://127.0.0.1:30500 (user $MLFLOW_USER; password:"
+  echo "           kubectl -n observability get secret mlflow-secrets -o jsonpath='{.data.USER_PASSWORD}' | base64 -d)"
   echo "  Prometheus http://127.0.0.1:30909   Alertmanager http://127.0.0.1:30903"
 fi

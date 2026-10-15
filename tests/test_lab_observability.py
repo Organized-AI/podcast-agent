@@ -23,6 +23,20 @@ def _manifests() -> list[dict]:
     return [d for f in kustomization["resources"] for d in _docs(OBS / f)]
 
 
+def _pod_spec(doc: dict) -> dict:
+    if doc["kind"] in ("Deployment", "StatefulSet", "Job"):
+        return doc["spec"]["template"]["spec"]
+    if doc["kind"] == "CronJob":
+        return doc["spec"]["jobTemplate"]["spec"]["template"]["spec"]
+    return {}
+
+
+def _pod_labels(doc: dict) -> dict:
+    template = (doc["spec"]["jobTemplate"]["spec"]["template"] if doc["kind"] == "CronJob"
+                else doc["spec"].get("template", {}))
+    return template.get("metadata", {}).get("labels", {})
+
+
 def _config(name: str) -> dict:
     return yaml.safe_load((OBS / "config" / name).read_text())
 
@@ -74,8 +88,7 @@ def test_the_tailnet_ports_line_up_from_the_node_to_the_issue_links():
 
 
 def test_every_image_is_pinned_by_digest():
-    images = [c["image"] for d in _manifests() if d["kind"] in ("Deployment", "StatefulSet", "Job")
-              for c in d["spec"]["template"]["spec"]["containers"]]
+    images = [c["image"] for d in _manifests() for c in _pod_spec(d).get("containers", [])]
     images.append("ghcr.io/mlflow/mlflow:" + yaml.safe_load((OBS / "mlflow-values.yaml").read_text())["image"]["tag"])
     assert images and all(re.search(r"@sha256:[0-9a-f]{64}$", i) for i in images), images
 
@@ -100,3 +113,32 @@ def test_argo_cd_may_deploy_everything_the_stack_contains():
     assert chart["helm"]["valueFiles"] == ["$values/deploy/gitops/observability/mlflow-values.yaml"]
     assert values["ref"] == "values" and chart["repoURL"] in project["spec"]["sourceRepos"]
     assert all(app["spec"]["destination"]["namespace"] == "observability" for app in (obs_app, mlflow_app))
+
+
+def test_ingress_is_denied_unless_a_policy_allows_it():
+    policies = {d["metadata"]["name"]: d for d in _manifests() if d["kind"] == "NetworkPolicy"}
+    deny = policies["default-deny-ingress"]["spec"]
+    assert deny["podSelector"] == {} and deny["policyTypes"] == ["Ingress"] and "ingress" not in deny
+    # Every workload has a policy of its own, and every pod label a policy admits belongs to a workload here.
+    workloads = {_pod_labels(d).get("app.kubernetes.io/name") for d in _manifests() if _pod_spec(d)}
+    workloads |= {"mlflow"}  # from its chart
+    selected = {p["spec"]["podSelector"].get("matchLabels", {}).get("app.kubernetes.io/name") for p in policies.values()}
+    assert workloads - {"postgres-backup", "mlflow-bootstrap"} <= selected
+    admitted = {peer["podSelector"]["matchLabels"]["app.kubernetes.io/name"]
+                for p in policies.values() for rule in p["spec"].get("ingress", []) for peer in rule.get("from", [])
+                if "podSelector" in peer and "namespaceSelector" not in peer}
+    assert admitted <= workloads, admitted - workloads
+
+
+def test_only_mlflow_and_its_backup_reach_postgres():
+    (policy,) = [d for d in _manifests() if d["kind"] == "NetworkPolicy" and d["metadata"]["name"] == "postgres"]
+    (rule,) = policy["spec"]["ingress"]
+    assert [peer["podSelector"]["matchLabels"]["app.kubernetes.io/name"] for peer in rule["from"]] == [
+        "mlflow", "postgres-backup"]
+    assert rule["ports"] == [{"port": 5432, "protocol": "TCP"}]
+
+
+def test_new_mlflow_users_start_with_no_permissions():
+    text = BOOTSTRAP.read_text()
+    assert "default_permission = NO_PERMISSIONS" in text and "default_permission = READ" not in text
+    assert "--from-literal=USER_NAME=" in text  # the personal account, so day to day nobody signs in as admin

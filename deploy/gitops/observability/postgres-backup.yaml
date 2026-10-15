@@ -1,0 +1,59 @@
+# Nightly dumps of MLflow's two databases (tracking data and users) to their own volume, kept for a week.
+# Restore one with pg_restore (docs/GITOPS.md). The volume is on the same node, so this guards against mistakes and
+# corruption, not against losing the machine: copy the dumps off the node for that.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+spec:
+  schedule: "17 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels: { app.kubernetes.io/name: postgres-backup }   # the postgres NetworkPolicy admits this label
+        spec:
+          restartPolicy: OnFailure
+          automountServiceAccountToken: false
+          securityContext: { runAsNonRoot: true, runAsUser: 70, runAsGroup: 70, fsGroup: 70, seccompProfile: { type: RuntimeDefault } }
+          containers:
+            - name: backup
+              image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+              command: ["/bin/sh", "-ec"]
+              args:
+                - |
+                  stamp=$(date -u +%Y%m%dT%H%M%SZ)
+                  for db in mlflow mlflow_auth; do
+                    pg_dump -h postgres -U mlflow -d "$db" -Fc -f "/backups/$db-$stamp.dump"
+                  done
+                  find /backups -name '*.dump' -mtime +7 -delete
+                  ls -l /backups
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef: { name: mlflow-secrets, key: POSTGRES_PASSWORD }
+              securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+              resources:
+                requests: { cpu: 10m, memory: 32Mi }
+                limits: { cpu: 500m, memory: 256Mi }
+              volumeMounts:
+                - { name: backups, mountPath: /backups }
+                - { name: tmp, mountPath: /tmp }
+          volumes:
+            - name: backups
+              persistentVolumeClaim: { claimName: postgres-backups }
+            - name: tmp
+              emptyDir: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-backups
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests: { storage: 2Gi }

@@ -24,6 +24,8 @@ spec:
     - { group: apps, kind: Deployment }
     - { group: apps, kind: StatefulSet }
     - { group: batch, kind: Job }
+    - { group: batch, kind: CronJob }
+    - { group: networking.k8s.io, kind: NetworkPolicy }
   orphanedResources:
     warn: true
 ---
