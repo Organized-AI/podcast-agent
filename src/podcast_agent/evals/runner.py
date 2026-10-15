@@ -13,6 +13,7 @@ Each section reports metrics; ``thresholds`` turn some of them into gates. A bar
 from __future__ import annotations
 
 import json
+import tempfile
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -30,7 +31,9 @@ from podcast_agent.evals.datasets import (
     load_episode_expectations,
     load_factcheck_cases,
 )
+from podcast_agent.evals.judge import CRITERIA, judge_summary
 from podcast_agent.models import Claim, EpisodeReport
+from podcast_agent.runtime import collect_inputs, new_run_id, run_batch
 from podcast_agent.text import word_count
 from podcast_agent.transcript import load_episode, normalize_episode
 
@@ -137,8 +140,9 @@ def run_factcheck(ctx: RunContext, cases: list[FactCheckCase], *, max_steps: int
 
 
 def score_run(run_dir: str | Path, expectations: dict[str, EpisodeExpectation], *, name: str | None = None,
-              root: str | Path = ".") -> Section:
-    """Score a finished run's report.json against the per-episode expectations. Calls no model."""
+              root: str | Path = ".", judge_ctx: RunContext | None = None) -> Section:
+    """Score a finished run's report.json against the per-episode expectations. Calls no model unless
+    ``judge_ctx`` is given, in which case the rubric judge also grades every summary."""
     run_dir, root = Path(run_dir), Path(root)
     combined = json.loads((run_dir / "report.json").read_text(encoding="utf-8"))
     rows: list[dict[str, Any]] = []
@@ -161,8 +165,14 @@ def score_run(run_dir: str | Path, expectations: dict[str, EpisodeExpectation], 
             verdict = match.verdict.value if match is not None else None
             claim_rows.append({"match": want.match, "found": match is not None, "verdict": verdict,
                                "correct": verdict is not None and verdict in want.acceptable})
+        judged: dict[str, Any] | None = None
+        if judge_ctx is not None and summary:
+            graded, judge_score = judge_summary(judge_ctx, source, summary)
+            judged = {"score": judge_score, **{k: getattr(graded, k).rating for k in CRITERIA},
+                      "invented_facts": graded.invented_facts}
         rows.append({
             "episode": rep.episode.episode_id,
+            "judge": judged,
             "summary_words": words,
             "summary_in_range": exp.summary.words[0] <= words <= exp.summary.words[1],
             "summary_coverage": m.mention_coverage(summary, exp.summary.mentions),
@@ -186,6 +196,11 @@ def score_run(run_dir: str | Path, expectations: dict[str, EpisodeExpectation], 
         "llm_calls_per_episode": sum(r["llm_calls"] for r in rows) / len(rows) if rows else 0.0,
         "tokens_per_episode": sum(r["tokens"] for r in rows) / len(rows) if rows else 0.0,
     }
+    judged_rows = [r["judge"] for r in rows if r["judge"]]
+    if judged_rows:
+        values["judge_score"] = sum(j["score"] for j in judged_rows) / len(judged_rows)
+        values.update({f"judge.{k}": sum(j[k] for j in judged_rows) / len(judged_rows) for k in CRITERIA})
+        values["invented_facts"] = float(sum(len(j["invented_facts"]) for j in judged_rows))
     return Section(name=name or run_dir.name, kind="run", metrics=_round(values), rows=rows)
 
 
@@ -203,8 +218,25 @@ def apply_thresholds(section: Section, thresholds: dict[str, Any]) -> None:
         section.checks.append(Check(section.name, metric, section.metrics[metric], float(value), direction))
 
 
-def run_suite(path: str | Path, ctx: RunContext | None = None, *, root: str | Path = ".") -> SuiteResult:
-    """Run every section of a suite file. ``ctx`` is needed only when the suite has a factcheck section."""
+def compare_to_baseline(section: Section, baseline: dict[str, float], tolerance: float) -> None:
+    """Add a check per gated metric: no worse than the baseline by more than ``tolerance`` (absolute)."""
+    for gate in list(section.checks):
+        base = baseline.get(gate.metric)
+        if base is None:
+            continue
+        limit = base - tolerance if gate.direction == "min" else base + tolerance
+        section.checks.append(Check(section.name, f"{gate.metric} vs baseline", gate.value, round(limit, 4), gate.direction))
+
+
+def baseline_snapshot(result: SuiteResult) -> dict[str, dict[str, float]]:
+    """The gated metrics of every section, as stored in evals/baselines/<suite>.json."""
+    return {s.name: {c.metric: c.value for c in s.checks if not c.metric.endswith(" vs baseline")} for s in result.sections}
+
+
+def run_suite(path: str | Path, ctx: RunContext | None = None, *, root: str | Path = ".",
+              work_dir: str | Path | None = None) -> SuiteResult:
+    """Run every section of a suite file. ``ctx`` is needed when the suite runs cases, fresh runs or the judge.
+    Fresh runs (``fresh: <transcripts>``) are written under ``work_dir``."""
     suite = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     root = Path(root)
     sections: list[Section] = []
@@ -218,10 +250,26 @@ def run_suite(path: str | Path, ctx: RunContext | None = None, *, root: str | Pa
         apply_thresholds(section, fc_spec.get("thresholds") or {})
         sections.append(section)
     for spec in suite.get("runs") or []:
-        section = score_run(root / spec["path"], load_episode_expectations(root / spec["expectations"]),
-                            name=spec.get("name"), root=root)
+        name = spec.get("name") or Path(spec.get("path") or spec["fresh"]).name
+        if spec.get("fresh"):  # run the pipeline now, then score what it wrote
+            if ctx is None:
+                raise ValueError(f"{name}: a fresh run needs a model context")
+            run_dir = Path(work_dir or Path(tempfile.mkdtemp(prefix="eval-"))) / name
+            files = collect_inputs([str(root / spec["fresh"])])
+            ctx.trace.episode_id = None
+            run_batch(ctx, files, run_dir, new_run_id())
+        else:
+            run_dir = root / spec["path"]
+        judge_ctx = ctx if spec.get("judge") and ctx is not None and ctx.llm.name != "offline" else None
+        section = score_run(run_dir, load_episode_expectations(root / spec["expectations"]), name=name, root=root,
+                            judge_ctx=judge_ctx)
         apply_thresholds(section, spec.get("thresholds") or {})
         sections.append(section)
+    base_spec = suite.get("baseline")
+    if base_spec and (root / base_spec["path"]).exists():
+        stored = json.loads((root / base_spec["path"]).read_text(encoding="utf-8"))
+        for section in sections:
+            compare_to_baseline(section, stored.get(section.name, {}), float(base_spec.get("tolerance", 0.05)))
     provider = ctx.llm.describe() if ctx else {"provider": "none"}
     return SuiteResult(suite=suite.get("name", Path(path).stem), description=suite.get("description", ""),
                        provider=" · ".join(f"{k}={v}" for k, v in provider.items()), sections=sections)
@@ -248,12 +296,17 @@ def render_markdown(result: SuiteResult) -> str:
                 out.append(f"| `{r['id']}` | {' / '.join(r['acceptable'])} | {r['verdict']} | {r['confidence']:.2f} | "
                            f"{', '.join(r['cited_kb']) or '—'} | {'✅' if r['correct'] else '❌'} |")
         else:
-            out += ["| Episode | Summary words | Coverage | Quotes verbatim | Claims found / right |", "|---|---|---|---|---|"]
+            out += ["| Episode | Summary words | Coverage | Quotes verbatim | Claims found / right | Judge |",
+                    "|---|---|---|---|---|---|"]
             for r in s.rows:
                 found = sum(c["found"] for c in r["claims"])
                 right = sum(c["correct"] for c in r["claims"])
+                judge = r.get("judge")
+                judged = (f"{judge['score']:.2f} (F{judge['faithfulness']} C{judge['coverage']} K{judge['concision']}"
+                          f"{', ' + str(len(judge['invented_facts'])) + ' invented' if judge['invented_facts'] else ''})"
+                          if judge else "—")
                 out.append(f"| {r['episode']} | {r['summary_words']} | {r['summary_coverage']:.2f} | "
-                           f"{r['quotes_verbatim']}/{r['quotes']} | {found}/{len(r['claims'])} found, {right} right |")
+                           f"{r['quotes_verbatim']}/{r['quotes']} | {found}/{len(r['claims'])} found, {right} right | {judged} |")
             misses = [(r["episode"], c) for r in s.rows for c in r["claims"] if not c["correct"]]
             if misses:
                 out += ["", "Claims that missed:"]

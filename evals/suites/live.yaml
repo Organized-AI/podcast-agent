@@ -1,0 +1,38 @@
+# Nightly with Claude (.github/workflows/nightly-evals.yml), or by hand with a key in the environment:
+#   podcast-agent eval --suite evals/suites/live.yaml --out evals/reports/live
+# The fact-check cases go through Claude, every bundled transcript is processed fresh and scored, and
+# the rubric judge grades each summary. Thresholds are the floor; the baseline catches regressions
+# against the last accepted run (refresh it with --update-baseline after reviewing a run).
+name: live
+description: Claude end to end. The labeled fact-check cases, a fresh run of every bundled transcript scored against the expectations, and the rubric judge on each summary.
+provider: anthropic
+
+factcheck:
+  dataset: evals/datasets/factcheck.jsonl
+  max_steps_per_claim: 4
+  thresholds:
+    verdict_accuracy: 0.85
+    macro_f1: 0.8
+    citation_validity: 0.95
+    accuracy.future-deadline: 1.0
+    accuracy.anecdote: 1.0
+    brier: { max: 0.15 }
+
+runs:
+  - name: fresh
+    fresh: data/transcripts
+    expectations: evals/datasets/episodes.yaml
+    judge: true
+    thresholds:
+      summary_in_range: 1.0
+      summary_coverage: 0.9
+      notes_shape_ok: 1.0
+      quote_fidelity: 1.0
+      claim_recall: 0.8
+      claim_verdict_accuracy: 0.85
+      judge_score: 0.7
+      invented_facts: { max: 2 }
+
+baseline:
+  path: evals/baselines/live.json
+  tolerance: 0.05

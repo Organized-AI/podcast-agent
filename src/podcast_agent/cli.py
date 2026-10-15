@@ -109,10 +109,19 @@ def cmd_audit(args: argparse.Namespace) -> int:
 
 
 def cmd_eval(args: argparse.Namespace) -> int:
+    import json
+
     import yaml
 
     from podcast_agent.evals.datasets import load_episode_expectations
-    from podcast_agent.evals.runner import SuiteResult, render_markdown, run_suite, score_run, write_reports
+    from podcast_agent.evals.runner import (
+        SuiteResult,
+        baseline_snapshot,
+        render_markdown,
+        run_suite,
+        score_run,
+        write_reports,
+    )
     from podcast_agent.runtime import build_context
     from podcast_agent.trace import Tracer
 
@@ -131,11 +140,24 @@ def cmd_eval(args: argparse.Namespace) -> int:
                 settings.provider = suite["provider"]
             tracer = Tracer(f"eval-{Path(args.suite).stem}", console=Console(quiet=True), verbose=False)
             ctx = build_context(settings, tracer)
+        if ctx is None and any(r.get("fresh") or r.get("judge") for r in suite.get("runs") or []):
+            settings = _apply_overrides(Settings(), args)
+            if suite.get("provider") and not args.provider:
+                settings.provider = suite["provider"]
+            ctx = build_context(settings, Tracer(f"eval-{Path(args.suite).stem}", console=Console(quiet=True), verbose=False))
         telemetry.setup()
         try:
-            result = run_suite(args.suite, ctx)
+            result = run_suite(args.suite, ctx, work_dir=Path(args.out) / "runs" if args.out else None)
         finally:
             telemetry.shutdown()
+        if args.update_baseline:
+            base = (suite.get("baseline") or {}).get("path")
+            if not base:
+                console.print("[red]--update-baseline: this suite has no baseline path[/red]")
+                return 2
+            Path(base).parent.mkdir(parents=True, exist_ok=True)
+            Path(base).write_text(json.dumps(baseline_snapshot(result), indent=2) + "\n", encoding="utf-8")
+            console.print(f"Wrote baseline {base}")
     print(render_markdown(result))  # raw Markdown, so tables are not re-wrapped
     if args.out:
         json_path, md_path = write_reports(result, args.out)
@@ -227,6 +249,7 @@ def main(argv: list[str] | None = None) -> int:
     ev.add_argument("--model", help="main model id")
     ev.add_argument("--fast-model", help="fast model id")
     ev.add_argument("--no-cache", action="store_true", help="bypass the local LLM response cache")
+    ev.add_argument("--update-baseline", action="store_true", help="write this run's gated metrics as the suite's baseline")
     ev.set_defaults(func=cmd_eval)
 
     kb = sub.add_parser("kb", help="Query the local knowledge base")

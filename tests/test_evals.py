@@ -97,3 +97,79 @@ def test_cli_exit_code_follows_the_thresholds(tmp_path, monkeypatch):
     assert json.loads((out / "eval.json").read_text())["passed"] is True
     assert main(["eval", "--suite", str(_suite(tmp_path, 1.0))]) == 1
     assert main(["eval", "--score", "samples/offline-mode"]) == 0  # scoring alone never gates
+
+
+def _judge(f, c, k, invented=()):
+    return {"faithfulness": {"rating": f, "note": "n"}, "coverage": {"rating": c, "note": "n"},
+            "concision": {"rating": k, "note": "n"}, "invented_facts": list(invented)}
+
+
+def test_judge_score_weights_and_penalty():
+    from podcast_agent.evals.judge import JudgeVerdict, score
+
+    assert score(JudgeVerdict.model_validate(_judge(5, 5, 5))) == 1.0
+    assert score(JudgeVerdict.model_validate(_judge(1, 1, 1))) == 0.0
+    assert score(JudgeVerdict.model_validate(_judge(5, 3, 1))) == pytest.approx(0.5 + 0.15)
+    assert score(JudgeVerdict.model_validate(_judge(5, 5, 5, ["made-up stat"]))) == pytest.approx(0.85)
+
+
+def test_live_style_suite_runs_fresh_judges_and_compares_to_a_baseline(tmp_path):
+    """A fresh run with a scripted model, the judge on every summary, and a baseline regression check."""
+    suite = tmp_path / "live.yaml"
+    baseline = tmp_path / "baseline.json"
+    baseline.write_text(json.dumps({"fresh": {"judge_score": 0.95, "quote_fidelity": 1.0}}))
+    suite.write_text(
+        "name: t\nruns:\n  - name: fresh\n    fresh: data/transcripts/ep004_pdf_example.txt\n"
+        "    expectations: evals/datasets/episodes.yaml\n    judge: true\n"
+        "    thresholds: {judge_score: 0.5, quote_fidelity: 1.0, invented_facts: {max: 1}}\n"
+        f"baseline: {{path: {baseline}, tolerance: 0.05}}\n"
+    )
+    provider = ScriptedProvider({"judge_summary": [_judge(5, 4, 3, ["Nina is an astronaut"])]})
+    result = run_suite(suite, make_ctx(provider), root=ROOT, work_dir=tmp_path / "runs")
+    section = result.sections[0]
+    assert (tmp_path / "runs" / "fresh" / "report.json").exists()
+    assert section.rows[0]["judge"]["invented_facts"] == ["Nina is an astronaut"]
+    assert section.metrics["judge_score"] == pytest.approx(0.5 + 0.225 + 0.1 - 0.15)
+    checks = {c.metric: c.passed for c in section.checks}
+    assert checks["judge_score"] and checks["invented_facts"]
+    assert checks["judge_score vs baseline"] is False  # 0.675 is more than 0.05 below 0.95
+    assert checks["quote_fidelity vs baseline"] is True
+    assert not result.passed
+    assert "F5 C4 K3, 1 invented" in render_markdown(result)
+
+
+def test_offline_provider_skips_the_judge(tmp_path):
+    suite = tmp_path / "s.yaml"
+    suite.write_text("name: t\nruns:\n  - name: c\n    path: samples/claude-run\n"
+                     "    expectations: evals/datasets/episodes.yaml\n    judge: true\n")
+    section = run_suite(suite, make_ctx(), root=ROOT).sections[0]
+    assert "judge_score" not in section.metrics and all(r["judge"] is None for r in section.rows)
+
+
+def test_update_baseline_writes_the_gated_metrics(tmp_path, monkeypatch):
+    monkeypatch.chdir(ROOT)
+    suite = tmp_path / "s.yaml"
+    base = tmp_path / "b" / "base.json"
+    suite.write_text("name: t\nruns:\n  - name: c\n    path: samples/claude-run\n    expectations: evals/datasets/episodes.yaml\n"
+                     f"    thresholds: {{quote_fidelity: 1.0}}\nbaseline: {{path: {base}}}\n")
+    assert main(["eval", "--suite", str(suite), "--update-baseline"]) == 0
+    assert json.loads(base.read_text()) == {"c": {"quote_fidelity": 1.0}}
+
+
+@pytest.mark.parametrize("suite_file", sorted((ROOT / "evals" / "suites").glob("*.yaml")), ids=lambda p: p.stem)
+def test_every_suite_gates_metrics_that_exist(suite_file):
+    """A typo in a threshold name would otherwise surface only when that suite runs (nightly, for live)."""
+    import yaml
+
+    from podcast_agent.evals.judge import CRITERIA
+
+    suite = yaml.safe_load(suite_file.read_text())
+    cases = load_factcheck_cases(CASES)[:3]
+    fc_names = set(run_factcheck(make_ctx(), cases, max_steps=2, tools=["search_knowledge_base"]).metrics)
+    fc_names |= {f"accuracy.{t}" for c in load_factcheck_cases(CASES) for t in c.tags}
+    run_names = set(score_run(ROOT / "samples" / "claude-run", load_episode_expectations(EPISODES), root=ROOT).metrics)
+    run_names |= {"judge_score", "invented_facts", *(f"judge.{k}" for k in CRITERIA)}
+    if suite.get("factcheck"):
+        assert set(suite["factcheck"].get("thresholds") or {}) <= fc_names
+    for spec in suite.get("runs") or []:
+        assert set(spec.get("thresholds") or {}) <= run_names, spec.get("name")
