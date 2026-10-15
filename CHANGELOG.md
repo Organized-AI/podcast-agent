@@ -4,6 +4,10 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 
 ## [Unreleased]
 
+### Security
+- `SECURITY.md` adds guidance for government and regulated deployments: the secure-development practices mapped to NIST SP 800-218 (SSDF 1.1) with the evidence for each, and how to run inside an authorization boundary (provider choice, air-gapped operation, telemetry, egress, identity, FIPS and hardened base images, deploy-by-digest, audit retention).
+- `SECURITY.md` no longer overstates the NetworkPolicy: it limits egress to DNS and HTTPS, not to named hosts; pinning destinations needs an egress gateway or an FQDN-aware CNI policy.
+
 ## [0.2.0] - 2026-10-15
 
 The production revamp: OpenTelemetry tracing and metrics with a local observability stack, an eval suite that gates every pull request, Argo CD GitOps with dev and prod Helm environments, images built once and promoted by digest with signed provenance, and supply-chain checks mapped to the OpenSSF Best Practices criteria. Tracked in the [v0.2.0 milestone](https://github.com/Organized-AI/podcast-agent/milestone/1).
