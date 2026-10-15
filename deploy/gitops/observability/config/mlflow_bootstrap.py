@@ -5,7 +5,7 @@
 
 New users get no access by default (basic_auth.ini sets default_permission = NO_PERMISSIONS), so these grants are the
 whole of what they can do. Runs as a Job in the MLflow image after MLflow is up. Idempotent: an existing user keeps its
-password, and a grant it already has is a no-op. Reads the passwords from the mlflow-secrets Secret.
+password, a grant it already has is kept, and a different one is replaced. Reads the passwords from the mlflow-secrets Secret.
 """
 
 import base64
@@ -58,16 +58,31 @@ def ensure_user(username, password):
         sys.exit(f"creating {username}: HTTP {status} {text[:300]}")
 
 
-def grant(username, permission):
-    status, text = call("POST", "/api/3.0/mlflow/users/permissions/grant",
-                        {"username": username, "resource_type": "experiment", "resource_id": EXPERIMENT,
-                         "permission": permission})
-    if status != 200:
-        sys.exit(f"granting {permission} on experiment {EXPERIMENT} to {username}: HTTP {status} {text[:300]}")
+def current_permission(username):
     query = f"?username={username}&resource_type=experiment&resource_id={EXPERIMENT}"
     status, text = call("GET", f"/api/3.0/mlflow/users/permissions/get{query}")
     print(f"{username} on experiment {EXPERIMENT}: HTTP {status} {text[:200]}")
-    if status != 200 or json.loads(text).get("permission") != permission:
+    return json.loads(text).get("permission") if status == 200 else None
+
+
+def grant(username, permission):
+    """Leave username with exactly `permission` on the experiment.
+
+    MLflow 3.17 answers a grant the user already has with 400 RESOURCE_ALREADY_EXISTS and has no update call for
+    user permissions, so an existing grant is read back and, if it differs, revoked and granted again.
+    """
+    resource = {"username": username, "resource_type": "experiment", "resource_id": EXPERIMENT}
+    status, text = call("POST", "/api/3.0/mlflow/users/permissions/grant", {**resource, "permission": permission})
+    if status != 200 and "RESOURCE_ALREADY_EXISTS" not in text:
+        sys.exit(f"granting {permission} on experiment {EXPERIMENT} to {username}: HTTP {status} {text[:300]}")
+    if status != 200 and current_permission(username) != permission:
+        status, text = call("POST", "/api/3.0/mlflow/users/permissions/revoke", resource)
+        if status != 200:
+            sys.exit(f"revoking {username}'s permission on experiment {EXPERIMENT}: HTTP {status} {text[:300]}")
+        status, text = call("POST", "/api/3.0/mlflow/users/permissions/grant", {**resource, "permission": permission})
+        if status != 200:
+            sys.exit(f"granting {permission} on experiment {EXPERIMENT} to {username}: HTTP {status} {text[:300]}")
+    if current_permission(username) != permission:
         sys.exit(f"{username} does not have {permission} on the experiment")
 
 
