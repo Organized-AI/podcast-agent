@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -55,10 +56,28 @@ def test_a_wrong_verdict_is_scored_wrong_and_fails_its_threshold():
     assert by_metric == {"verdict_accuracy": False, "brier": False}
 
 
-def test_scoring_the_committed_claude_run_finds_the_issue_13_miss():
+def _issue_13_run(tmp_path: Path) -> Path:
+    """The committed Claude run with the #13 mistake put back: "Humans will walk on Mars before 2040" rated ⚠️."""
+    run = tmp_path / "claude-run-issue-13"
+    shutil.copytree(ROOT / "samples" / "claude-run", run)
+    report = json.loads((run / "report.json").read_text())
+    for ep in report["episodes"]:
+        for fc in ep["fact_checks"]:
+            if "Mars before 2040" in fc["claim"]["claim"]:
+                fc["verdict"] = "possibly_outdated_or_inaccurate"
+    (run / "report.json").write_text(json.dumps(report))
+    return run
+
+
+def test_scoring_the_committed_claude_run():
     section = score_run(ROOT / "samples" / "claude-run", load_episode_expectations(EPISODES), root=ROOT)
     assert section.metrics["episodes"] == 4
     assert section.metrics["quote_fidelity"] == 1.0 and section.metrics["claim_recall"] == 1.0
+    assert section.metrics["claim_verdict_accuracy"] == 1.0
+
+
+def test_scoring_finds_and_shows_a_wrong_verdict(tmp_path):
+    section = score_run(_issue_13_run(tmp_path), load_episode_expectations(EPISODES), root=ROOT)
     misses = [(r["episode"], c["match"]) for r in section.rows for c in r["claims"] if not c["correct"]]
     assert misses == [("ep004", ["Mars", "2040"])]
     assert "Mars + 2040 → possibly_outdated_or_inaccurate" in render_markdown_section(section)
@@ -77,9 +96,13 @@ def test_unknown_metric_in_thresholds_is_an_error():
 
 
 def _suite(tmp_path, threshold: float) -> Path:
+    """A suite scoring a run with one wrong verdict, so claim_verdict_accuracy is below 1.0."""
+    run = tmp_path / "claude-run-issue-13"
+    if not run.exists():
+        _issue_13_run(tmp_path)
     path = tmp_path / "suite.yaml"
     path.write_text(
-        "name: t\nruns:\n  - name: claude-run\n    path: samples/claude-run\n"
+        f"name: t\nruns:\n  - name: claude-run\n    path: {run}\n"
         f"    expectations: evals/datasets/episodes.yaml\n    thresholds: {{claim_verdict_accuracy: {threshold}}}\n"
     )
     return path

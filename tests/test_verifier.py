@@ -124,7 +124,7 @@ MARS = Claim(id="C5", claim="Humans will walk on Mars before 2040.", speaker="Ni
 
 
 def test_an_unexpired_prediction_is_unverifiable_whatever_the_model_says():
-    """#13: samples/claude-run has this claim as ⚠️ 0.60; the deadline is 2040, so it cannot be checked yet."""
+    """#13: the first committed Claude run had this claim as ⚠️ 0.60; the deadline is 2040, so it can't be checked yet."""
     provider = ScriptedProvider({"verify_step": [kb("crewed Mars landing"), finish("possibly_outdated_or_inaccurate", 0.6, ["E1"])]})
     ctx = make_ctx(provider)
     fc = verify_claim(ctx, MARS, "ep", max_steps=4, tools=["search_knowledge_base"])

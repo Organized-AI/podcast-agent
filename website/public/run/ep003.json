@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "run_id": "20261014-204457-8d333f",
-  "generated_at": "2026-10-14T20:47:35+00:00",
+  "run_id": "20261016-002216-4ea64a",
+  "generated_at": "2026-10-16T00:24:07+00:00",
   "episode": {
     "episode_id": "ep003",
     "title": "Bootstrapping vs Fundraising — Which Path Wins?",
@@ -23,30 +23,30 @@
     "fast": "claude-haiku-5-5"
   },
   "plan": {
-    "goal": "Produce a summary, key notes, and a verified fact-check table for the bootstrapping vs fundraising episode ep003.",
+    "goal": "Produce a summary, key notes, and a fact-check table for episode ep003 on bootstrapping versus fundraising.",
     "steps": [
       {
         "step": "summarize",
-        "reason": "The 192-word transcript is short, so a single pass is enough to write the 200-300 word summary.",
+        "reason": "The episode is short (192 words), so a single pass can produce the required 200-300 word summary.",
         "params": {
           "strategy": "single_pass"
         }
       },
       {
         "step": "extract_notes",
-        "reason": "Top takeaways, timestamped quotes and topic tags are required deliverables drawn from the full transcript.",
+        "reason": "A required deliverable: the top takeaways, timestamped verbatim quotes, and topic tags come from the transcript directly.",
         "params": {}
       },
       {
         "step": "extract_claims",
-        "reason": "Only one numeric signal and four named entities (SaaS, VC, Founder, Debates) suggest a modest set of check-worthy claims.",
+        "reason": "Claim signals are weak (1 number, 0 years, 0 predictions), so a small cap of 3 claims fits, and it must precede verification.",
         "params": {
-          "max_claims": 4
+          "max_claims": 3
         }
       },
       {
         "step": "verify_claims",
-        "reason": "Each extracted claim needs a tool-backed verdict, so both the knowledge base and web search are enabled with a moderate step budget.",
+        "reason": "Each extracted claim needs a verdict and confidence, and a 3-step budget per claim suffices for a short episode with few claims.",
         "params": {
           "max_steps_per_claim": 3,
           "tools": [
@@ -60,30 +60,30 @@
     "repair_notes": []
   },
   "summary": {
-    "text": "In this episode of Founder Debates, host Lena Torres asks which funding path gives founders the edge: bootstrapping or venture capital. She is joined by Samir Gupta, who has bootstrapped companies from scratch, and Emily Rogers, who has raised multiple funding rounds. The two agree to debate both perspectives.\nThe conversation opens with the case for bootstrapping. Samir argues that it forces discipline, pushing founders to focus on revenue and profitability early, without the distraction of chasing VC metrics. Emily acknowledges the point but counters that when a market is time-sensitive, venture money helps a company capture it before competitors do.\nLena then asks for concrete examples. Samir describes a SaaS company he built with no outside capital, which reached break-even in 18 months and gave him total control. Emily points to a fintech startup she advised, which raised a seed round to scale quickly and secured market leadership within two years.\nNext, the discussion turns to how founders should decide. Samir recommends bootstrapping when a market is niche, defensible and able to generate revenue early. Emily recommends raising when the space is fast-moving and competitive, or when a founder needs talent or product scale quickly.\nThe guests then weigh the trade-offs. Samir sums up bootstrapping as slower growth, but with full control and less risk from investors. Emily describes venture funding as offering faster growth and more resources, at the cost of diluted control and possible pressure for quick exits.\nIn closing, Lena thanks both guests and concludes that the best path depends heavily on market type and founder priorities, rather than on one approach winning outright.",
-    "word_count": 268,
+    "text": "In this episode of Founder Debates, host Lena Torres asks whether bootstrapping or venture capital gives founders the greater edge. She is joined by Samir Gupta, who has bootstrapped companies from scratch, and Emily Rogers, who has raised multiple funding rounds. The two agree to debate both perspectives.\nThe conversation opens with the case for bootstrapping. Samir argues that it forces discipline, pushing founders to focus on revenue and profitability early and sparing them the distraction of chasing VC metrics. Emily acknowledges the point but counters that when a market is time-sensitive, venture money helps a company capture it before competitors do.\nLena then asks for concrete examples. Samir describes building a SaaS company with no outside capital, reaching break-even in 18 months while keeping total control. Emily points to a fintech startup she advised, which raised seed funding to scale quickly and secured market leadership within two years.\nNext, the discussion turns to how founders should decide. Samir recommends bootstrapping when a market is niche, defensible and revenue-generating early. Emily recommends raising when the space is fast-moving and competitive, and when a company needs talent or product scale quickly.\nThe guests then weigh the trade-offs. Samir sums up bootstrapping as slower growth, but with full control and less risk from investors. Emily describes venture funding as offering faster growth and more resources, at the cost of diluted control and possible pressure for quick exits.\nIn closing, Lena thanks both guests and concludes that the best path depends heavily on market type and founder priorities, rather than on one approach winning outright.",
+    "word_count": 262,
     "strategy": "single_pass"
   },
   "notes": {
     "takeaways": [
       {
-        "text": "Samir Gupta argues bootstrapping forces discipline, pushing founders to focus on revenue and profitability early instead of chasing VC metrics.",
-        "timestamp": "01:05"
+        "text": "Lena Torres's closing summary: the best funding path depends heavily on market type and founder priorities, not on one approach being universally better.",
+        "timestamp": "05:10"
       },
       {
-        "text": "Emily Rogers says that in a time-sensitive market, venture capital helps founders capture the opportunity before competitors do.",
-        "timestamp": "01:30"
-      },
-      {
-        "text": "Samir recommends bootstrapping if your market is niche, defensible, and generating revenue early.",
+        "text": "Samir Gupta recommends bootstrapping if your market is niche, defensible, and revenue-generating early.",
         "timestamp": "03:15"
       },
       {
-        "text": "Emily recommends raising money in fast-moving, competitive spaces where you need talent or product scale quickly.",
+        "text": "Emily Rogers advises raising money in fast-moving, competitive spaces where you need talent or product scale quickly.",
         "timestamp": "03:40"
       },
       {
-        "text": "Bootstrapping trades slower growth for full control, while VC brings faster growth and resources at the cost of diluted control and pressure for quick exits.",
+        "text": "Samir Gupta argues bootstrapping forces discipline, keeping founders focused on revenue and profitability early rather than on VC metrics.",
+        "timestamp": "01:05"
+      },
+      {
+        "text": "Emily Rogers says VC brings faster growth and resources, but founders dilute control and may face pressure for quick exits.",
         "timestamp": "04:40"
       }
     ],
@@ -101,15 +101,15 @@
         "match_score": 1.0
       },
       {
-        "text": "If your market is niche, defensible, and revenue-generating early, bootstrap.",
-        "speaker": "Samir Gupta",
-        "timestamp": "03:15",
-        "match_score": 1.0
-      },
-      {
         "text": "If it’s a fast-moving, competitive space and you need talent or product scale fast, raise.",
         "speaker": "Emily Rogers",
         "timestamp": "03:40",
+        "match_score": 1.0
+      },
+      {
+        "text": "If your market is niche, defensible, and revenue-generating early, bootstrap.",
+        "speaker": "Samir Gupta",
+        "timestamp": "03:15",
         "match_score": 1.0
       },
       {
@@ -122,12 +122,12 @@
     "topics": [
       "bootstrapping",
       "venture-capital",
-      "startup-funding",
+      "startup-fundraising",
       "founder-control",
       "market-timing",
-      "saas-break-even",
-      "fintech-seed-round",
-      "funding-trade-offs"
+      "saas-startups",
+      "fintech-scaling",
+      "funding-tradeoffs"
     ]
   },
   "fact_checks": [
@@ -143,8 +143,8 @@
       },
       "verdict": "unverifiable",
       "confidence": 0.5,
-      "raw_confidence": 0.85,
-      "rationale": "The knowledge base and web search returned only generic bootstrapping articles and unrelated items, with nothing about Samir Gupta's company, its funding, or its break-even timeline [E1][E4]. The claim is a personal anecdote with no corroborating evidence found.",
+      "raw_confidence": 0.8,
+      "rationale": "The claim is a personal anecdote about Samir Gupta's own company. The knowledge base and web search returned only generic bootstrapping material [E1][E3] and unrelated Mars-rover items [E2][E4], with nothing on his company's funding or break-even timing.",
       "evidence": [
         {
           "id": "E1",
@@ -153,16 +153,16 @@
           "snippet": "Bootstrapping means funding a company from founders' savings and customer revenue instead of outside investment. Founders keep full ownership and control and must focus on revenue and profitability early, but growth is usually slower because it is limited by cash flow.",
           "url": null,
           "date": "2025-01-01",
-          "relevance": 0.161
+          "relevance": 0.127
         },
         {
-          "id": "E4",
+          "id": "E3",
           "source": "web_search",
           "title": "Why most startups should bootstrap first",
           "snippet": "Bootstrapped founders keep control and are forced to find revenue early; venture-backed founders trade equity and some control for speed, and face pressure from investors for an exit.",
           "url": "https://example-startups.test/bootstrap-first",
           "date": "2023-08-30",
-          "relevance": 0.199
+          "relevance": 0.225
         }
       ],
       "tool_calls": 2,
@@ -176,7 +176,7 @@
     {
       "claim": {
         "id": "C2",
-        "claim": "A fintech startup that Emily Rogers advised raised seed funding to scale quickly and secured market leadership within two years.",
+        "claim": "A fintech startup advised by Emily Rogers raised seed funding to scale quickly and secured market leadership within two years.",
         "speaker": "Emily Rogers",
         "timestamp": "02:35",
         "quote": "a fintech startup I advised raised seed to scale quickly and secured market leadership within two years.",
@@ -186,7 +186,7 @@
       "verdict": "unverifiable",
       "confidence": 0.5,
       "raw_confidence": 0.85,
-      "rationale": "Neither the knowledge base nor web search returned anything about Emily Rogers advising a fintech startup, its seed round, or its market leadership [E1][E2][E4]. The claim is a personal anecdote with no named company, so it cannot be checked against external evidence.",
+      "rationale": "Neither the knowledge base nor web search returned anything about Emily Rogers, an advised fintech startup, its seed round, or market leadership; results were only tangentially related to bootstrapping vs. VC [E2][E3][E4]. The claim is a personal anecdote with no identifiable company to check.",
       "evidence": [
         {
           "id": "E1",
@@ -227,58 +227,17 @@
     {
       "claim": {
         "id": "C3",
-        "claim": "Venture capital funding dilutes founders' control of their company and may bring pressure for quick exits.",
-        "speaker": "Emily Rogers",
-        "timestamp": "04:40",
-        "quote": "VC: faster growth, resources, but you dilute control and may face pressure for quick exits.",
-        "type": "factual",
-        "time_sensitive": false
-      },
-      "verdict": "verified",
-      "confidence": 0.9,
-      "raw_confidence": 0.9,
-      "rationale": "The knowledge base states that venture rounds dilute founder ownership and that board seats or protective provisions can reduce founder control [E2], and that ten-year fund lifecycles create pressure for exits [E1]. Both parts of the claim are supported, and these are general structural features that are unlikely to have changed since the 2025 as-of date.",
-      "evidence": [
-        {
-          "id": "E1",
-          "source": "knowledge_base",
-          "title": "KB-021: VC fund lifecycles create pressure for exits",
-          "snippet": "Venture capital funds are usually structured with a life of about ten years, so investors need portfolio companies to reach a liquidity event such as an acquisition or IPO within that horizon. This can create pressure on founders for growth and exits.",
-          "url": null,
-          "date": "2025-01-01",
-          "relevance": 0.703
-        },
-        {
-          "id": "E2",
-          "source": "knowledge_base",
-          "title": "KB-020: Venture funding dilutes founder ownership and can reduce control",
-          "snippet": "Raising venture capital means selling equity: each priced round dilutes existing shareholders' ownership, and investors typically receive board seats or protective provisions that reduce founder control in exchange for capital that funds faster growth.",
-          "url": null,
-          "date": "2025-01-01",
-          "relevance": 0.67
-        }
-      ],
-      "tool_calls": 1,
-      "tools_used": [
-        "search_knowledge_base"
-      ],
-      "method": "knowledge base",
-      "verification": "✅ Verified true (confirmed by knowledge base KB-021, KB-020)"
-    },
-    {
-      "claim": {
-        "id": "C4",
         "claim": "Emily Rogers has raised multiple funding rounds.",
         "speaker": "Emily Rogers",
         "timestamp": "00:30",
-        "quote": "I’ve raised multiple funding rounds, so we’ll debate both perspectives.",
+        "quote": "I’ve raised multiple funding rounds",
         "type": "anecdotal",
         "time_sensitive": false
       },
       "verdict": "unverifiable",
       "confidence": 0.5,
       "raw_confidence": 0.8,
-      "rationale": "The knowledge base [E1-E3] and web search [E4] only contain generic content on bootstrapping and venture funding, with nothing about Emily Rogers' fundraising history. The claim is a personal statement that no evidence found could confirm or contradict.",
+      "rationale": "The knowledge base and web search returned only generic content on bootstrapping and venture funding, with nothing about Emily Rogers or her funding rounds [E1][E4]. The claim is a personal statement about her own history and no adequate evidence was found to confirm or contradict it.",
       "evidence": [
         {
           "id": "E1",
@@ -312,46 +271,56 @@
     {
       "step": "plan",
       "status": "ok",
-      "duration_ms": 5933,
+      "duration_ms": 3332,
       "attempts": 0,
       "detail": "4 steps"
     },
     {
       "step": "summarize",
       "status": "ok",
-      "duration_ms": 4405,
+      "duration_ms": 4213,
       "attempts": 1,
-      "detail": "268 words (single_pass, target 200–300)"
+      "detail": "262 words (single_pass, target 200–300)"
     },
     {
       "step": "extract_notes",
       "status": "ok",
-      "duration_ms": 5030,
+      "duration_ms": 4726,
       "attempts": 1,
       "detail": "5 takeaways · 5 verbatim quotes · 8 topics"
     },
     {
       "step": "extract_claims",
       "status": "ok",
-      "duration_ms": 5213,
-      "attempts": 1,
-      "detail": "4 check-worthy claims (3 anecdotal, 1 factual)"
+      "duration_ms": 6717,
+      "attempts": 2,
+      "detail": "3 check-worthy claims (3 anecdotal)"
     },
     {
       "step": "verify_claims",
       "status": "ok",
-      "duration_ms": 24215,
-      "attempts": 4,
-      "detail": "1 ✅ · 0 ⚠️ · 3 ❓ across 4 claims · 7 tool calls"
+      "duration_ms": 19160,
+      "attempts": 3,
+      "detail": "0 ✅ · 0 ⚠️ · 3 ❓ across 3 claims · 6 tool calls"
     }
   ],
   "usage": {
-    "llm_calls": 15,
+    "llm_calls": 14,
     "cached_calls": 0,
-    "input_tokens": 15251,
-    "output_tokens": 4019,
-    "cache_read_tokens": 3057,
-    "estimated": false
+    "input_tokens": 15676,
+    "output_tokens": 4459,
+    "cache_read_tokens": 2038,
+    "estimated": false,
+    "cost_usd": 0.049802,
+    "cost_by_step": {
+      "plan": 0.000428,
+      "summarize": 0.00799,
+      "extract_notes": 0.009092,
+      "extract_claims": 0.000958,
+      "verify_claims": 0.031334
+    },
+    "budget_usd": 0.2,
+    "over_budget": false
   },
   "warnings": [],
   "fact_check_table": [
@@ -361,14 +330,9 @@
       "confidence": 0.5
     },
     {
-      "claim": "A fintech startup that Emily Rogers advised raised seed funding to scale quickly and secured market leadership within two years.",
+      "claim": "A fintech startup advised by Emily Rogers raised seed funding to scale quickly and secured market leadership within two years.",
       "verification": "❓ Unverifiable (personal anecdote)",
       "confidence": 0.5
-    },
-    {
-      "claim": "Venture capital funding dilutes founders' control of their company and may bring pressure for quick exits.",
-      "verification": "✅ Verified true (confirmed by knowledge base KB-021, KB-020)",
-      "confidence": 0.9
     },
     {
       "claim": "Emily Rogers has raised multiple funding rounds.",

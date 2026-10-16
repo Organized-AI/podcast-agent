@@ -67,19 +67,16 @@ Provider: provider=offline · main=offline-heuristic · fast=offline-heuristic �
 | `notes_shape_ok` | 1 | ≥ 1 | ✅ |
 | `quote_fidelity` | 1 | ≥ 1 | ✅ |
 | `claim_recall` | 1 | ≥ 1 | ✅ |
-| `claim_verdict_accuracy` | 0.9167 | ≥ 0.9 | ✅ |
-| `llm_calls_per_episode` | 17.5 |  |  |
-| `tokens_per_episode` | 23984.8 |  |  |
+| `claim_verdict_accuracy` | 1 | ≥ 0.9 | ✅ |
+| `llm_calls_per_episode` | 16.5 |  |  |
+| `tokens_per_episode` | 24324.8 |  |  |
 
 | Episode | Summary words | Coverage | Quotes verbatim | Claims found / right | Judge |
 |---|---|---|---|---|---|
-| ep001 | 282 | 1.00 | 5/5 | 2/2 found, 2 right | — |
-| ep002 | 262 | 1.00 | 5/5 | 3/3 found, 3 right | — |
-| ep003 | 268 | 1.00 | 5/5 | 2/2 found, 2 right | — |
-| ep004 | 280 | 1.00 | 4/4 | 5/5 found, 4 right | — |
-
-Claims that missed:
-- ep004: Mars + 2040 → possibly_outdated_or_inaccurate
+| ep001 | 262 | 1.00 | 5/5 | 2/2 found, 2 right | — |
+| ep002 | 248 | 1.00 | 5/5 | 3/3 found, 3 right | — |
+| ep003 | 262 | 1.00 | 5/5 | 2/2 found, 2 right | — |
+| ep004 | 279 | 1.00 | 5/5 | 5/5 found, 5 right | — |
 
 ## offline-mode (run)
 

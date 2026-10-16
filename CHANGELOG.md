@@ -36,6 +36,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - Guide: a v0.2.0 view that answers the six review points on v0.1.0 with evidence, summarizes what the release added and measured, shows how it shipped (one digest from dev to prod) and lists what is not done yet. The Audit trail adds proof cards for the release run, the dev and prod digest with its SLSA provenance, and the OpenSSF Scorecard.
 
 ### Changed
+- `samples/claude-run` is a fresh run of the current code: the fresh run from a live eval in GitHub Actions ([run 38828849082](https://github.com/Organized-AI/podcast-agent/actions/runs/38828849082)), 36 of 36 audit checks. The previous sample predated #31 and showed "Humans will walk on Mars before 2040" as ⚠️ 0.60; the current code, the README and this run give ❓ 0.50. `podcast-agent eval` now writes a fresh run's reasoning logs (`logs/run.log`, `logs/trace.jsonl`) into its folder, so the nightly artifact is a complete, auditable run. The guide's Audit trail and the offline eval report are rebuilt from it.
 - Each pod reports telemetry as its own instance (`service.instance.id` is the pod name). Before, two pods' cumulative counters shared one Prometheus series during a rollout, which looks like a counter reset and can make `increase()` count events that did not happen.
 - The Collector's OTLP exporters use their current names, `otlp_grpc` and `otlp_http`; Collector 0.161 logs the old `otlp` and `otlphttp` names as deprecated.
 
