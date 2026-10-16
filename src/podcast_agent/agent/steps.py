@@ -84,6 +84,23 @@ def chunk_episode(ep: Episode, target_words: int = 1500) -> list[list[Utterance]
     return [c for c in chunks if c]
 
 
+# Words that describe how something was said rather than what was said. A summary may use one only when the
+# transcript does; otherwise it is the summarizer's interpretation, which the rubric judge counts as invented (#93).
+TONE_WORDS = re.compile(
+    r"\b(cautious(?:ly)?|light[- ]?hearted(?:ly)?|hopeful(?:ly)?|skeptic(?:al|ally|ism)|playful(?:ly)?|"
+    r"jok(?:es|ed|ing(?:ly)?)|quips?|wry(?:ly)?|enthusiastic(?:ally)?|optimistic(?:ally)?|pessimistic(?:ally)?|"
+    r"concedes?|grudging(?:ly)?|tongue[- ]in[- ]cheek|humou?rous(?:ly)?)\b",
+    re.IGNORECASE,
+)
+
+
+def unsupported_tone(summary: str, ep: Episode) -> list[str]:
+    """Tone words in the summary whose stem never appears in the transcript."""
+    said = {w[:6] for u in ep.utterances for w in re.findall(r"[a-z'-]+", u.text.lower())}
+    found = {m.group(0).lower() for m in TONE_WORDS.finditer(summary)}
+    return sorted(w for w in found if w.replace(" ", "-")[:6] not in said)
+
+
 @register("summarize")
 def summarize(ctx: RunContext, state: EpisodeState, params: dict[str, Any]) -> tuple[str, int]:
     ep = state.episode
@@ -98,9 +115,14 @@ def summarize(ctx: RunContext, state: EpisodeState, params: dict[str, Any]) -> t
         problems = []
         wc = word_count(out.summary)
         if wc < accept_lo:
-            problems.append(f"the summary is {wc} words; it must be {lo}–{hi} words — expand it using only the transcript")
+            problems.append(f"the summary is {wc} words; it must be {lo}–{hi} words — expand it with more of what was said "
+                            "(who said it, their names, figures and dates, the replies), not interpretation")
         if wc > accept_hi:
             problems.append(f"the summary is {wc} words; it must be {lo}–{hi} words — tighten it")
+        tone = unsupported_tone(out.summary, ep)
+        if tone:
+            problems.append("say what the speakers said, not how: the transcript never says "
+                            + ", ".join(f"'{w}'" for w in tone))
         if re.search(r"\[?\b\d{1,2}:\d{2}\b", out.summary):
             problems.append("remove timestamps from the summary")
         if re.search(r"^\s*[-*•]", out.summary, re.MULTILINE):
