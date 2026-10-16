@@ -36,6 +36,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - Guide: a v0.2.0 view that answers the six review points on v0.1.0 with evidence, summarizes what the release added and measured, shows how it shipped (one digest from dev to prod) and lists what is not done yet. The Audit trail adds proof cards for the release run, the dev and prod digest with its SLSA provenance, and the OpenSSF Scorecard.
 
 ### Changed
+- `docs/DEPLOYMENT.md` and `docs/architecture.svg` now describe what was built since they were written. Observability is the Collector with Jaeger and MLflow, not Langfuse. Releases carry signed SLSA provenance in GHCR, not a cosign signature in ECR. Promotion is dev → prod (there is no staging). The fault-tolerance table gains the drilled costly-deploy row and no longer counts the dead-letter alarm as implemented. The response cache is per pod until it moves to Redis.
 - Each pod reports telemetry as its own instance (`service.instance.id` is the pod name). Before, two pods' cumulative counters shared one Prometheus series during a rollout, which looks like a counter reset and can make `increase()` count events that did not happen.
 - The Collector's OTLP exporters use their current names, `otlp_grpc` and `otlp_http`; Collector 0.161 logs the old `otlp` and `otlphttp` names as deprecated.
 
