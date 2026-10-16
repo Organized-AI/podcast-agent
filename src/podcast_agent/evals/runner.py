@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from rich.console import Console
 
 from podcast_agent.agent.context import RunContext
 from podcast_agent.agent.steps import VERBATIM_THRESHOLD, locate_span
@@ -35,6 +36,7 @@ from podcast_agent.evals.judge import CRITERIA, judge_summary
 from podcast_agent.models import Claim, EpisodeReport
 from podcast_agent.runtime import collect_inputs, new_run_id, run_batch
 from podcast_agent.text import word_count
+from podcast_agent.trace import Tracer
 from podcast_agent.transcript import load_episode, normalize_episode
 
 TOOL_SOURCES = ("knowledge_base", "web_search")
@@ -244,6 +246,22 @@ def baseline_from_report(report: dict[str, Any], suite_name: str) -> dict[str, d
             for s in report["sections"]}
 
 
+def _fresh_run(ctx: RunContext, files: list[Path], run_dir: Path) -> None:
+    """Run the pipeline into run_dir with its own reasoning logs, as `podcast-agent run` would, so a fresh run is a
+    complete, auditable run folder (logs/run.log and logs/trace.jsonl included), not just its reports."""
+    run_id = new_run_id()
+    log_dir = run_dir / "logs"
+    for stale in ("trace.jsonl", "run.log"):
+        (log_dir / stale).unlink(missing_ok=True)
+    outer = ctx.trace
+    ctx.trace = Tracer(run_id, log_dir=log_dir, console=Console(quiet=True), verbose=False)
+    try:
+        run_batch(ctx, files, run_dir, run_id)
+    finally:
+        ctx.trace.close()
+        ctx.trace = outer
+
+
 def run_suite(path: str | Path, ctx: RunContext | None = None, *, root: str | Path = ".",
               work_dir: str | Path | None = None) -> SuiteResult:
     """Run every section of a suite file. ``ctx`` is needed when the suite runs cases, fresh runs or the judge.
@@ -267,8 +285,7 @@ def run_suite(path: str | Path, ctx: RunContext | None = None, *, root: str | Pa
                 raise ValueError(f"{name}: a fresh run needs a model context")
             run_dir = Path(work_dir or Path(tempfile.mkdtemp(prefix="eval-"))) / name
             files = collect_inputs([str(root / spec["fresh"])])
-            ctx.trace.episode_id = None
-            run_batch(ctx, files, run_dir, new_run_id())
+            _fresh_run(ctx, files, run_dir)
         else:
             run_dir = root / spec["path"]
         judge_ctx = ctx if spec.get("judge") and ctx is not None and ctx.llm.name != "offline" else None

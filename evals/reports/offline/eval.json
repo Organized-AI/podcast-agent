@@ -633,15 +633,15 @@
         "notes_shape_ok": 1.0,
         "quote_fidelity": 1.0,
         "claim_recall": 1.0,
-        "claim_verdict_accuracy": 0.9167,
-        "llm_calls_per_episode": 17.5,
-        "tokens_per_episode": 23984.75
+        "claim_verdict_accuracy": 1.0,
+        "llm_calls_per_episode": 16.5,
+        "tokens_per_episode": 24324.75
       },
       "rows": [
         {
           "episode": "ep001",
           "judge": null,
-          "summary_words": 282,
+          "summary_words": 262,
           "summary_in_range": true,
           "summary_coverage": 1.0,
           "notes_shape_ok": true,
@@ -662,17 +662,17 @@
                 "talent"
               ],
               "found": true,
-              "verdict": "possibly_outdated_or_inaccurate",
+              "verdict": "unverifiable",
               "correct": true
             }
           ],
-          "llm_calls": 26,
-          "tokens": 38179
+          "llm_calls": 16,
+          "tokens": 23824
         },
         {
           "episode": "ep002",
           "judge": null,
-          "summary_words": 262,
+          "summary_words": 248,
           "summary_in_range": true,
           "summary_coverage": 1.0,
           "notes_shape_ok": true,
@@ -705,13 +705,13 @@
               "correct": true
             }
           ],
-          "llm_calls": 13,
-          "tokens": 16768
+          "llm_calls": 16,
+          "tokens": 23545
         },
         {
           "episode": "ep003",
           "judge": null,
-          "summary_words": 268,
+          "summary_words": 262,
           "summary_in_range": true,
           "summary_coverage": 1.0,
           "notes_shape_ok": true,
@@ -735,18 +735,18 @@
               "correct": true
             }
           ],
-          "llm_calls": 15,
-          "tokens": 19270
+          "llm_calls": 14,
+          "tokens": 20135
         },
         {
           "episode": "ep004",
           "judge": null,
-          "summary_words": 280,
+          "summary_words": 279,
           "summary_in_range": true,
           "summary_coverage": 1.0,
           "notes_shape_ok": true,
-          "quotes": 4,
-          "quotes_verbatim": 4,
+          "quotes": 5,
+          "quotes_verbatim": 5,
           "claims": [
             {
               "match": [
@@ -790,12 +790,12 @@
                 "2040"
               ],
               "found": true,
-              "verdict": "possibly_outdated_or_inaccurate",
-              "correct": false
+              "verdict": "unverifiable",
+              "correct": true
             }
           ],
-          "llm_calls": 16,
-          "tokens": 21722
+          "llm_calls": 20,
+          "tokens": 29795
         }
       ],
       "checks": [
@@ -842,7 +842,7 @@
         {
           "section": "claude-run",
           "metric": "claim_verdict_accuracy",
-          "value": 0.9167,
+          "value": 1.0,
           "threshold": 0.9,
           "direction": "min",
           "passed": true

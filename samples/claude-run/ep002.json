@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "run_id": "20261014-204457-8d333f",
-  "generated_at": "2026-10-14T20:46:51+00:00",
+  "run_id": "20261016-002216-4ea64a",
+  "generated_at": "2026-10-16T00:23:29+00:00",
   "episode": {
     "episode_id": "ep002",
     "title": "AI in Healthcare: Hype or Reality?",
@@ -23,30 +23,30 @@
     "fast": "claude-haiku-5-5"
   },
   "plan": {
-    "goal": "Produce a summary, key notes, and a verified fact-check table for the ep002 AI-in-healthcare podcast episode.",
+    "goal": "Produce a summary, key notes, and a fact-check table for the ep002 AI-in-healthcare episode.",
     "steps": [
       {
         "step": "summarize",
-        "reason": "The 233-word transcript is short enough for a single pass to write the 200-300 word summary.",
+        "reason": "The 233-word transcript is short enough for a single pass to produce the required 200-300 word summary.",
         "params": {
           "strategy": "single_pass"
         }
       },
       {
         "step": "extract_notes",
-        "reason": "Top takeaways, timestamped verbatim quotes and topic tags are required deliverables drawn from the transcript.",
+        "reason": "Takeaways, timestamped verbatim quotes and topic tags are required deliverables that can be drawn directly from the transcript.",
         "params": {}
       },
       {
         "step": "extract_claims",
-        "reason": "Four prediction cues and several named entities (FDA, AI, Health, Tech) make a moderate set of check-worthy claims likely, with no numbers or years to add more.",
+        "reason": "Four prediction cues and named entities (FDA, Health, Tech) signal several check-worthy statements, so five claims are targeted.",
         "params": {
-          "max_claims": 4
+          "max_claims": 5
         }
       },
       {
         "step": "verify_claims",
-        "reason": "Each extracted claim needs a verdict and confidence, and checking against both the knowledge base and the web covers the FDA and industry references.",
+        "reason": "Each extracted claim needs checking against the knowledge base and the web, with a few steps allowed per claim to reach a verdict.",
         "params": {
           "max_steps_per_claim": 3,
           "tools": [
@@ -60,30 +60,30 @@
     "repair_notes": []
   },
   "summary": {
-    "text": "In this episode of Tech Health Today, host David Chen sits down with Dr. Priya Patel and Alex Moore to separate hype from reality in healthcare AI. David opens by noting that AI is everywhere but that its role in healthcare is complicated, while Priya promises a look at real applications and limitations and Alex urges a practical focus on use cases that are live today.\nThe conversation begins with diagnostics and triage assistants. Priya confirms that some hospitals already use AI to read X-rays and flag urgent cases, stressing that the technology is assistive and does not replace clinicians. Alex adds that regulatory barriers are huge, arguing that because the FDA reviews these systems carefully, full autonomy is not happening anytime soon.\nAsked for a concrete example patients might encounter, Priya points to smart triage chatbots on hospital websites and apps, which help people work out their next steps before they see a doctor. Alex then turns to challenges, identifying data privacy and bias as major hurdles, since AI learns from existing clinical data that may be skewed.\nDavid asks why adoption continues despite these issues. Priya cites efficiency and clinician support, noting that hospitals want faster reads and fewer errors. Alex says the pandemic accelerated digital health adoption, including AI tools.\nLooking ahead, Priya anticipates AI copilots that suggest treatment plans, but maintains that a human will always make the final call. Alex says interoperability is key, with AI working best when systems talk to each other securely. David closes by calling AI powerful and cautious optimism the way forward.",
-    "word_count": 262,
+    "text": "In this episode of Tech Health Today, host David Chen sets out to separate hype from reality when it comes to artificial intelligence in healthcare. He is joined by Dr. Priya Patel and Alex Moore, who commit to examining real applications, limitations and use cases that are live today.\nThe conversation begins with diagnostics and triage assistants. Patel explains that some hospitals already use AI to read X-rays and flag urgent cases, stressing that the technology is assistive and does not replace clinicians. Moore adds that regulatory barriers are significant, noting that the FDA reviews these systems carefully, so full autonomy is not coming anytime soon.\nAsked for a concrete example patients might encounter, Patel points to smart triage chatbots on hospital websites and apps that help people work out next steps before seeing a doctor. Moore then turns to the challenges, identifying data privacy and bias as major hurdles, since AI learns from existing clinical data that may be skewed.\nChen asks why adoption continues despite these concerns. Patel cites efficiency and clinician support, saying hospitals want faster reads and fewer errors. Moore observes that the pandemic accelerated digital health adoption, including AI tools.\nLooking ahead, Patel envisions AI copilots that suggest treatment plans, while insisting that a human will always make the final call. Moore argues that interoperability is key, and that AI will work best when systems communicate securely.\nChen closes by concluding that AI is powerful, but that cautious optimism is the way forward.",
+    "word_count": 248,
     "strategy": "single_pass"
   },
   "notes": {
     "takeaways": [
       {
-        "text": "Dr. Priya Patel says some hospitals already use AI to read X-rays and flag urgent cases, but it assists clinicians rather than replacing them.",
+        "text": "Dr. Priya Patel says hospitals already use AI to read X-rays and flag urgent cases, but as an assistive tool rather than a replacement for clinicians.",
         "timestamp": "00:55"
       },
       {
-        "text": "Alex Moore argues FDA scrutiny and regulatory barriers mean fully autonomous healthcare AI is not coming anytime soon.",
+        "text": "Alex Moore argues FDA review and other regulatory barriers mean fully autonomous healthcare AI is not coming anytime soon.",
         "timestamp": "01:15"
       },
       {
-        "text": "Patients may already encounter AI through smart triage chatbots on hospital websites or apps that help them decide next steps before seeing a doctor.",
+        "text": "Patients may already meet AI through smart triage chatbots on hospital websites or apps that help them figure out next steps before seeing a doctor, according to Dr. Priya Patel.",
         "timestamp": "01:50"
       },
       {
-        "text": "Alex Moore warns data privacy and bias are major hurdles, since AI learns from existing clinical data that may be skewed.",
+        "text": "Alex Moore warns that data privacy and bias are major hurdles, since AI learns from existing clinical data that may be skewed.",
         "timestamp": "02:20"
       },
       {
-        "text": "Dr. Priya Patel expects AI copilots to suggest treatment plans, with a human always making the final call.",
+        "text": "Dr. Priya Patel expects AI copilots to suggest treatment plans, while insisting a human will always make the final call.",
         "timestamp": "04:15"
       }
     ],
@@ -101,6 +101,12 @@
         "match_score": 1.0
       },
       {
+        "text": "Efficiency and clinician support. Hospitals want faster reads and fewer errors.",
+        "speaker": "Dr. Priya Patel",
+        "timestamp": "03:05",
+        "match_score": 1.0
+      },
+      {
         "text": "AI copilots that suggest treatment plans, but a human will always make the final call.",
         "speaker": "Dr. Priya Patel",
         "timestamp": "04:15",
@@ -111,21 +117,15 @@
         "speaker": "Alex Moore",
         "timestamp": "04:40",
         "match_score": 1.0
-      },
-      {
-        "text": "AI is powerful, but cautious optimism is the way forward.",
-        "speaker": "David Chen",
-        "timestamp": "05:10",
-        "match_score": 1.0
       }
     ],
     "topics": [
-      "ai-in-healthcare",
-      "diagnostic-ai",
-      "triage-chatbots",
+      "healthcare-ai",
+      "diagnostics",
+      "clinical-triage",
       "fda-regulation",
-      "data-privacy-and-bias",
-      "clinician-support",
+      "data-privacy",
+      "algorithmic-bias",
       "ai-copilots",
       "interoperability"
     ]
@@ -142,9 +142,9 @@
         "time_sensitive": true
       },
       "verdict": "possibly_outdated_or_inaccurate",
-      "confidence": 0.75,
-      "raw_confidence": 0.75,
-      "rationale": "The FDA has already authorized a fully autonomous AI diagnostic (IDx-DR/LumineticsCore, 2018) for a narrow indication [E2], so FDA review has not prevented autonomy. Most authorized AI devices remain assistive [E1][E3], so the claim holds only for broad autonomy and is overstated as stated.",
+      "confidence": 0.8,
+      "raw_confidence": 0.8,
+      "rationale": "The FDA authorized IDx-DR/LumineticsCore in 2018 as an autonomous AI diagnostic that makes screening decisions without clinician interpretation, so autonomy already exists for narrow indications [E2]. The FDA does review AI devices carefully through standard pathways [E1], but the claim that full autonomy is not happening soon overstates the case, though most authorized devices remain assistive [E3].",
       "evidence": [
         {
           "id": "E1",
@@ -194,7 +194,7 @@
       "verdict": "verified",
       "confidence": 0.9,
       "raw_confidence": 0.9,
-      "rationale": "The knowledge base states hospitals use AI to read X-rays and flag urgent cases via computer-aided triage, with an FDA-authorized example [E1]. The FDA's AI-enabled device list has grown past 1,000 devices with radiology about three quarters of them, which indicates the use is current and widespread [E3].",
+      "rationale": "The knowledge base confirms hospitals use AI to read medical images and flag urgent cases, with FDA-authorized triage tools such as Viz.ai ContaCT [E1]. Web reports describe hospitals deploying AI triage to prioritize urgent X-rays and CT scans [E4], and the FDA's list of over 1,200 AI-enabled devices, mostly in radiology, shows the practice is widespread [E5]. The newest evidence is from 2025, but the claim is modest ('some hospitals'), so continued use is very likely.",
       "evidence": [
         {
           "id": "E1",
@@ -203,28 +203,71 @@
           "snippet": "AI tools are used in hospitals for reading medical images such as X-rays and CT scans and for flagging urgent cases so clinicians review them first (computer-aided triage). In February 2018 the FDA authorized Viz.ai's ContaCT, which analyzes CT images for suspected large-vessel-occlusion strokes and alerts specialists. Most such tools assist clinicians rather than replace their reads.",
           "url": "https://www.fiercehealthcare.com/regulatory/fda-approval-clinical-decision-support-ai-triage-app",
           "date": "2025-06-01",
-          "relevance": 0.87
+          "relevance": 0.842
         },
         {
-          "id": "E3",
-          "source": "knowledge_base",
-          "title": "KB-010: FDA reviews AI-enabled medical devices and lists more than 1,000 authorized devices",
-          "snippet": "The US FDA reviews AI-enabled medical devices through its standard premarket pathways (510(k), De Novo and PMA) and maintains a public list of authorized AI-enabled devices. The list has grown past 1,000 devices; a third-party tally counted 1,451 by the end of 2025, with radiology accounting for roughly three quarters.",
-          "url": "https://intuitionlabs.ai/articles/fda-ai-medical-device-tracker",
-          "date": "2025-12-31",
-          "relevance": 0.136
+          "id": "E4",
+          "source": "web_search",
+          "title": "Hospitals deploy AI triage to flag urgent scans",
+          "snippet": "Hospitals are using AI to prioritize X-rays and CT scans with urgent findings such as strokes and collapsed lungs, moving them to the top of radiologists' worklists.",
+          "url": "https://example-health.test/2024/ai-triage-scans",
+          "date": "2024-03-04",
+          "relevance": 0.512
+        },
+        {
+          "id": "E5",
+          "source": "web_search",
+          "title": "FDA's AI-enabled medical device list passes 1,200 entries",
+          "snippet": "The FDA's updated list of AI-enabled medical devices now includes more than 1,200 authorized devices, most of them in radiology, all reviewed through 510(k), De Novo or PMA pathways.",
+          "url": "https://example-health.test/2025/fda-ai-device-list",
+          "date": "2025-07-10",
+          "relevance": 0.183
         }
       ],
-      "tool_calls": 1,
+      "tool_calls": 2,
       "tools_used": [
-        "search_knowledge_base"
+        "search_knowledge_base",
+        "web_search"
       ],
-      "method": "knowledge base",
-      "verification": "✅ Verified true (confirmed by knowledge base KB-011, KB-010)"
+      "method": "knowledge base + web search",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-011 and web search)"
     },
     {
       "claim": {
         "id": "C3",
+        "claim": "Smart triage chatbots are deployed on hospital websites or apps to help patients determine next steps before seeing a doctor.",
+        "speaker": "Dr. Priya Patel",
+        "timestamp": "01:50",
+        "quote": "Smart triage chatbots on hospital websites or apps, helping patients figure out next steps before seeing a doctor.",
+        "type": "factual",
+        "time_sensitive": true
+      },
+      "verdict": "verified",
+      "confidence": 0.8,
+      "raw_confidence": 0.8,
+      "rationale": "The knowledge base states that some health systems offer symptom-checker and triage chatbots on their websites and apps to guide patients toward next steps before seeing a doctor [E1]. The web search results were off-topic (imaging triage, bias, Mars) and neither confirmed nor contradicted this [E4][E5][E6], and the KB entry is dated mid-2025, so currency is only moderately confirmed.",
+      "evidence": [
+        {
+          "id": "E1",
+          "source": "knowledge_base",
+          "title": "KB-013: Symptom-checker and triage chatbots are offered to patients online",
+          "snippet": "Symptom-checker and triage chatbots are offered by digital-health companies (for example Ada Health and Buoy Health) and by some health systems on their websites and apps, guiding patients toward next steps and an appropriate level of care before they see a doctor.",
+          "url": "https://ada.com/",
+          "date": "2025-06-01",
+          "relevance": 0.823
+        }
+      ],
+      "tool_calls": 2,
+      "tools_used": [
+        "search_knowledge_base",
+        "web_search"
+      ],
+      "method": "knowledge base",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-013)"
+    },
+    {
+      "claim": {
+        "id": "C4",
         "claim": "The pandemic accelerated digital health adoption, including AI tools.",
         "speaker": "Alex Moore",
         "timestamp": "03:30",
@@ -235,7 +278,7 @@
       "verdict": "verified",
       "confidence": 0.85,
       "raw_confidence": 0.85,
-      "rationale": "The agency knowledge base entry KB-015 reports that telehealth use stabilized at levels far above pre-pandemic levels (McKinsey, 2021) and that digital health investment, including in AI tools, rose sharply during the pandemic [E1]. This is a historical claim and the entry is consistent with it, though the evidence on AI tools specifically is brief.",
+      "rationale": "The knowledge base entry [E1] reports that McKinsey found telehealth use stabilized at 38 times pre-pandemic levels and that digital health investment, including AI tools, rose sharply during the pandemic. This is a historical claim, and the evidence supports it as stated; the entry is dated 2021 but historical facts about the pandemic period don't go stale.",
       "evidence": [
         {
           "id": "E1",
@@ -256,8 +299,8 @@
     },
     {
       "claim": {
-        "id": "C4",
-        "claim": "AI learns from existing clinical data, which may be skewed, so data privacy and bias are major hurdles.",
+        "id": "C5",
+        "claim": "AI learns from existing clinical data, which may be skewed, making bias a major hurdle.",
         "speaker": "Alex Moore",
         "timestamp": "02:20",
         "quote": "Data privacy and bias are major hurdles. AI learns from existing clinical data, which may be skewed.",
@@ -265,9 +308,9 @@
         "time_sensitive": false
       },
       "verdict": "verified",
-      "confidence": 0.7,
-      "raw_confidence": 0.7,
-      "rationale": "The knowledge base documents that clinical algorithms trained on historical data can inherit bias (Obermeyer et al., Science 2019) and that patient data is subject to privacy rules like HIPAA [E1]; a news report corroborates the bias example [E4]. The evidence is dated 2019 and does not directly rank these issues as 'major hurdles' today, so confidence is moderate.",
+      "confidence": 0.85,
+      "raw_confidence": 0.85,
+      "rationale": "KB-014 documents that clinical algorithms trained on historical healthcare data reproduce skew, citing the 2019 Obermeyer et al. Science study as a well-documented example [E1]. This supports the claim that skewed clinical data makes bias a significant hurdle; the evidence is from 2019, but the underlying issue is a structural property of data-driven AI and not time-sensitive.",
       "evidence": [
         {
           "id": "E1",
@@ -276,83 +319,88 @@
           "snippet": "A 2019 study in Science by Obermeyer et al. found that a widely used commercial algorithm for allocating extra care underestimated the needs of Black patients because it used past healthcare costs as a proxy for need. It is a well-documented example of AI trained on existing clinical data reproducing skew in that data. Patient data used by such systems is also subject to privacy rules such as HIPAA.",
           "url": "https://www.science.org/doi/10.1126/science.aax2342",
           "date": "2019-10-25",
-          "relevance": 0.823
-        },
-        {
-          "id": "E4",
-          "source": "web_search",
-          "title": "Study finds racial bias in widely used health algorithm",
-          "snippet": "Researchers found a commercial algorithm used to guide care for millions of patients underestimated the needs of Black patients because it was trained on historical cost data.",
-          "url": "https://example-health.test/2019/algorithm-bias",
-          "date": "2019-10-24",
-          "relevance": 0.332
+          "relevance": 0.846
         }
       ],
-      "tool_calls": 2,
+      "tool_calls": 1,
       "tools_used": [
-        "search_knowledge_base",
-        "web_search"
+        "search_knowledge_base"
       ],
-      "method": "knowledge base + web search",
-      "verification": "✅ Verified true (confirmed by knowledge base KB-014 and web search)"
+      "method": "knowledge base",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-014)"
     }
   ],
   "steps": [
     {
       "step": "plan",
       "status": "ok",
-      "duration_ms": 3175,
+      "duration_ms": 3196,
       "attempts": 0,
       "detail": "4 steps"
     },
     {
       "step": "summarize",
       "status": "ok",
-      "duration_ms": 4700,
+      "duration_ms": 3751,
       "attempts": 1,
-      "detail": "262 words (single_pass, target 200–300)"
+      "detail": "248 words (single_pass, target 200–300)"
     },
     {
       "step": "extract_notes",
       "status": "ok",
-      "duration_ms": 4537,
+      "duration_ms": 4116,
       "attempts": 1,
       "detail": "5 takeaways · 5 verbatim quotes · 8 topics"
     },
     {
       "step": "extract_claims",
       "status": "ok",
-      "duration_ms": 2290,
+      "duration_ms": 2579,
       "attempts": 1,
-      "detail": "4 check-worthy claims (3 factual, 1 historical)"
+      "detail": "5 check-worthy claims (4 factual, 1 historical)"
     },
     {
       "step": "verify_claims",
       "status": "ok",
-      "duration_ms": 26416,
-      "attempts": 4,
-      "detail": "3 ✅ · 1 ⚠️ · 0 ❓ across 4 claims · 5 tool calls"
+      "duration_ms": 21795,
+      "attempts": 5,
+      "detail": "4 ✅ · 1 ⚠️ · 0 ❓ across 5 claims · 7 tool calls"
     }
   ],
   "usage": {
-    "llm_calls": 13,
+    "llm_calls": 16,
     "cached_calls": 0,
-    "input_tokens": 12993,
-    "output_tokens": 3775,
-    "cache_read_tokens": 3216,
-    "estimated": false
+    "input_tokens": 19350,
+    "output_tokens": 4195,
+    "cache_read_tokens": 1072,
+    "estimated": false,
+    "cost_usd": 0.064351,
+    "cost_by_step": {
+      "plan": 0.000405,
+      "summarize": 0.007796,
+      "extract_notes": 0.008147,
+      "extract_claims": 0.000459,
+      "verify_claims": 0.047544
+    },
+    "budget_usd": 0.2,
+    "over_budget": false
   },
   "warnings": [],
   "fact_check_table": [
     {
       "claim": "The FDA reviews AI-based medical systems carefully, so full autonomy for such systems is not expected anytime soon.",
       "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-010, KB-012, KB-011)",
-      "confidence": 0.75
+      "confidence": 0.8
     },
     {
       "claim": "Some hospitals currently use AI for reading X-rays or flagging urgent cases.",
-      "verification": "✅ Verified true (confirmed by knowledge base KB-011, KB-010)",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-011 and web search)",
       "confidence": 0.9
+    },
+    {
+      "claim": "Smart triage chatbots are deployed on hospital websites or apps to help patients determine next steps before seeing a doctor.",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-013)",
+      "confidence": 0.8
     },
     {
       "claim": "The pandemic accelerated digital health adoption, including AI tools.",
@@ -360,9 +408,9 @@
       "confidence": 0.85
     },
     {
-      "claim": "AI learns from existing clinical data, which may be skewed, so data privacy and bias are major hurdles.",
-      "verification": "✅ Verified true (confirmed by knowledge base KB-014 and web search)",
-      "confidence": 0.7
+      "claim": "AI learns from existing clinical data, which may be skewed, making bias a major hurdle.",
+      "verification": "✅ Verified true (confirmed by knowledge base KB-014)",
+      "confidence": 0.85
     }
   ]
 }
