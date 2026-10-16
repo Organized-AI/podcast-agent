@@ -4,7 +4,7 @@ from podcast_agent.agent.pipeline import EpisodeState
 from podcast_agent.agent.planner import make_plan
 from podcast_agent.agent.steps import summarize, unsupported_tone
 from podcast_agent.llm.structured import extract_json
-from podcast_agent.prompts import summary_prompt
+from podcast_agent.prompts import claims_prompt, summary_prompt
 from podcast_agent.transcript import load_episode
 
 
@@ -76,3 +76,9 @@ def test_a_tone_word_the_speakers_use_is_allowed(data_dir):
 def test_the_summary_prompt_asks_for_what_was_said_not_interpretation():
     prompt = summary_prompt(200, 300)
     assert "not how they say it" in prompt and "never by interpretation" in prompt
+
+
+def test_the_claims_prompt_asks_for_one_checkable_fact_per_claim():
+    """A live run merged "Perseverance landed in February 2021" with "NASA plans to bring the samples back", so a
+    true landing date was rated ⚠️ because of the mission's status."""
+    assert "one checkable fact per claim" in claims_prompt(8)

@@ -144,6 +144,7 @@ Exclude pure opinions, advice, questions and pleasantries.
 
 For each claim
 - "claim": one standalone sentence that makes sense out of context (resolve pronouns, name the subject, keep the speaker's meaning and any numbers or dates exactly);
+- one checkable fact per claim: when a line states two things that could be true or false separately (a rover's landing date and a plan to return its samples), return two claims;
 - "type": factual | statistical | historical | prediction | anecdotal;
 - "time_sensitive": true if the claim's truth can change over time (schedules, counts, "currently", "recently", dates);
 - "speaker": full name as shown; "timestamp": exactly as written; "quote": verbatim span from that line that supports the claim.
