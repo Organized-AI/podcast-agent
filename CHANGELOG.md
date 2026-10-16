@@ -40,6 +40,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 - The Collector's OTLP exporters use their current names, `otlp_grpc` and `otlp_http`; Collector 0.161 logs the old `otlp` and `otlphttp` names as deprecated.
 
 ### Fixed
+- The incident bridge's webhook no longer returns the exception text to the caller on a 500 (CodeQL: information exposure through an exception); the redacted detail stays in its log. An issue the bridge opened that was later deleted no longer fails every delivery for its group with a 404: the bridge forgets it and falls back to the issue list.
 - Incident bridge, found in the first cost drill:
   - A token with a trailing newline (as `gh auth token` prints it) made every GitHub call fail, and the HTTP client's error, which the server logged with a traceback, contained the token. The bridge now strips the token, catches webhook errors, and logs a redacted message without a traceback. Alertmanager still gets a 500 and retries.
   - Alertmanager redelivered a group 8 s after the bridge opened its issue, before GitHub's issue list showed it, and the bridge opened a duplicate (#79). The bridge now remembers which issue it opened for each group.

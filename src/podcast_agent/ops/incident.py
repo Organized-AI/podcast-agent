@@ -267,9 +267,15 @@ class GitHub:
         if self.cfg.dry_run:
             return None
         if key in self.opened:  # GitHub's issue list can lag a just-created issue by seconds
-            issue: dict[str, Any] = self._call("GET", f"/issues/{self.opened[key]}")
+            issue: dict[str, Any] = {}
+            try:
+                issue = self._call("GET", f"/issues/{self.opened[key]}")
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code not in (404, 410):  # deleted or gone: fall back to the list
+                    raise
             if issue.get("state") == "open":
                 return issue
+            del self.opened[key]
         label = self.cfg.labels[0]
         for issue in self._call("GET", "/issues", params={"state": "open", "labels": label, "per_page": 100}):
             state = read_marker(issue.get("body") or "")
@@ -728,7 +734,7 @@ def create_app(cfg: Config | None = None, src: Sources | None = None, gh: GitHub
         except Exception as exc:  # log without a traceback: HTTP client errors can echo request headers
             message = redact(f"{type(exc).__name__}: {exc}", cfg.token)
             log.error("webhook failed: %s", message)
-            return JSONResponse({"action": "error", "error": message}, status_code=500)  # Alertmanager retries
+            return JSONResponse({"action": "error"}, status_code=500)  # details stay in the log; Alertmanager retries
 
     return app
 

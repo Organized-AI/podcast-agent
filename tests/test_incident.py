@@ -279,7 +279,7 @@ def test_a_failing_webhook_logs_no_token(caplog):
     app = incident.create_app(cfg, src=FakeSources(cfg), gh=gh)
     with caplog.at_level("ERROR", logger="incident-bridge"):
         resp = TestClient(app).post("/alertmanager", json=payload())
-    assert resp.status_code == 500 and token not in resp.text
+    assert resp.status_code == 500 and resp.json() == {"action": "error"}  # no exception text to the caller
     assert "webhook failed: LocalProtocolError" in caplog.text and token not in caplog.text
     assert incident.redact(f"x {token} y Bearer abc", None) == "x *** y ***"
 
@@ -303,3 +303,24 @@ def test_a_redelivery_finds_the_issue_even_when_githubs_list_lags(cfg):
     assert incident.handle(payload(), cfg, FakeSources(cfg), gh, now=at(2.2))["action"] == "opened"
     assert incident.handle(payload(), cfg, FakeSources(cfg), gh, now=at(2.4)) == {"action": "exists", "issue": 78}
     assert len(created) == 1
+
+
+def test_a_deleted_issue_is_forgotten_instead_of_failing_every_delivery(cfg):
+    """An issue the bridge opened and someone deleted answers 404: the bridge falls back to the list and opens anew."""
+    created: list[int] = []
+
+    def github(request: httpx.Request) -> httpx.Response:
+        if request.method == "POST" and request.url.path.endswith("/issues"):
+            created.append(90 + len(created))
+            return httpx.Response(201, json={"number": created[-1], "state": "open", "created_at": "2026-10-15T12:10:00Z"})
+        if request.url.path.endswith("/issues/78"):
+            return httpx.Response(404, json={"message": "Not Found"})
+        if request.url.path.endswith("/issues"):
+            return httpx.Response(200, json=[])
+        return httpx.Response(404, json={})
+
+    gh = GitHub(cfg, httpx.Client(transport=httpx.MockTransport(github)))
+    key = incident.group_key(payload())
+    gh.opened[key] = 78
+    assert incident.handle(payload(), cfg, FakeSources(cfg), gh, now=at(2.2))["action"] == "opened"
+    assert created == [90] and gh.opened.get(key) != 78
