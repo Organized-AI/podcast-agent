@@ -750,8 +750,8 @@
           "claims": [
             {
               "match": [
-                "Mars",
-                "sample"
+                "NASA",
+                "2026"
               ],
               "found": true,
               "verdict": "possibly_outdated_or_inaccurate",
@@ -976,8 +976,8 @@
           "claims": [
             {
               "match": [
-                "Mars",
-                "sample"
+                "NASA",
+                "2026"
               ],
               "found": true,
               "verdict": "possibly_outdated_or_inaccurate",
