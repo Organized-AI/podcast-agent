@@ -64,7 +64,8 @@ episodes:
         - [Nvidia]
     notes: { takeaways: 5, quotes: [3, 5], topics: [4, 10] }
     claims:
-      - { match: [Mars, sample], acceptable: [possibly_outdated_or_inaccurate] }
+      # NASA + 2026, not Mars + sample: the Perseverance claim can name the sample return too and match first.
+      - { match: [NASA, "2026"], acceptable: [possibly_outdated_or_inaccurate] }
       - { match: [Perseverance, landed], acceptable: [verified] }
       - { match: [Bitcoin, "200"], acceptable: [possibly_outdated_or_inaccurate] }
       - { match: [Nvidia, trillion], acceptable: [verified] }

@@ -32,7 +32,7 @@ The deployment strategy (diagram + narrative) is in **[docs/DEPLOYMENT.md](docs/
 | A deployment strategy with diagram and narrative | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/architecture.svg](docs/architecture.svg) |
 | A detailed README | This file, plus the [interactive guide](https://podcast-agent-guide.jordan-691.workers.dev) (`website/public/index.html`) |
 
-Sample outputs are committed for two complete runs, each with its audit (`audit.md`): [`samples/claude-run/`](samples/claude-run) (Claude Sonnet 5.5 and Haiku 5.5: the fresh run of [a live eval in GitHub Actions](https://github.com/Organized-AI/podcast-agent/actions/runs/38828849082), reasoning logs included; 36 of 36 audit checks pass) and [`samples/offline-mode/`](samples/offline-mode) (no API key, deterministic heuristics). Captured test, lint, Helm and Docker output, including Claude and offline runs in Docker on an M1 MacBook and a tamper test the audit catches, is in [`samples/proof/`](samples/proof). The guide's **Audit trail** tab renders all of it and re-hashes the run's files in the browser.
+Sample outputs are committed for two complete runs, each with its audit (`audit.md`): [`samples/claude-run/`](samples/claude-run) (Claude Sonnet 5.5 and Haiku 5.5: the fresh run of [a live eval in GitHub Actions](https://github.com/Organized-AI/podcast-agent/actions/runs/38833243275) that met all 28 gates, reasoning logs included; 36 of 36 audit checks pass) and [`samples/offline-mode/`](samples/offline-mode) (no API key, deterministic heuristics). Captured test, lint, Helm and Docker output, including Claude and offline runs in Docker on an M1 MacBook and a tamper test the audit catches, is in [`samples/proof/`](samples/proof). The guide's **Audit trail** tab renders all of it and re-hashes the run's files in the browser.
 
 ---
 
@@ -175,7 +175,7 @@ make help                                      # every target, grouped by area
 |---|---|---|
 | NASA's Mars sample-return mission launches in early 2026 | ⚠️ Possibly outdated/inaccurate | Mars Sample Return was restructured in 2025 (Earth return 2035–2039, decision deferred to 2026). The "launch in 2026" figure comes from the 2020 plan. |
 | Bitcoin will reach $200K by 2025 | ⚠️ Possibly outdated/inaccurate | A prediction whose deadline has passed is checkable: the 2025 peak was about $126K (Oct 6, 2025). |
-| Perseverance landed in Jezero Crater in February 2021 | ✅ Verified true | KB + web agree (Feb 18, 2021). |
+| Perseverance landed in Jezero Crater in February 2021 | ✅ Verified true | Confirmed by the knowledge base (Feb 18, 2021). |
 | Humans will walk on Mars before 2040 | ❓ Unverifiable | A future prediction. |
 
 ### A reasoning-log excerpt (`output/logs/run.log`)

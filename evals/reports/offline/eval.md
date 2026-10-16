@@ -68,15 +68,15 @@ Provider: provider=offline · main=offline-heuristic · fast=offline-heuristic �
 | `quote_fidelity` | 1 | ≥ 1 | ✅ |
 | `claim_recall` | 1 | ≥ 1 | ✅ |
 | `claim_verdict_accuracy` | 1 | ≥ 0.9 | ✅ |
-| `llm_calls_per_episode` | 16.5 |  |  |
-| `tokens_per_episode` | 24324.8 |  |  |
+| `llm_calls_per_episode` | 16.75 |  |  |
+| `tokens_per_episode` | 26288.5 |  |  |
 
 | Episode | Summary words | Coverage | Quotes verbatim | Claims found / right | Judge |
 |---|---|---|---|---|---|
-| ep001 | 262 | 1.00 | 5/5 | 2/2 found, 2 right | — |
-| ep002 | 248 | 1.00 | 5/5 | 3/3 found, 3 right | — |
-| ep003 | 262 | 1.00 | 5/5 | 2/2 found, 2 right | — |
-| ep004 | 279 | 1.00 | 5/5 | 5/5 found, 5 right | — |
+| ep001 | 318 | 1.00 | 5/5 | 2/2 found, 2 right | — |
+| ep002 | 288 | 1.00 | 5/5 | 3/3 found, 3 right | — |
+| ep003 | 254 | 1.00 | 5/5 | 2/2 found, 2 right | — |
+| ep004 | 208 | 1.00 | 5/5 | 5/5 found, 5 right | — |
 
 ## offline-mode (run)
 

@@ -6,7 +6,7 @@ import json
 
 from podcast_agent.models import Episode, format_seconds
 
-PROMPT_VERSION = "2026-10-13.1"
+PROMPT_VERSION = "2026-10-16.1"
 
 
 def episode_context(ep: Episode) -> str:
@@ -68,9 +68,11 @@ def summary_prompt(min_words: int, max_words: int) -> str:
 
 Requirements
 - Length: {min_words}–{max_words} words. This is a hard limit; count carefully.
-- Cover (1) the core themes, (2) the key discussions in the order they happen, and (3) the outcomes or opinions shared — attribute opinions to speakers by name.
+- Cover the topics discussed in the order they come up, and the opinions and conclusions shared. Attribute each point to the speaker who made it, by name.
+- Report what the speakers say, not how they say it: don't describe tone, mood or attitude ("cautiously", "jokes", "light-hearted", "concedes", "skeptical", "hopeful") unless a speaker says it.
+- Add nothing the speakers don't state: no themes or framing of your own, no implications, and no dates, time frames, numbers or comparisons beyond their words.
+- If the transcript is short, reach the length by giving each point in full (who said it, the names, figures and dates they used, and how the other speaker replied), never by interpretation.
 - Third person, present tense, publishable tone. No timestamps, bullet points or headings.
-- Use only information from the transcript.
 
 Return JSON: {{"summary": "<the summary>"}}"""
 

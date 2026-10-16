@@ -252,3 +252,17 @@ def test_baseline_from_refuses_another_suite_or_a_failing_run(tmp_path, monkeypa
     assert main(["eval", "--suite", str(suite), "--baseline-from", str(report)]) == 2
     assert not (tmp_path / "base" / "live.json").exists()
 
+
+
+def test_each_ep004_expectation_matches_only_the_claim_it_means():
+    """A live run worded the Perseverance claim "…collected the samples for NASA's planned Mars sample return…", so
+    the old [Mars, sample] keywords matched it before the NASA-launch claim and scored a correct ✅ as wrong."""
+    claims = {
+        "nasa": "NASA's new Mars mission is launching in early 2026 and is planning to bring back samples.",
+        "perseverance": "The Perseverance rover, which collected the samples for NASA's planned Mars sample return, "
+                        "landed in Jezero Crater in February 2021.",
+    }
+    wants = load_episode_expectations(EPISODES)["ep004"].claims
+    matched = {tuple(w.match): [k for k, text in claims.items() if m.matches_all(text, w.match)] for w in wants}
+    assert matched[("NASA", "2026")] == ["nasa"]
+    assert matched[("Perseverance", "landed")] == ["perseverance"]

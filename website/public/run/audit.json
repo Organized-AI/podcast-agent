@@ -1,7 +1,7 @@
 {
-  "run_id": "20261016-002216-4ea64a",
+  "run_id": "20261016-010820-9471da",
   "run_dir": "samples/claude-run",
-  "audited_at": "2026-10-16T00:34:04+00:00",
+  "audited_at": "2026-10-16T01:12:25+00:00",
   "summary": {
     "pass": 36,
     "warn": 0,
@@ -27,7 +27,7 @@
       "area": "run",
       "name": "Trace belongs to this run, in order and complete",
       "status": "pass",
-      "detail": "379 events, all run_id 20261016-002216-4ea64a, timestamps in order, count matches the manifest (379)"
+      "detail": "377 events, all run_id 20261016-010820-9471da, timestamps in order, count matches the manifest (377)"
     },
     {
       "scope": "run",
@@ -48,7 +48,7 @@
       "area": "notes",
       "name": "Summary length (spec mode)",
       "status": "pass",
-      "detail": "262 words, accepted range 180–321"
+      "detail": "318 words, accepted range 180–321"
     },
     {
       "scope": "ep001",
@@ -104,7 +104,7 @@
       "area": "notes",
       "name": "Summary length (spec mode)",
       "status": "pass",
-      "detail": "248 words, accepted range 180–321"
+      "detail": "288 words, accepted range 180–321"
     },
     {
       "scope": "ep002",
@@ -160,7 +160,7 @@
       "area": "notes",
       "name": "Summary length (spec mode)",
       "status": "pass",
-      "detail": "262 words, accepted range 180–321"
+      "detail": "254 words, accepted range 180–321"
     },
     {
       "scope": "ep003",
@@ -188,21 +188,21 @@
       "area": "claims",
       "name": "Every claim is grounded in its transcript line",
       "status": "pass",
-      "detail": "3 claims re-matched at ≥ 0.85"
+      "detail": "2 claims re-matched at ≥ 0.85"
     },
     {
       "scope": "ep003",
       "area": "claims",
       "name": "Confidence within the evidence cap; evidence ids unique",
       "status": "pass",
-      "detail": "3 verdicts re-calibrated from their evidence, all within cap"
+      "detail": "2 verdicts re-calibrated from their evidence, all within cap"
     },
     {
       "scope": "ep003",
       "area": "claims",
       "name": "Every verdict has a complete trace",
       "status": "pass",
-      "detail": "3 claims: tool calls in the trace match the report, each ends in a verdict"
+      "detail": "2 claims: tool calls in the trace match the report, each ends in a verdict"
     },
     {
       "scope": "ep004",
@@ -216,7 +216,7 @@
       "area": "notes",
       "name": "Summary length (spec mode)",
       "status": "pass",
-      "detail": "279 words, accepted range 180–321"
+      "detail": "208 words, accepted range 180–321"
     },
     {
       "scope": "ep004",
@@ -244,21 +244,21 @@
       "area": "claims",
       "name": "Every claim is grounded in its transcript line",
       "status": "pass",
-      "detail": "6 claims re-matched at ≥ 0.85"
+      "detail": "5 claims re-matched at ≥ 0.85"
     },
     {
       "scope": "ep004",
       "area": "claims",
       "name": "Confidence within the evidence cap; evidence ids unique",
       "status": "pass",
-      "detail": "6 verdicts re-calibrated from their evidence, all within cap"
+      "detail": "5 verdicts re-calibrated from their evidence, all within cap"
     },
     {
       "scope": "ep004",
       "area": "claims",
       "name": "Every verdict has a complete trace",
       "status": "pass",
-      "detail": "6 claims: tool calls in the trace match the report, each ends in a verdict"
+      "detail": "5 claims: tool calls in the trace match the report, each ends in a verdict"
     }
   ]
 }
