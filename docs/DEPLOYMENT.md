@@ -2,7 +2,7 @@
 
 How this agent would run for real at an ad agency: many client brands, bursty episode drops, human editors approving everything before it is published, and confidential pre-release content.
 
-> **What exists in this repo vs. what is proposed.** The agent, CLI, HTTP API, queue worker (`dir://` and SQS adapters), Docker image and a lint-clean Helm chart (`deploy/helm/podcast-agent`) are implemented. Terraform, the model gateway service, the review UI and the managed data stores below are the proposed production design.
+> **What exists in this repo vs. what is proposed.** Implemented and tested in CI: the agent, CLI, HTTP API, queue worker (`dir://` queue; SQS and S3 adapters written but not yet run against AWS), the Docker image with SBOM and signed provenance, the Helm chart for dev and prod, Argo CD GitOps, OpenTelemetry traces and metrics, seven alert rules with unit tests, per-episode cost budgets, a synthetic canary and the incident bridge. Running on the lab cluster ([GITOPS.md](GITOPS.md)): dev synced by Argo CD from `main`, and the Collector, Jaeger, MLflow, Prometheus and Alertmanager. Proposed: Terraform, the model gateway, the review UI and SSO, and the managed AWS data stores below.
 
 ---
 
@@ -39,7 +39,7 @@ flowchart LR
         pg[("Aurora Postgres<br/>jobs · reports · KB + pgvector")]
         redis[("ElastiCache Redis<br/>LLM + search cache")]
         secrets["Secrets Manager<br/>External Secrets + IRSA"]
-        obs["Observability<br/>OTel · Prometheus · Grafana · Langfuse"]
+        obs["Observability<br/>OTel · Jaeger · MLflow · Prometheus"]
     end
 
     subgraph providers["Model and tool providers"]
@@ -94,7 +94,7 @@ The same view in plain text, for terminals and slides:
              │            │            │                  ▼
      Bedrock (Claude)  Anthropic    vLLM (GPU)     Report → S3 + Postgres → review UI → publish
        primary         failover     on-prem
-                                                   OTel traces · Prometheus/Grafana · Langfuse
+                                                   OTel → Jaeger · MLflow · Prometheus/Grafana
 ```
 
 ### Life of a job
@@ -109,11 +109,11 @@ The same view in plain text, for terminals and slides:
 
 | Concern | Approach |
 |---|---|
-| Packaging | One image, three entrypoints (`run`, `serve`, `worker`). Multi-stage build, non-root user (uid 10001), read-only root filesystem. Trivy scan, SBOM and cosign signature in CI; pushed to ECR. |
+| Packaging | One image, three entrypoints (`run`, `serve`, `worker`). Multi-stage build, non-root user (uid 10001), read-only root filesystem. Trivy scan, SBOM and signed SLSA build provenance in CI; pushed to GHCR by digest (ECR in a client's own account). |
 | Infrastructure as code | Terraform modules for VPC (3 AZs, private subnets, VPC endpoints for S3, SQS and Bedrock), EKS with managed node groups, Aurora Postgres, SQS + DLQ, S3, KMS, IAM roles for service accounts. Separate state and account per environment. |
 | Kubernetes | `deploy/helm/podcast-agent`: API Deployment + Service + HPA + PDB; worker Deployment with a KEDA `ScaledObject` on SQS depth (scale to zero); ConfigMap for non-secret config; `ExternalSecret` from Secrets Manager; NetworkPolicy (DNS + HTTPS egress only); zone spread; config-checksum rollouts. |
 | Environments | `values.yaml` holds shared defaults; `values-dev.yaml` (offline provider, no cloud dependencies, runs on kind) and `values-prod.yaml` (External Secrets, KEDA, OpenTelemetry at 25% sampling, PrometheusRule alerts) override them. `values.schema.json` rejects unknown keys and bad values at `helm template` time, and CI renders every environment and validates the manifests and CRDs with kubeconform. Images are pinned by digest per environment. |
-| Delivery | GitOps with Argo CD: one Application per environment, promotion dev → staging → prod by pull request. Argo Rollouts canary for the API, with automatic rollback on error-rate or latency regression. |
+| Delivery | GitOps with Argo CD ([GITOPS.md](GITOPS.md)): one Application per environment from an ApplicationSet. Every merge to `main` builds the image once; a bot pull request moves dev to its digest and Argo CD syncs dev. A release re-tags the same digest, a bot pull request moves prod, and a person presses Sync. Proposed: an Argo Rollouts canary for the API, with automatic rollback on error-rate or latency regression. |
 | Model and prompt changes | Prompts live in `prompts.py` with a `PROMPT_VERSION`. Model ids are pinned in config. A prompt or model change runs the evaluation suite in CI and must pass blocking thresholds before merge. It then ships behind a config flag and is shadow-run on a sample of live jobs. |
 | Configuration | Twelve-factor: everything is an environment variable (`.env.example` lists them); secrets never live in the image or chart values. |
 | Self-hosted installs | The same chart installs into a customer's own cluster (EKS, AKS, GKE, OKE or on-prem) with `LLM_PROVIDER=ollama`/vLLM and search disabled or internal. That is the shape of a SeekrFlow-style private deployment. |
@@ -136,7 +136,7 @@ Every run records actual token usage per step in `run_manifest.json`, so these e
 1. **Tiered verification.** Run the claim loop on Haiku and escalate to Sonnet only for ⚠️ or low-confidence verdicts. If about 30% escalate, verification drops from ~$0.125 to ~$0.04 per episode and the total to ~$0.09.
 2. **Batch API for backlog.** Archive back-catalogues and non-urgent jobs through the Message Batches API at 50% off.
 3. **Prompt caching** (implemented). The transcript prefix is marked cacheable, so notes and claims reuse it. This matters most for long episodes.
-4. **Response and search caching** (implemented for LLM responses). Re-running an episode costs nothing, and a redelivered job replays its finished steps from cache. In production the cache moves to Redis so all workers share it.
+4. **Response and search caching** (implemented for LLM responses). Re-running an episode costs nothing, and a redelivered job that already finished is acknowledged without new spend. The cache is per pod today; in production it moves to Redis, so a half-finished job replays its completed steps on any worker.
 5. **Planner budgets.** The planner sizes the claim budget to the transcript, and every claim has a tool-call cap.
 6. **Gateway budgets.** Per-tenant monthly token budgets with alerts at 80% and a hard stop or downgrade at 100%.
 7. **Episode budgets** (implemented). `COST_BUDGET_USD` caps each episode at list prices. Over it, `warn` mode raises `PodcastAgentCostBudgetExceeded` and `enforce` mode stops checking claims. A canary episode every minute catches a costlier deploy before a customer's episode does ([runbook](runbooks/cost-budget.md)).
@@ -162,7 +162,8 @@ Every run records actual token usage per step in `run_manifest.json`, so these e
 | One step fails | Isolated: dependents are skipped, independent steps still run, and the report is produced with warnings | Implemented |
 | Worker crash or pod eviction | Message not deleted → redelivered after the visibility timeout; SIGTERM drains the current job | Implemented (worker) |
 | Duplicate delivery | Idempotency key; finished jobs are acknowledged without new LLM spend | Implemented (worker) |
-| Poison message | Invalid input dead-letters immediately; transient failures after `maxReceiveCount`; DLQ alarm | Implemented (dir queue); SQS redrive proposed |
+| Poison message | Invalid input dead-letters immediately; transient failures after `maxReceiveCount`; DLQ alarm | Dead-lettering implemented (dir queue); SQS redrive and the DLQ alarm proposed |
+| A deploy makes episodes cost more | Every model call is priced; each episode has a budget; a synthetic canary runs every minute; `PodcastAgentCostBudgetExceeded` reaches the incident bridge, which opens a GitHub issue naming the suspect pull request; the fix is a revert through GitOps | Implemented and drilled on the lab: MTTD 1m 1s, MTTR 10m 33s, no client episode affected ([postmortem](postmortems/2026-10-15-cost-budget-drill.md)) |
 | Agent runaway | Tool budget per claim, turn cap, default ❓ for human review; per-job token budget at the gateway | Loop caps implemented |
 | Zone or region loss | Multi-AZ EKS and Aurora; S3 cross-region replication and Aurora snapshots for disaster recovery | Proposed |
 | Quality failure (hallucination) | Verbatim quote checks, evidence-id validation, confidence caps, human review before publishing | Implemented + process |
@@ -177,7 +178,8 @@ Every run records actual token usage per step in `run_manifest.json`, so these e
 - Optional PII redaction before model calls, retention limits (for example, delete transcripts 90 days after publication) and an audit log of who approved what.
 
 **Observability**
-- The reasoning trace (`trace.jsonl`) already carries `run_id`, `episode_id`, `step` and `kind`. In production each record becomes an OpenTelemetry span event: one trace per episode, one span per step, LLM call and tool call. LLM payloads go to Langfuse or Arize Phoenix for inspection.
+- Every run is one OpenTelemetry trace following the GenAI semantic conventions: a span per episode, step, model call and tool call, and every `trace.jsonl` line carries its trace and span ids (implemented, [OBSERVABILITY.md](OBSERVABILITY.md)). The Collector fans traces out to Jaeger (latency, span tree) and MLflow (the run as an agent trace with token totals), and metrics to Prometheus. Spans carry ids, counts, models and verdicts, never transcript or prompt text, unless content capture is switched on for debugging.
+- Seven alert rules, each with promtool unit tests. The cost alert goes from Alertmanager to the incident bridge, which opens a GitHub issue with the evidence and closes it with the timeline when the alert resolves.
 - Metrics: latency per step, tokens and dollars per episode and tenant, cache hit rate, self-correction rate, quote verbatim rate, tool error rate, verdict mix, queue depth and DLQ count.
 - Example SLOs: 99% of jobs complete without manual intervention; p95 end-to-end under 5 minutes for a 60-minute episode; alerts on error-budget burn.
 
