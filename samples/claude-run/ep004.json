@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "run_id": "20261016-002216-4ea64a",
-  "generated_at": "2026-10-16T00:25:08+00:00",
+  "run_id": "20261016-010820-9471da",
+  "generated_at": "2026-10-16T01:11:26+00:00",
   "episode": {
     "episode_id": "ep004",
     "title": "Space & Markets Roundup (synthetic test transcript built from the assignment's example)",
@@ -27,23 +27,35 @@
     "fast": "claude-haiku-5-5"
   },
   "plan": {
-    "goal": "Produce a summary, key notes, and a verified fact-check table for the ep004 Space & Markets Roundup transcript.",
+    "goal": "Produce a summary, key notes and a verified fact-check table for episode ep004 from its transcript.",
     "steps": [
       {
         "step": "normalize_transcript",
-        "reason": "The profile shows 11 filler or repeated words, so cleaning the text first improves every downstream step while keeping the raw text for audit.",
+        "reason": "The profile reports 11 filler or repeated words, so cleaning the text first improves downstream extraction while keeping the raw text for audit.",
+        "params": {}
+      },
+      {
+        "step": "summarize",
+        "reason": "The transcript is short (122 words), so a single pass is sufficient to write the 200-300 word summary.",
+        "params": {
+          "strategy": "single_pass"
+        }
+      },
+      {
+        "step": "extract_notes",
+        "reason": "Top takeaways, timestamped verbatim quotes and topic tags are a required deliverable.",
         "params": {}
       },
       {
         "step": "extract_claims",
-        "reason": "The transcript has 5 numbers, 4 years, several named entities and 3 prediction cues, which justifies a mid-range claim cap of 6.",
+        "reason": "There are 5 numbers, 4 years and 3 prediction cues, so a moderate cap of 6 claims covers the check-worthy statements.",
         "params": {
           "max_claims": 6
         }
       },
       {
         "step": "verify_claims",
-        "reason": "Each extracted claim needs a tool-backed verdict, and both the knowledge base and web search are useful for dated space and market facts.",
+        "reason": "Each extracted claim needs a verdict and confidence, and the two tools cover internal knowledge and current public sources; 4 steps per claim is enough for these short factual checks.",
         "params": {
           "max_steps_per_claim": 4,
           "tools": [
@@ -51,32 +63,20 @@
             "web_search"
           ]
         }
-      },
-      {
-        "step": "summarize",
-        "reason": "At 122 words the transcript fits in a single pass, so a single_pass summary of 200-300 words is sufficient.",
-        "params": {
-          "strategy": "single_pass"
-        }
-      },
-      {
-        "step": "extract_notes",
-        "reason": "The key notes deliverable requires top takeaways, timestamped verbatim quotes and topic tags drawn from the normalized transcript.",
-        "params": {}
       }
     ],
     "repaired": false,
     "repair_notes": []
   },
   "summary": {
-    "text": "In this roundup, host Chris Bell and guest Nina Alvarez move from space exploration to market speculation, closing with a look at the longer-term future of human spaceflight.\nThe conversation opens with Bell raising NASA's recent announcement of a new Mars mission. Alvarez explains that the mission is set to launch in early 2026 and that the plan is to bring back samples. Bell responds with enthusiasm, calling the prospect exciting. Alvarez adds context, noting that the samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.\nBell then shifts to the markets, pointing out that people keep saying Bitcoin will reach $200K by 2025. Alvarez says she has heard the claim often, but offers a cautious view: in her opinion, crypto is simply too volatile to call. Bell accepts the point and steers the discussion toward AI stocks. Alvarez observes that Nvidia became the first company to hit a five trillion dollar market cap last year, a milestone that Bell describes as wild.\nTo close, Bell asks for predictions. Alvarez offers hers: she believes humans will walk on Mars before 2040. Bell responds with a light-hearted note of wait-and-see, and thanks Alvarez for joining the show.\nThroughout, the episode pairs concrete developments with measured opinion. Alvarez provides the factual background on the Mars sample effort and Nvidia's valuation, while declining to endorse the popular Bitcoin forecast. Her one firm prediction concerns a crewed Mars landing within the next decade and a half or so. The episode is a brisk, accessible overview for listeners who follow both space news and market trends, and it shows how bold forecasts in both fields invite healthy skepticism.",
-    "word_count": 279,
+    "text": "Host Chris Bell opens by saying NASA recently announced something about a new Mars mission. Guest Nina Alvarez says the mission is launching in early 2026 and that NASA is planning to bring back samples. Bell responds that this is exciting. Alvarez adds that the samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.\nBell then turns to the markets and says people keep saying Bitcoin will reach $200K by 2025. Alvarez says she has heard that a lot. She gives her own view that crypto is just too volatile to call. Bell replies that this is fair.\nBell asks what Alvarez thinks about AI stocks. She states that Nvidia became the first company to hit a five trillion dollar market cap last year. Bell responds by calling that wild.\nBell asks whether Alvarez has any predictions. She says she thinks humans will walk on Mars before 2040. Bell replies that they will see, and he thanks Alvarez for joining the episode.\nIn summary, the conversation covers NASA's new Mars mission and the Perseverance samples, the Bitcoin $200K by 2025 claim and Alvarez's view on crypto volatility, Nvidia's five trillion dollar market cap, and Alvarez's prediction about humans on Mars before 2040.",
+    "word_count": 208,
     "strategy": "single_pass"
   },
   "notes": {
     "takeaways": [
       {
-        "text": "Nina Alvarez says NASA's new Mars mission is planned to launch in early 2026, with the goal of bringing back samples.",
+        "text": "Nina Alvarez says a new NASA Mars mission is planned to launch in early 2026, with the goal of bringing back samples.",
         "timestamp": "00:02:18"
       },
       {
@@ -84,21 +84,21 @@
         "timestamp": "00:03:05"
       },
       {
-        "text": "Nina Alvarez says Nvidia became the first company to hit a five trillion dollar market cap last year.",
+        "text": "Nina Alvarez says Nvidia became the first company to hit a five trillion dollar market cap last year, a claim to verify before publishing.",
         "timestamp": "00:03:44"
       },
       {
         "text": "Chris Bell notes that people keep predicting Bitcoin will reach $200K by 2025, while Nina Alvarez thinks crypto is too volatile to call.",
-        "timestamp": "00:03:20"
+        "timestamp": "00:03:27"
       },
       {
-        "text": "Nina Alvarez predicts humans will walk on Mars before 2040.",
+        "text": "Nina Alvarez predicts humans will walk on Mars before 2040, a personal opinion rather than an established forecast.",
         "timestamp": "00:04:06"
       }
     ],
     "quotes": [
       {
-        "text": "Yes, it’s launching in early 2026 — they’re planning to bring back samples.",
+        "text": "it’s launching in early 2026 — they’re planning to bring back samples.",
         "speaker": "Nina Alvarez",
         "timestamp": "00:02:18",
         "match_score": 1.0
@@ -143,7 +143,7 @@
     {
       "claim": {
         "id": "C1",
-        "claim": "Nvidia became the first company to hit a five trillion dollar market cap in the year before the episode was recorded.",
+        "claim": "Nvidia became the first company to hit a five trillion dollar market cap last year.",
         "speaker": "Nina Alvarez",
         "timestamp": "00:03:44",
         "quote": "Nvidia became the first company to hit a five trillion dollar market cap last year.",
@@ -151,9 +151,9 @@
         "time_sensitive": true
       },
       "verdict": "verified",
-      "confidence": 0.85,
-      "raw_confidence": 0.85,
-      "rationale": "The knowledge base records that Nvidia became the first public company to reach a $5 trillion market cap on October 29, 2025 [E1]. If the episode was recorded in 2026, 'last year' is correct. The recording date wasn't given, so that is an assumption.",
+      "confidence": 0.9,
+      "raw_confidence": 0.93,
+      "rationale": "The knowledge base states Nvidia became the first public company to reach a $5 trillion market cap on October 29, 2025 [E1]. Since today is 2026-10-13, that date falls in last year, so the claim holds as stated.",
       "evidence": [
         {
           "id": "E1",
@@ -162,7 +162,7 @@
           "snippet": "On October 29, 2025, Nvidia became the first public company to reach a market capitalization of $5 trillion, driven by demand for its AI chips.",
           "url": "https://www.entrepreneur.com/business-news/nvidia-becomes-the-first-to-pass-5-trillion-in-market-value",
           "date": "2025-10-29",
-          "relevance": 1.0
+          "relevance": 0.827
         }
       ],
       "tool_calls": 1,
@@ -175,118 +175,17 @@
     {
       "claim": {
         "id": "C2",
-        "claim": "NASA's new Mars mission is launching in early 2026 and is planning to bring back samples from Mars.",
-        "speaker": "Nina Alvarez",
-        "timestamp": "00:02:18",
-        "quote": "Yes, it’s launching in early 2026 — they’re planning to bring back samples.",
-        "type": "factual",
-        "time_sensitive": true
-      },
-      "verdict": "possibly_outdated_or_inaccurate",
-      "confidence": 0.85,
-      "raw_confidence": 0.85,
-      "rationale": "The 2026 launch date comes from an outdated 2020 plan [E5]; the program was restructured with launches around 2030-2031 and sample return 2035-2039, with the FY2026 budget proposing cancellation [E1][E4]. Costs of up to $11B drove the changes [E6]. No evidence of a NASA Mars sample-return launch in early 2026.",
-      "evidence": [
-        {
-          "id": "E1",
-          "source": "knowledge_base",
-          "title": "KB-030: NASA's Mars Sample Return has been delayed and restructured; no 2026 launch",
-          "snippet": "NASA's Mars Sample Return (MSR) has not launched. The original plan targeted launches around 2026 with samples back in the early 2030s, but after an independent review warned costs could reach $11 billion, NASA in January 2025 outlined two cheaper architectures with launches around 2030-2031 and Earth return between 2035 and 2039. A decision between them was deferred to mid-2026, and the President's FY2026 budget request proposed cancelling the program.",
-          "url": "https://www.scientificamerican.com/article/the-fate-of-nasas-mars-sample-return-program-may-be-decided-in-2026/",
-          "date": "2025-07-01",
-          "relevance": 1.0
-        },
-        {
-          "id": "E4",
-          "source": "web_search",
-          "title": "NASA unveils two cheaper options for Mars Sample Return, return now 2035-2039",
-          "snippet": "NASA announced two possible architectures for Mars Sample Return, using a sky-crane lander or a commercial heavy-lift lander, with samples returning between 2035 and 2039. A final decision was delayed to 2026.",
-          "url": "https://example-news.test/2025/nasa-msr-two-options",
-          "date": "2025-01-07",
-          "relevance": 0.619
-        },
-        {
-          "id": "E5",
-          "source": "web_search",
-          "title": "NASA and ESA outline Mars Sample Return campaign with launches in 2026",
-          "snippet": "NASA and ESA plan to launch the Mars Sample Return lander and Earth Return Orbiter in 2026, bringing Perseverance's samples back to Earth in the early 2030s.",
-          "url": "https://example-news.test/2020/mars-sample-return-plan",
-          "date": "2020-11-10",
-          "relevance": 0.491
-        },
-        {
-          "id": "E6",
-          "source": "web_search",
-          "title": "Independent review: Mars Sample Return could cost up to $11 billion",
-          "snippet": "An independent review board found the Mars Sample Return mission could cost $8 billion to $11 billion, with samples unlikely to return before 2040 under the existing plan; NASA paused parts of the program.",
-          "url": "https://example-news.test/2023/msr-independent-review",
-          "date": "2023-09-21",
-          "relevance": 0.362
-        }
-      ],
-      "tool_calls": 2,
-      "tools_used": [
-        "search_knowledge_base",
-        "web_search"
-      ],
-      "method": "knowledge base + web search",
-      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-030)"
-    },
-    {
-      "claim": {
-        "id": "C3",
-        "claim": "The Mars samples to be returned were collected by the Perseverance rover.",
-        "speaker": "Nina Alvarez",
-        "timestamp": "00:03:05",
-        "quote": "The samples were collected by the Perseverance rover",
-        "type": "factual",
-        "time_sensitive": false
-      },
-      "verdict": "verified",
-      "confidence": 0.85,
-      "raw_confidence": 0.85,
-      "rationale": "The knowledge base states Perseverance has been collecting and caching rock and regolith samples intended for eventual return to Earth [E1]. The Mars Sample Return program remains unlaunched and restructured, but that does not change which rover collected the samples [E2].",
-      "evidence": [
-        {
-          "id": "E1",
-          "source": "knowledge_base",
-          "title": "KB-031: Perseverance landed in Jezero Crater in February 2021 and is caching samples",
-          "snippet": "NASA's Perseverance rover landed in Jezero Crater on Mars on February 18, 2021, and has been collecting and caching rock and regolith samples intended for eventual return to Earth.",
-          "url": "https://science.nasa.gov/mission/mars-2020-perseverance/",
-          "date": "2025-01-01",
-          "relevance": 1.0
-        },
-        {
-          "id": "E2",
-          "source": "knowledge_base",
-          "title": "KB-030: NASA's Mars Sample Return has been delayed and restructured; no 2026 launch",
-          "snippet": "NASA's Mars Sample Return (MSR) has not launched. The original plan targeted launches around 2026 with samples back in the early 2030s, but after an independent review warned costs could reach $11 billion, NASA in January 2025 outlined two cheaper architectures with launches around 2030-2031 and Earth return between 2035 and 2039. A decision between them was deferred to mid-2026, and the President's FY2026 budget request proposed cancelling the program.",
-          "url": "https://www.scientificamerican.com/article/the-fate-of-nasas-mars-sample-return-program-may-be-decided-in-2026/",
-          "date": "2025-07-01",
-          "relevance": 0.415
-        }
-      ],
-      "tool_calls": 1,
-      "tools_used": [
-        "search_knowledge_base"
-      ],
-      "method": "knowledge base",
-      "verification": "✅ Verified true (confirmed by knowledge base KB-031, KB-030)"
-    },
-    {
-      "claim": {
-        "id": "C4",
         "claim": "The Perseverance rover landed in Jezero Crater in February 2021.",
         "speaker": "Nina Alvarez",
         "timestamp": "00:03:05",
-        "quote": "which landed in Jezero Crater in February 2021",
+        "quote": "The samples were collected by the Perseverance rover, which landed in Jezero Crater in February 2021.",
         "type": "historical",
         "time_sensitive": false
       },
       "verdict": "verified",
       "confidence": 0.9,
       "raw_confidence": 0.95,
-      "rationale": "The knowledge base entry states Perseverance landed in Jezero Crater on February 18, 2021, matching the claim [E1]. A landing date is a fixed historical fact, so the 2025 as-of date does not affect its currency.",
+      "rationale": "The knowledge base entry states Perseverance landed in Jezero Crater on February 18, 2021, matching the claim [E1]. This is a fixed historical event, so the as-of date of the entry does not affect its currency.",
       "evidence": [
         {
           "id": "E1",
@@ -307,8 +206,68 @@
     },
     {
       "claim": {
-        "id": "C5",
-        "claim": "People have been saying Bitcoin will reach $200K by 2025.",
+        "id": "C3",
+        "claim": "NASA's new Mars mission, which plans to bring back samples, is launching in early 2026.",
+        "speaker": "Nina Alvarez",
+        "timestamp": "00:02:18",
+        "quote": "Yes, it's launching in early 2026 — they're planning to bring back samples.",
+        "type": "factual",
+        "time_sensitive": true
+      },
+      "verdict": "possibly_outdated_or_inaccurate",
+      "confidence": 0.85,
+      "raw_confidence": 0.85,
+      "rationale": "The 2026 launch date comes from the original plan [E5], which has since been superseded: NASA's restructured options target launches around 2030-2031 with return in 2035-2039, and the FY2026 budget proposed cancelling the program [E1][E4]. Cost reviews also pushed timelines out [E6]. No evidence shows an MSR launch in early 2026, and the date has now passed.",
+      "evidence": [
+        {
+          "id": "E1",
+          "source": "knowledge_base",
+          "title": "KB-030: NASA's Mars Sample Return has been delayed and restructured; no 2026 launch",
+          "snippet": "NASA's Mars Sample Return (MSR) has not launched. The original plan targeted launches around 2026 with samples back in the early 2030s, but after an independent review warned costs could reach $11 billion, NASA in January 2025 outlined two cheaper architectures with launches around 2030-2031 and Earth return between 2035 and 2039. A decision between them was deferred to mid-2026, and the President's FY2026 budget request proposed cancelling the program.",
+          "url": "https://www.scientificamerican.com/article/the-fate-of-nasas-mars-sample-return-program-may-be-decided-in-2026/",
+          "date": "2025-07-01",
+          "relevance": 0.797
+        },
+        {
+          "id": "E4",
+          "source": "web_search",
+          "title": "NASA unveils two cheaper options for Mars Sample Return, return now 2035-2039",
+          "snippet": "NASA announced two possible architectures for Mars Sample Return, using a sky-crane lander or a commercial heavy-lift lander, with samples returning between 2035 and 2039. A final decision was delayed to 2026.",
+          "url": "https://example-news.test/2025/nasa-msr-two-options",
+          "date": "2025-01-07",
+          "relevance": 0.52
+        },
+        {
+          "id": "E5",
+          "source": "web_search",
+          "title": "NASA and ESA outline Mars Sample Return campaign with launches in 2026",
+          "snippet": "NASA and ESA plan to launch the Mars Sample Return lander and Earth Return Orbiter in 2026, bringing Perseverance's samples back to Earth in the early 2030s.",
+          "url": "https://example-news.test/2020/mars-sample-return-plan",
+          "date": "2020-11-10",
+          "relevance": 0.412
+        },
+        {
+          "id": "E6",
+          "source": "web_search",
+          "title": "Independent review: Mars Sample Return could cost up to $11 billion",
+          "snippet": "An independent review board found the Mars Sample Return mission could cost $8 billion to $11 billion, with samples unlikely to return before 2040 under the existing plan; NASA paused parts of the program.",
+          "url": "https://example-news.test/2023/msr-independent-review",
+          "date": "2023-09-21",
+          "relevance": 0.304
+        }
+      ],
+      "tool_calls": 2,
+      "tools_used": [
+        "search_knowledge_base",
+        "web_search"
+      ],
+      "method": "knowledge base + web search",
+      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-030)"
+    },
+    {
+      "claim": {
+        "id": "C4",
+        "claim": "People are saying Bitcoin will reach $200K by 2025.",
         "speaker": "Chris Bell",
         "timestamp": "00:03:20",
         "quote": "people keep saying Bitcoin will reach $200K by 2025.",
@@ -316,9 +275,9 @@
         "time_sensitive": true
       },
       "verdict": "possibly_outdated_or_inaccurate",
-      "confidence": 0.85,
-      "raw_confidence": 0.85,
-      "rationale": "Analysts did publicly forecast $200K by end of 2025 [E4], so people did say it, but the deadline has passed and Bitcoin peaked near $126,210 in 2025 and never reached $200K [E1][E5]. The present-tense framing ('keep saying') is outdated, as the prediction failed.",
+      "confidence": 0.9,
+      "raw_confidence": 0.9,
+      "rationale": "Analysts did forecast $200K by end of 2025 [E4], so people were saying it, but the deadline has passed and Bitcoin peaked near $126,210 in 2025 without reaching $200K [E1][E5]. The claim is stale as a present-tense statement, since the prediction failed.",
       "evidence": [
         {
           "id": "E1",
@@ -358,18 +317,18 @@
     },
     {
       "claim": {
-        "id": "C6",
+        "id": "C5",
         "claim": "Humans will walk on Mars before 2040.",
         "speaker": "Nina Alvarez",
         "timestamp": "00:04:06",
         "quote": "I think humans will walk on Mars before 2040.",
         "type": "prediction",
-        "time_sensitive": false
+        "time_sensitive": true
       },
       "verdict": "unverifiable",
       "confidence": 0.5,
-      "raw_confidence": 0.7,
-      "rationale": "This is a prediction whose deadline (2040) has not passed, and no crewed Mars landing has occurred; NASA targets crewed missions no earlier than the late 2030s and private timelines have repeatedly slipped, with no firm date [E1][E4]. The evidence neither confirms nor rules out a landing before 2040.",
+      "raw_confidence": 0.8,
+      "rationale": "This is a prediction about 2040, which has not yet arrived, so it can't be confirmed or refuted. The evidence shows no crewed landing so far, NASA targeting crewed Mars missions no earlier than the late 2030s, and private timelines that have repeatedly slipped [E1][E4].",
       "evidence": [
         {
           "id": "E1",
@@ -387,13 +346,12 @@
           "snippet": "NASA targets crewed Mars missions no earlier than the late 2030s; private timelines have repeatedly slipped and no date is firm.",
           "url": "https://example-news.test/2025/humans-on-mars-timeline",
           "date": "2025-03-12",
-          "relevance": 0.477
+          "relevance": 0.475
         }
       ],
-      "tool_calls": 3,
+      "tool_calls": 2,
       "tools_used": [
         "search_knowledge_base",
-        "web_search",
         "web_search"
       ],
       "method": "knowledge base + web search",
@@ -404,60 +362,60 @@
     {
       "step": "plan",
       "status": "ok",
-      "duration_ms": 3388,
+      "duration_ms": 2128,
       "attempts": 0,
       "detail": "5 steps"
     },
     {
       "step": "normalize_transcript",
       "status": "ok",
-      "duration_ms": 3,
+      "duration_ms": 4,
       "attempts": 0,
       "detail": "removed 7 filler words, 3 filler phrases, 1 repeated words across 7 lines"
     },
     {
-      "step": "extract_claims",
-      "status": "ok",
-      "duration_ms": 6231,
-      "attempts": 1,
-      "detail": "6 check-worthy claims (2 factual, 1 historical, 2 prediction, 1 statistical)"
-    },
-    {
-      "step": "verify_claims",
-      "status": "ok",
-      "duration_ms": 37374,
-      "attempts": 6,
-      "detail": "3 ✅ · 2 ⚠️ · 1 ❓ across 6 claims · 10 tool calls"
-    },
-    {
       "step": "summarize",
       "status": "ok",
-      "duration_ms": 5148,
+      "duration_ms": 3407,
       "attempts": 1,
-      "detail": "279 words (single_pass, target 200–300)"
+      "detail": "208 words (single_pass, target 200–300)"
     },
     {
       "step": "extract_notes",
       "status": "ok",
-      "duration_ms": 8383,
+      "duration_ms": 8264,
       "attempts": 1,
       "detail": "5 takeaways · 5 verbatim quotes · 8 topics"
+    },
+    {
+      "step": "extract_claims",
+      "status": "ok",
+      "duration_ms": 5458,
+      "attempts": 1,
+      "detail": "5 check-worthy claims (1 factual, 1 historical, 2 prediction, 1 statistical)"
+    },
+    {
+      "step": "verify_claims",
+      "status": "ok",
+      "duration_ms": 30988,
+      "attempts": 5,
+      "detail": "2 ✅ · 2 ⚠️ · 1 ❓ across 5 claims · 8 tool calls"
     }
   ],
   "usage": {
-    "llm_calls": 20,
+    "llm_calls": 17,
     "cached_calls": 0,
-    "input_tokens": 23449,
-    "output_tokens": 6346,
+    "input_tokens": 19278,
+    "output_tokens": 5482,
     "cache_read_tokens": 633,
     "estimated": false,
-    "cost_usd": 0.087176,
+    "cost_usd": 0.072911,
     "cost_by_step": {
-      "plan": 0.000439,
-      "extract_claims": 0.000785,
-      "verify_claims": 0.062992,
-      "summarize": 0.007708,
-      "extract_notes": 0.015253
+      "plan": 0.000328,
+      "summarize": 0.00653,
+      "extract_notes": 0.015393,
+      "extract_claims": 0.000752,
+      "verify_claims": 0.049908
     },
     "budget_usd": 0.2,
     "over_budget": false
@@ -465,19 +423,9 @@
   "warnings": [],
   "fact_check_table": [
     {
-      "claim": "Nvidia became the first company to hit a five trillion dollar market cap in the year before the episode was recorded.",
+      "claim": "Nvidia became the first company to hit a five trillion dollar market cap last year.",
       "verification": "✅ Verified true (confirmed by knowledge base KB-033)",
-      "confidence": 0.85
-    },
-    {
-      "claim": "NASA's new Mars mission is launching in early 2026 and is planning to bring back samples from Mars.",
-      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-030)",
-      "confidence": 0.85
-    },
-    {
-      "claim": "The Mars samples to be returned were collected by the Perseverance rover.",
-      "verification": "✅ Verified true (confirmed by knowledge base KB-031, KB-030)",
-      "confidence": 0.85
+      "confidence": 0.9
     },
     {
       "claim": "The Perseverance rover landed in Jezero Crater in February 2021.",
@@ -485,9 +433,14 @@
       "confidence": 0.9
     },
     {
-      "claim": "People have been saying Bitcoin will reach $200K by 2025.",
-      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-032)",
+      "claim": "NASA's new Mars mission, which plans to bring back samples, is launching in early 2026.",
+      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-030)",
       "confidence": 0.85
+    },
+    {
+      "claim": "People are saying Bitcoin will reach $200K by 2025.",
+      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-032)",
+      "confidence": 0.9
     },
     {
       "claim": "Humans will walk on Mars before 2040.",

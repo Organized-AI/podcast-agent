@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "run_id": "20261016-002216-4ea64a",
-  "generated_at": "2026-10-16T00:22:53+00:00",
+  "run_id": "20261016-010820-9471da",
+  "generated_at": "2026-10-16T01:09:14+00:00",
   "episode": {
     "episode_id": "ep001",
     "title": "The Future of Remote Work",
@@ -22,32 +22,32 @@
     "fast": "claude-haiku-5-5"
   },
   "plan": {
-    "goal": "Produce a summary, key notes, and a verified fact-check table for the remote work podcast episode ep001.",
+    "goal": "Produce a summary, key notes, and a fact-check table for episode ep001 'The Future of Remote Work'.",
     "steps": [
       {
         "step": "summarize",
-        "reason": "The 325-word transcript is short enough for a single pass to produce the 200-300 word summary.",
+        "reason": "The 325-word transcript is short enough for a single pass, so a single_pass summary is the cheapest accurate option.",
         "params": {
           "strategy": "single_pass"
         }
       },
       {
         "step": "extract_notes",
-        "reason": "Top takeaways, timestamped verbatim quotes and topic tags can be drawn directly from the 19 lines without prior normalization.",
+        "reason": "Takeaways, timestamped quotes and topic tags can be pulled directly from the 19 lines with no dependencies.",
         "params": {}
       },
       {
         "step": "extract_claims",
-        "reason": "The episode has 2 numbers, 2 years, several named organisations and 3 prediction cues, so a moderate cap of 5 claims covers the checkable material.",
+        "reason": "The profile shows 2 numbers, 2 years, several named organisations and 3 prediction cues, which supports about 6 check-worthy claims.",
         "params": {
-          "max_claims": 5
+          "max_claims": 6
         }
       },
       {
         "step": "verify_claims",
-        "reason": "Each extracted claim needs tool-backed checking, and both the knowledge base and web search are useful for company and trend facts, so three steps per claim is enough.",
+        "reason": "Each extracted claim needs checking against both the internal knowledge base and the open web, and it must run after extraction.",
         "params": {
-          "max_steps_per_claim": 3,
+          "max_steps_per_claim": 4,
           "tools": [
             "search_knowledge_base",
             "web_search"
@@ -59,30 +59,30 @@
     "repair_notes": []
   },
   "summary": {
-    "text": "In this episode of Work Reimagined, host Sarah Johnson and guest Mark Rivera examine what remote work really looks like in 2025 and beyond, moving past the hype to focus on culture, communication and trust. Sarah opens by asking whether remote work simply means working from anywhere. Mark argues it is not, describing it instead as an approach built on async-first culture, documentation and autonomy, supported by structured processes and trust. Asked how companies build that culture, he points to GitLab, Automattic and Doist, which have written handbooks for everything so employees can solve problems without constant guidance. Mark says even small teams benefit from clear documentation because it reduces context-switching and keeps knowledge from being siloed. The conversation then turns to tools. Mark says Zoom and Slack help, but culture is the real solution, and he warns that relying on Slack for everything leads to burnout. On measuring productivity without micromanaging, he advocates outcomes over hours: set goals, track progress on deliverables and trust the team, with transparency mattering more than check-ins. Addressing loneliness, a downside often cited about remote work, Mark recommends regular virtual coffee chats, occasional in-person retreats and team rituals, insisting that remote does not mean isolated, only that it needs intention. Looking ahead, he predicts that remote-first companies will dominate talent acquisition, local offices may become optional hubs, and async culture will become standard practice. For teams making the transition, Mark closes with a simple foundation: focus on documentation, set clear goals, invest in culture and trust your team. Sarah thanks him and the listeners for joining.",
-    "word_count": 262,
+    "text": "In this episode of Work Reimagined, host Sarah Johnson opens by saying the show is diving into remote work, not just the hype, but what it really looks like in 2025 and beyond. Guest Mark Rivera says remote work has evolved a lot in just a few years. Sarah asks whether remote work as working from anywhere is the full picture. Mark says it is not quite, and that it is more about async-first culture, documentation and autonomy. He says being remote does not just mean a location; it means structured processes and trust. Asked how companies build that culture, Mark points to GitLab, Automattic and Doist, saying they have written handbooks for everything so employees can figure things out without asking for constant guidance. Sarah asks whether this scales for smaller teams. Mark says it does, and that even small teams benefit from clear documentation because it reduces context-switching and keeps knowledge from being siloed. On tools, Sarah asks whether Zoom and Slack are enough. Mark says they help, but tools are not the solution; culture is. He says Slack is great, but if people rely on it for everything, they will burn out. Sarah asks how teams measure productivity without micromanaging. Mark answers with outcomes over hours: set goals, track progress on deliverables and trust the team, with transparency mattering more than check-ins. Sarah raises loneliness and lack of connection, which she notes is often cited as a downside. Mark says regular virtual coffee chats, occasional in-person retreats and team rituals help, and that remote does not mean isolated; it just needs intention. For 2025 and beyond, Mark predicts remote-first companies will dominate talent acquisition, local offices might become optional hubs, and async culture will become standard practice. His advice for teams transitioning to remote work is to focus on documentation, set clear goals, invest in culture and trust the team, which he calls the foundation.",
+    "word_count": 318,
     "strategy": "single_pass"
   },
   "notes": {
     "takeaways": [
       {
-        "text": "Mark Rivera argues remote work is less about location and more about async-first culture, documentation, autonomy, structured processes and trust.",
+        "text": "Mark Rivera argues remote work is defined by async-first culture, documentation, and autonomy, supported by structured processes and trust, rather than by location alone.",
         "timestamp": "00:45"
       },
       {
-        "text": "Mark Rivera points to GitLab, Automattic and Doist as companies that have written handbooks for everything so employees can solve problems without constant guidance.",
+        "text": "Rivera points to GitLab, Automattic, and Doist as companies that wrote handbooks for everything so employees can solve problems without constant guidance.",
         "timestamp": "01:20"
       },
       {
-        "text": "Mark Rivera says even small teams benefit from clear documentation because it reduces context-switching and keeps knowledge from being siloed.",
-        "timestamp": "02:05"
+        "text": "Rivera says tools like Slack are not the solution; culture is, and relying on Slack for everything risks burnout.",
+        "timestamp": "02:45"
       },
       {
-        "text": "Mark Rivera recommends measuring productivity by outcomes over hours: set goals, track progress on deliverables, and favor transparency over frequent check-ins.",
+        "text": "Rivera recommends measuring productivity by outcomes over hours: set goals, track progress on deliverables, and favor transparency over frequent check-ins.",
         "timestamp": "03:25"
       },
       {
-        "text": "Mark Rivera suggests countering remote isolation with virtual coffee chats, occasional in-person retreats and team rituals, since remote work just needs intention.",
+        "text": "Rivera suggests virtual coffee chats, occasional in-person retreats, and team rituals to counter isolation, since remote work just needs intention.",
         "timestamp": "04:10"
       }
     ],
@@ -100,9 +100,9 @@
         "match_score": 1.0
       },
       {
-        "text": "Slack is great, but if you rely on it for everything, people will burn out.",
+        "text": "Outcomes over hours. Set goals, track progress on deliverables, and trust the team.",
         "speaker": "Mark Rivera",
-        "timestamp": "02:45",
+        "timestamp": "03:25",
         "match_score": 1.0
       },
       {
@@ -112,9 +112,9 @@
         "match_score": 1.0
       },
       {
-        "text": "Focus on documentation, set clear goals, invest in culture, and trust your team. That’s the foundation.",
+        "text": "Remote-first companies will dominate talent acquisition.",
         "speaker": "Mark Rivera",
-        "timestamp": "05:35",
+        "timestamp": "05:00",
         "match_score": 1.0
       }
     ],
@@ -122,18 +122,18 @@
       "remote-work",
       "async-first-culture",
       "documentation",
-      "outcomes-over-hours",
+      "team-handbooks",
+      "outcome-based-productivity",
       "remote-team-connection",
-      "remote-tools",
-      "talent-acquisition",
-      "future-of-work"
+      "remote-first-hiring",
+      "slack-and-tool-fatigue"
     ]
   },
   "fact_checks": [
     {
       "claim": {
         "id": "C1",
-        "claim": "GitLab, Automattic, and Doist have literally written handbooks for everything.",
+        "claim": "GitLab, Automattic, and Doist have written handbooks covering everything for their employees.",
         "speaker": "Mark Rivera",
         "timestamp": "01:20",
         "quote": "look at GitLab, Automattic, and Doist. They’ve literally written handbooks for everything.",
@@ -141,9 +141,9 @@
         "time_sensitive": true
       },
       "verdict": "possibly_outdated_or_inaccurate",
-      "confidence": 0.6,
-      "raw_confidence": 0.6,
-      "rationale": "GitLab's public handbook is well documented as covering nearly every process [E1][E4]. However, Automattic is described as relying on internal P2 blogs and Doist as publishing guides and essays [E3][E2], so neither is shown to have a comprehensive handbook, and 'literally written handbooks for everything' is overstated for the group.",
+      "confidence": 0.55,
+      "raw_confidence": 0.55,
+      "rationale": "GitLab's comprehensive public handbook is supported [E1][E4], but the evidence only shows Automattic and Doist cite a documentation-first model and publish async/remote guides or use internal P2 blogs [E2][E3][E4]; none shows they wrote handbooks covering everything, so the claim is overstated as stated.",
       "evidence": [
         {
           "id": "E1",
@@ -179,12 +179,13 @@
           "snippet": "GitLab's public handbook runs to thousands of pages and documents nearly every process, a model other remote companies such as Automattic and Doist cite for async, documentation-first work.",
           "url": "https://example-work.test/gitlab-handbook-remote",
           "date": "2024-05-02",
-          "relevance": 1.0
+          "relevance": 0.791
         }
       ],
-      "tool_calls": 2,
+      "tool_calls": 3,
       "tools_used": [
         "search_knowledge_base",
+        "web_search",
         "web_search"
       ],
       "method": "knowledge base + web search",
@@ -193,17 +194,17 @@
     {
       "claim": {
         "id": "C2",
-        "claim": "Remote-first companies will dominate talent acquisition.",
+        "claim": "Remote-first companies will dominate talent acquisition in 2025 and beyond.",
         "speaker": "Mark Rivera",
         "timestamp": "05:00",
         "quote": "Remote-first companies will dominate talent acquisition.",
         "type": "prediction",
         "time_sensitive": true
       },
-      "verdict": "unverifiable",
-      "confidence": 0.5,
-      "raw_confidence": 0.5,
-      "rationale": "Available evidence shows hybrid remains the dominant arrangement for remote-capable US workers (about half, versus roughly a quarter fully remote) and some large employers have mandated returns to office [E2][E5], which does not support remote-first companies dominating talent acquisition. No evidence directly measures remote-first companies' share of hiring, so this is a weak contradiction of a vague, forward-looking claim. Reclassified as unverifiable: the prediction's deadline has not passed yet.",
+      "verdict": "possibly_outdated_or_inaccurate",
+      "confidence": 0.55,
+      "raw_confidence": 0.55,
+      "rationale": "The prediction's 2025 window has passed, and available evidence shows hybrid remains the dominant arrangement (about half of remote-capable US workers, versus roughly a quarter fully remote) with little change [E2][E5], and large employers like Amazon mandated a return to office [E2]. No evidence was found that remote-first companies dominate talent acquisition, though the evidence is indirect and does not measure hiring share directly.",
       "evidence": [
         {
           "id": "E2",
@@ -212,7 +213,7 @@
           "snippet": "Gallup's surveys of remote-capable US employees show hybrid as the most common arrangement (roughly half), with about a quarter fully remote and the rest on-site. Several large employers have moved the other way: Amazon required corporate staff to return to the office five days a week from January 2025.",
           "url": "https://www.gallup.com/401384/indicator-hybrid-work.aspx",
           "date": "2025-06-01",
-          "relevance": 0.274
+          "relevance": 0.17
         },
         {
           "id": "E5",
@@ -224,18 +225,19 @@
           "relevance": 0.071
         }
       ],
-      "tool_calls": 2,
+      "tool_calls": 3,
       "tools_used": [
         "search_knowledge_base",
+        "web_search",
         "web_search"
       ],
       "method": "knowledge base + web search",
-      "verification": "❓ Unverifiable (future prediction)"
+      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-004)"
     },
     {
       "claim": {
         "id": "C3",
-        "claim": "Local offices might become optional hubs for remote-first companies.",
+        "claim": "Local offices might become optional hubs for remote-first companies in 2025 and beyond.",
         "speaker": "Mark Rivera",
         "timestamp": "05:00",
         "quote": "Local offices might become optional hubs",
@@ -243,19 +245,10 @@
         "time_sensitive": true
       },
       "verdict": "unverifiable",
-      "confidence": 0.4,
-      "raw_confidence": 0.4,
-      "rationale": "The claim is a hedged ('might') prediction about office roles at remote-first companies, and the evidence found does not address it directly. The knowledge base and search results show remote-first firms like Doist and GitLab [E1][E3] and a hybrid-majority workforce with some firms mandating return to office [E2][E6], but nothing confirms or contradicts offices becoming optional hubs.",
+      "confidence": 0.5,
+      "raw_confidence": 0.5,
+      "rationale": "The claim is a hedged prediction (\"might\") whose 2025 window has largely passed, but no retrieved evidence addresses whether remote-first companies made local offices optional hubs. The evidence found [E2][E6] shows hybrid as the most common arrangement and large employers mandating return to office, which is neither support nor refutation for remote-first firms specifically.",
       "evidence": [
-        {
-          "id": "E1",
-          "source": "knowledge_base",
-          "title": "KB-003: Doist is a remote-first, async-first company",
-          "snippet": "Doist, maker of Todoist and Twist, is a fully remote, async-first company with team members spread across dozens of countries. It publishes guides and essays on asynchronous communication and remote work practices.",
-          "url": "https://doist.com/about",
-          "date": "2025-06-01",
-          "relevance": 0.291
-        },
         {
           "id": "E2",
           "source": "knowledge_base",
@@ -266,27 +259,19 @@
           "relevance": 0.333
         },
         {
-          "id": "E3",
-          "source": "knowledge_base",
-          "title": "KB-001: GitLab is all-remote and publishes its company handbook publicly",
-          "snippet": "GitLab operates as an all-remote company and publishes its company handbook publicly at handbook.gitlab.com. The handbook documents how the company works across functions and serves as the single source of truth for processes, which lets team members find answers asynchronously instead of asking for guidance.",
-          "url": "https://handbook.gitlab.com/",
-          "date": "2025-12-01",
-          "relevance": 0.188
-        },
-        {
           "id": "E6",
           "source": "web_search",
           "title": "Amazon orders corporate staff back to the office five days a week",
           "snippet": "Amazon told corporate employees to return to the office five days a week starting January 2, 2025, one of the largest return-to-office mandates among big employers.",
           "url": "https://example-work.test/2024/amazon-rto",
           "date": "2024-09-16",
-          "relevance": 0.116
+          "relevance": 0.185
         }
       ],
-      "tool_calls": 2,
+      "tool_calls": 3,
       "tools_used": [
         "search_knowledge_base",
+        "web_search",
         "web_search"
       ],
       "method": "knowledge base + web search",
@@ -295,7 +280,7 @@
     {
       "claim": {
         "id": "C4",
-        "claim": "Asynchronous culture will become standard practice.",
+        "claim": "Async culture will become standard practice in remote work in 2025 and beyond.",
         "speaker": "Mark Rivera",
         "timestamp": "05:00",
         "quote": "async culture will become standard practice.",
@@ -305,7 +290,7 @@
       "verdict": "unverifiable",
       "confidence": 0.5,
       "raw_confidence": 0.5,
-      "rationale": "The claim is a open-ended prediction with no deadline; the evidence shows only a few async-first companies [E1][E2][E3] and a hybrid-dominant workforce with little change [E5], but nothing measuring async adoption as standard practice, so it can be neither confirmed nor refuted.",
+      "rationale": "Evidence shows async practices at a few remote-first firms (Doist, Automattic, GitLab) [E1][E2][E3], but no survey data shows async has become standard across remote work. The only workforce data shows hybrid remains dominant with little change [E5], which doesn't settle whether async became standard.",
       "evidence": [
         {
           "id": "E1",
@@ -341,12 +326,13 @@
           "snippet": "Surveys of remote-capable US employees find about half work hybrid, roughly a quarter fully remote, and the rest on-site, with little change over the past two years.",
           "url": "https://example-work.test/2025/hybrid-dominant",
           "date": "2025-06-15",
-          "relevance": 0.178
+          "relevance": 0.238
         }
       ],
-      "tool_calls": 2,
+      "tool_calls": 3,
       "tools_used": [
         "search_knowledge_base",
+        "web_search",
         "web_search"
       ],
       "method": "knowledge base + web search",
@@ -357,53 +343,53 @@
     {
       "step": "plan",
       "status": "ok",
-      "duration_ms": 3901,
+      "duration_ms": 3637,
       "attempts": 0,
       "detail": "4 steps"
     },
     {
       "step": "summarize",
       "status": "ok",
-      "duration_ms": 4183,
+      "duration_ms": 3966,
       "attempts": 1,
-      "detail": "262 words (single_pass, target 200–300)"
+      "detail": "318 words (single_pass, target 200–300)"
     },
     {
       "step": "extract_notes",
       "status": "ok",
-      "duration_ms": 4442,
+      "duration_ms": 4650,
       "attempts": 1,
       "detail": "5 takeaways · 5 verbatim quotes · 8 topics"
     },
     {
       "step": "extract_claims",
       "status": "ok",
-      "duration_ms": 3662,
+      "duration_ms": 4993,
       "attempts": 1,
       "detail": "4 check-worthy claims (1 factual, 3 prediction)"
     },
     {
       "step": "verify_claims",
       "status": "ok",
-      "duration_ms": 21402,
+      "duration_ms": 37015,
       "attempts": 4,
-      "detail": "0 ✅ · 1 ⚠️ · 3 ❓ across 4 claims · 8 tool calls"
+      "detail": "0 ✅ · 2 ⚠️ · 2 ❓ across 4 claims · 12 tool calls"
     }
   ],
   "usage": {
-    "llm_calls": 16,
+    "llm_calls": 20,
     "cached_calls": 0,
-    "input_tokens": 19595,
-    "output_tokens": 4229,
+    "input_tokens": 28161,
+    "output_tokens": 4778,
     "cache_read_tokens": 1329,
     "estimated": false,
-    "cost_usd": 0.062351,
+    "cost_usd": 0.08314,
     "cost_by_step": {
-      "plan": 0.000422,
-      "summarize": 0.0085,
-      "extract_notes": 0.008533,
-      "extract_claims": 0.000592,
-      "verify_claims": 0.044304
+      "plan": 0.000411,
+      "summarize": 0.009562,
+      "extract_notes": 0.008463,
+      "extract_claims": 0.0007,
+      "verify_claims": 0.064004
     },
     "budget_usd": 0.2,
     "over_budget": false
@@ -411,22 +397,22 @@
   "warnings": [],
   "fact_check_table": [
     {
-      "claim": "GitLab, Automattic, and Doist have literally written handbooks for everything.",
+      "claim": "GitLab, Automattic, and Doist have written handbooks covering everything for their employees.",
       "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-001, KB-003, KB-002)",
-      "confidence": 0.6
+      "confidence": 0.55
     },
     {
-      "claim": "Remote-first companies will dominate talent acquisition.",
+      "claim": "Remote-first companies will dominate talent acquisition in 2025 and beyond.",
+      "verification": "⚠️ Possibly outdated/inaccurate (contradicted by knowledge base KB-004)",
+      "confidence": 0.55
+    },
+    {
+      "claim": "Local offices might become optional hubs for remote-first companies in 2025 and beyond.",
       "verification": "❓ Unverifiable (future prediction)",
       "confidence": 0.5
     },
     {
-      "claim": "Local offices might become optional hubs for remote-first companies.",
-      "verification": "❓ Unverifiable (future prediction)",
-      "confidence": 0.4
-    },
-    {
-      "claim": "Asynchronous culture will become standard practice.",
+      "claim": "Async culture will become standard practice in remote work in 2025 and beyond.",
       "verification": "❓ Unverifiable (future prediction)",
       "confidence": 0.5
     }
