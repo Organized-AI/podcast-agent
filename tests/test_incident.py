@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -259,3 +260,67 @@ def test_a_suspect_without_a_pull_request_is_named_by_its_commit_and_long_lists_
     _, body, _ = incident.render_issue(payload(), ev, cfg)
     assert body.count("**Suspect:") == 3 and "…and 2 earlier commit(s)" in body
     assert "revert `0000000` (`git revert 0000000` in a pull request)" in body and "#None" not in body
+
+
+def test_a_token_with_a_trailing_newline_is_stripped(monkeypatch):
+    monkeypatch.setenv("GITHUB_TOKEN", "gho_example\n")
+    assert Config().token == "gho_example"
+
+
+def test_a_failing_webhook_logs_no_token(caplog):
+    """An HTTP client error can echo the Authorization header; the bridge logs and returns a redacted message."""
+    token = "gho_" + "A1b2C3d4" * 5
+    cfg = Config(repository="Organized-AI/podcast-agent", token=token)
+
+    def explode(request: httpx.Request) -> httpx.Response:
+        raise httpx.LocalProtocolError(f"Illegal header value b'Bearer {token}\\n'")
+
+    gh = GitHub(cfg, httpx.Client(transport=httpx.MockTransport(explode)))
+    app = incident.create_app(cfg, src=FakeSources(cfg), gh=gh)
+    with caplog.at_level("ERROR", logger="incident-bridge"):
+        resp = TestClient(app).post("/alertmanager", json=payload())
+    assert resp.status_code == 500 and resp.json() == {"action": "error"}  # no exception text to the caller
+    assert "webhook failed: LocalProtocolError" in caplog.text and token not in caplog.text
+    assert incident.redact(f"x {token} y Bearer abc", None) == "x *** y ***"
+
+
+def test_a_redelivery_finds_the_issue_even_when_githubs_list_lags(cfg):
+    """Alertmanager redelivered a group 8 s after the bridge opened its issue, before GitHub listed it (#79)."""
+    created: list[dict[str, Any]] = []
+
+    def github(request: httpx.Request) -> httpx.Response:
+        if request.method == "POST" and request.url.path.endswith("/issues"):
+            body = json.loads(request.content)
+            created.append({"number": 78, "state": "open", "body": body["body"], "created_at": "2026-10-15T12:02:10Z"})
+            return httpx.Response(201, json=created[-1])
+        if request.url.path.endswith("/issues/78"):
+            return httpx.Response(200, json=created[-1])
+        if request.url.path.endswith("/issues"):
+            return httpx.Response(200, json=[])  # the list has not caught up
+        return httpx.Response(404, json={})
+
+    gh = GitHub(cfg, httpx.Client(transport=httpx.MockTransport(github)))
+    assert incident.handle(payload(), cfg, FakeSources(cfg), gh, now=at(2.2))["action"] == "opened"
+    assert incident.handle(payload(), cfg, FakeSources(cfg), gh, now=at(2.4)) == {"action": "exists", "issue": 78}
+    assert len(created) == 1
+
+
+def test_a_deleted_issue_is_forgotten_instead_of_failing_every_delivery(cfg):
+    """An issue the bridge opened and someone deleted answers 404: the bridge falls back to the list and opens anew."""
+    created: list[int] = []
+
+    def github(request: httpx.Request) -> httpx.Response:
+        if request.method == "POST" and request.url.path.endswith("/issues"):
+            created.append(90 + len(created))
+            return httpx.Response(201, json={"number": created[-1], "state": "open", "created_at": "2026-10-15T12:10:00Z"})
+        if request.url.path.endswith("/issues/78"):
+            return httpx.Response(404, json={"message": "Not Found"})
+        if request.url.path.endswith("/issues"):
+            return httpx.Response(200, json=[])
+        return httpx.Response(404, json={})
+
+    gh = GitHub(cfg, httpx.Client(transport=httpx.MockTransport(github)))
+    key = incident.group_key(payload())
+    gh.opened[key] = 78
+    assert incident.handle(payload(), cfg, FakeSources(cfg), gh, now=at(2.2))["action"] == "opened"
+    assert created == [90] and gh.opened.get(key) != 78
