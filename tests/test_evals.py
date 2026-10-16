@@ -144,9 +144,15 @@ def test_live_style_suite_runs_fresh_judges_and_compares_to_a_baseline(tmp_path)
         f"baseline: {{path: {baseline}, tolerance: 0.05}}\n"
     )
     provider = ScriptedProvider({"judge_summary": [_judge(5, 4, 3, ["Nina is an astronaut"])]})
-    result = run_suite(suite, make_ctx(provider), root=ROOT, work_dir=tmp_path / "runs")
+    ctx = make_ctx(provider)
+    outer = ctx.trace
+    result = run_suite(suite, ctx, root=ROOT, work_dir=tmp_path / "runs")
     section = result.sections[0]
-    assert (tmp_path / "runs" / "fresh" / "report.json").exists()
+    fresh = tmp_path / "runs" / "fresh"
+    assert (fresh / "report.json").exists()
+    # A fresh run is a complete run folder, reasoning logs included, so the nightly artifact can be audited.
+    assert (fresh / "logs" / "run.log").read_text() and (fresh / "logs" / "trace.jsonl").read_text()
+    assert ctx.trace is outer
     assert section.rows[0]["judge"]["invented_facts"] == ["Nina is an astronaut"]
     assert section.metrics["judge_score"] == pytest.approx(0.5 + 0.225 + 0.1 - 0.15)
     checks = {c.metric: c.passed for c in section.checks}
