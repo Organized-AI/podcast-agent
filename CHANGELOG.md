@@ -5,6 +5,7 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- `docs/EXTENDING.md`: how to add a pipeline step, a tool, a setting, a provider or an endpoint, and prove it end to end. It was written from a full rehearsal of adding an optional step, and every gotcha in it was hit, not guessed. `tests/test_step_registry.py` fails when a step is missing from `StepName`, `CANONICAL_ORDER`, `capability_catalog()` or the step registry, or when the offline provider can't run it. Each case was checked by removing one registry at a time. The README, AGENTS.md and the guide's recipe now point to the guide; the recipe listed three files where a step needs seven. The reason given for bumping `PROMPT_VERSION` is corrected: it is part of the worker's idempotency key.
 - The lab runs the observability stack through Argo CD (`deploy/gitops/argocd/observability.yaml`). It has:
   - the Collector, Jaeger (in memory, capped at 3,000 traces), Prometheus (the repository's `alerts.yml`) and Alertmanager (which posts to the incident bridge), all as a kustomization;
   - a private MLflow from its official Helm chart, with Postgres, basic auth, and a Collector user that may only edit experiment 0.

@@ -975,8 +975,8 @@ MAX_STEPS_PER_CLAIM=6 podcast-agent run --provider offline</pre></div></div>
 <pre>    elif len(sources) == 1:
         cap = 0.6 if verdict == Verdict.VERIFIED else 0.9   <span class="c"># was 0.9 for every verdict</span></pre></div></div>
 
-    <div class="recipe"><h4>Add a new step, such as chapters <span class="tag notes">three files</span></h4>
-      <p>Register a function, add it to the capability catalog so the planner can schedule it, and render it in the report. The validator and executor pick it up automatically.</p>
+    <div class="recipe"><h4>Add a new step, such as chapters <span class="tag notes">seven files</span></h4>
+      <p>Register a function, declare the step where the planner and the offline provider look it up, and render it in the report. The checklist is <code>docs/EXTENDING.md</code>, and <code>tests/test_step_registry.py</code> fails if a registry is missed.</p>
       <div class="try"><span class="kick">agent/steps.py <button type="button" class="copy">Copy</button></span>
 <pre><span class="k">@register("extract_chapters")</span>
 def extract_chapters(ctx, state, params):
@@ -984,15 +984,19 @@ def extract_chapters(ctx, state, params):
                           prompt=CHAPTERS_PROMPT, cache_prefix=episode_context(state.episode))
     state.chapters = res.value.chapters
     return f"{len(state.chapters)} chapters", res.attempts
-<span class="c"># planner.py: add "extract_chapters" to capability_catalog() and CANONICAL_ORDER
-# report.py:  render state.chapters in render_markdown()</span></pre></div></div>
+<span class="c"># models.py:     "extract_chapters" in StepName; a chapters field on EpisodeReport
+# pipeline.py:   EpisodeState.chapters, passed into EpisodeReport(...)
+# planner.py:    capability_catalog() and CANONICAL_ORDER
+# heuristics.py: an offline handler for the task, so runs without a key still work
+# prompts.py:    CHAPTERS_SYSTEM / CHAPTERS_PROMPT, and bump PROMPT_VERSION
+# report.py:     render it in render_markdown()</span></pre></div></div>
 
     <div class="recipe"><h4>Edit a prompt <span class="tag acc">prompts.py</span></h4>
-      <p>All prompts are in <code>prompts.py</code>. Bump <code>PROMPT_VERSION</code> after an edit: it busts the response cache and is recorded in the run manifest, so every output can be traced to the prompt that produced it.</p></div>
+      <p>All prompts are in <code>prompts.py</code>. Bump <code>PROMPT_VERSION</code> after an edit. It is part of the worker's idempotency key, so a resubmitted episode runs again with the new prompt, and it is recorded in the run manifest, so every output can be traced to the prompt that produced it.</p></div>
     <div class="concepts"><span>Key ideas</span><button type="button" class="chip" data-concept="register" aria-expanded="false">@register</button><button type="button" class="chip" data-concept="prompt-version" aria-expanded="false">PROMPT_VERSION</button><button type="button" class="chip" data-concept="mock-web-search" aria-expanded="false">Mock web search</button></div>
     <div class="pop" hidden></div>
     <div class="quiz" data-quiz="m12"><span class="kick">Check yourself · +15 XP</span><p class="qq">You add a new step function with @register. What else must change before the planner can schedule it?</p>
-      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>Nothing</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>The Dockerfile</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>Its entry in capability_catalog() (and CANONICAL_ORDER), plus rendering in the report</span></button></div><p class="why" hidden></p></div>
+      <div class="opts"><button type="button" class="opt" data-opt="0"><em>A</em><span>Nothing</span></button><button type="button" class="opt" data-opt="1"><em>B</em><span>The Dockerfile</span></button><button type="button" class="opt" data-opt="2"><em>C</em><span>Its StepName entry, capability_catalog() and CANONICAL_ORDER, an offline heuristic, and rendering in the report</span></button></div><p class="why" hidden></p></div>
     <div class="foot-row"><button type="button" class="btn go" data-done="m12">Mark module done · +10 XP</button></div>
   </section>
 </section>

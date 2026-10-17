@@ -15,7 +15,7 @@ Instructions for coding agents (and humans in a hurry) working in this repositor
 | `deploy/` | Deployable assets only: `helm/`, `gitops/` (Argo CD), `compose/`, `observability/` |
 | `tools/` | `make/*.mk`, CI checks (`ci/`), the guide's embed script (`guide/`) |
 | `website/` | The interactive guide, deployed as Cloudflare Worker assets |
-| `docs/` | Deployment, observability, evals and GitOps write-ups |
+| `docs/` | Deployment, observability, GitOps, and how to extend the agent (`EXTENDING.md`) |
 | `samples/` | Committed runs and captured proof; regenerate, never hand-edit |
 
 ## Commands
@@ -26,6 +26,8 @@ make check                     # lint + types + tests + drift; run before every 
 make evals                     # offline eval suite and committed-run scoring
 make help                      # everything else
 ```
+
+To add a feature (a pipeline step, a tool, a setting, a provider, an endpoint), follow [docs/EXTENDING.md](docs/EXTENDING.md). It has the checklist, the commands that prove a change end to end, and the gotchas.
 
 ## Rules
 
