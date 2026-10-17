@@ -5,6 +5,13 @@ All notable changes are recorded here. The format follows [Keep a Changelog](htt
 ## [Unreleased]
 
 ### Added
+- `make doctor` checks that a machine is ready to change the agent and run it end to end:
+  - the tools (uv, Docker's engine actually answering, Claude Code, Cursor);
+  - the repository's state;
+  - that `.env` holds a key, without printing it;
+  - then `make check`, an offline run with its audit, and the Docker image built and run with an audit inside the container.
+
+  `LIVE=1` adds one short episode with Claude to prove the key works (about $0.09).
 - The lab runs the observability stack through Argo CD (`deploy/gitops/argocd/observability.yaml`). It has:
   - the Collector, Jaeger (in memory, capped at 3,000 traces), Prometheus (the repository's `alerts.yml`) and Alertmanager (which posts to the incident bridge), all as a kustomization;
   - a private MLflow from its official Helm chart, with Postgres, basic auth, and a Collector user that may only edit experiment 0.
