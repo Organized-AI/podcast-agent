@@ -254,9 +254,9 @@ samples/                  committed runs and captured proof
 | To… | Do this |
 |---|---|
 | Add a fact the checker can use | Append an entry to `data/knowledge_base.json` (`id`, `title`, `content`, `source`, `url`, `as_of`, `tags`) |
-| Change a prompt | Edit `prompts.py` and bump `PROMPT_VERSION` (busts the response cache and is recorded in the manifest) |
+| Change a prompt | Edit `prompts.py` and bump `PROMPT_VERSION`: it is part of the worker's idempotency key and recorded in the manifest. Then run the live evals |
 | Swap models or vendors | `ANTHROPIC_MODEL=…`, or `LLM_PROVIDER=ollama OLLAMA_MODEL=…`, or `--model` |
-| Add a new output (e.g. chapters) | Write a function in `agent/steps.py` decorated with `@register("…")`, add it to `capability_catalog()` in `planner.py`, render it in `report.py` |
+| Add a new output (e.g. chapters) | Follow [docs/EXTENDING.md](docs/EXTENDING.md): a `@register("…")` step in `agent/steps.py`, plus its name and output in `models.py`, `pipeline.py`, `planner.py`, an offline heuristic in `heuristics.py`, and rendering in `report.py`. `tests/test_step_registry.py` catches a missed registry |
 | Make fact-checking stricter | Change the caps in `verifier.calibrate()`; require 2 source types for ✅; raise `MAX_STEPS_PER_CLAIM` |
 | Demo resilience | `MOCK_SEARCH_FAILURE_RATE=0.6 podcast-agent run …` and watch retries and fallback in the log |
 
