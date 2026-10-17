@@ -120,6 +120,7 @@ uv run podcast-agent audit output              # re-verify a run: hashes, quotes
 uv run podcast-agent kb "FDA autonomous AI"    # query the knowledge base directly
 uv run podcast-agent serve --host 127.0.0.1    # HTTP API: POST /v1/process, POST /v1/jobs (needs QUEUE_URI), GET /healthz
 make check                                     # lint, types, hermetic tests, drift checks
+make doctor                                    # is this machine ready? tools, key, checks, offline and Docker runs
 make help                                      # every target, grouped by area
 ```
 

@@ -21,9 +21,12 @@ audit: ## Re-verify the last run from its files
 serve: ## HTTP API on :8080
 	$(PA) serve --host 127.0.0.1 --port 8080
 
+doctor: ## Is this machine ready? Tools, key, make check, offline and Docker runs (LIVE=1 adds one Claude episode)
+	LIVE=$(LIVE) bash tools/dev/doctor.sh
+
 worker-demo: ## Drop transcripts into a local queue and drain it
 	mkdir -p queue/inbox && cp data/transcripts/* queue/inbox/ && $(PA) worker --queue dir://queue --output output/jobs --once
 
 config: ## Regenerate config/settings.yaml from the code and .env.example
 	$(UV) run python tools/ci/gen_config.py
-.PHONY: install lock run offline audit serve worker-demo config
+.PHONY: install lock run offline audit serve doctor worker-demo config
